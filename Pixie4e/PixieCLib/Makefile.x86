@@ -1,0 +1,217 @@
+# manual full compile sequence for release: p500elib xoplib dlllib sample pixielib
+
+# -*- PIXIE-4 Makefile for Windows -*-
+
+# The extension of an object file
+OBJ := obj
+# The extension of Igor Pro .xop
+XOPLIB  := xop
+# The extension of a dynamic library
+DYNLIB  := dll
+# The extension of a static library
+STATLIB := lib
+
+# The archiver
+AR := lib
+
+# This should be the compiler
+CC := cl
+
+# This should be the resource compiler
+RC := rc
+
+#delete command
+RM := del
+
+# Compiler flags
+CFLAG_COMPILE 	:= -c
+CFLAG_OUT     	:= /Fo
+INCFLAGS 	:= /I "include/plx" /I "include/igor" /I "include/jungo" /I "."
+
+CFLAGS_XOPLIB 	:= /nologo  /Zp2 /W3 /Gm /ZI /Od /D "WIN32" /D "XIA_WINDOZE" \
+                      /D "COMPILE_IGOR_XOP" /D "WINDRIVER_API" \
+                      /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" \
+                      /D "PIXIELIB_EXPORTS" /FD /D "_CRT_SECURE_NO_DEPRECATE"
+
+CFLAGS_DLLLIB 	:= /nologo  /Zp8 /W3 /Gm /ZI /Od /D "WIN32" /D "XIA_WINDOZE" \
+                      /D "WINDRIVER_API" \
+                      /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" \
+                      /D "PIXIELIB_EXPORTS" /FD /D "_CRT_SECURE_NO_DEPRECATE" 
+
+CFLAGS_P500ELIB 	:= /nologo  /Zp8 /W3 /Gm /ZI /Od /D "WIN32" /D "XIA_WINDOZE" \
+                      /D "WINDRIVER_API" \
+                      /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" \
+                      /D "PIXIELIB_EXPORTS" /FD /D "_CRT_SECURE_NO_DEPRECATE" 
+					  
+CFLAGS_SAMPLE  := /Od \
+		      /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "XIA_WINDOZE" /D "WINDRIVER_API" /D "_UNICODE" /D "UNICODE" \
+		      /D "PIXIELIB_EXPORTS" /D "_WINDOWS" /D "_MBCS" /D "_CRT_SECURE_NO_DEPRECATE"  \
+		      /Gm /MT /Zp8 \
+		      /W1 /nologo /c /Wp64 /ZI /errorReport:prompt
+
+# Resource compiler flags
+RCFLAGS 	:= /v /l 0x409 /d "NDEBUG"
+RCINCFLAGS 	:= /i"include/igor"
+
+# This should be the linker
+LINK := link
+
+# Any flags that go before the object files in the linker pass
+LINK_PRE_FLAGS := 
+
+# Linker output flag
+LINK_FLAG_OUT := /out:
+
+# Dynamic linker flags for DLLs
+DYN_LIB_LINK_FLAGS := /INCREMENTAL:NO /NOLOGO \
+		      /DLL /MANIFEST /NODEFAULTLIB:"libcd.lib" /PDB:"Pixie.pdb" /IMPLIB:"Pixie4DLL.lib" \
+		      /MACHINE:X86 /ERRORREPORT:PROMPT \
+		      /libpath:"lib/plx" /libpath:"lib/igor" /libpath:"lib/jungo/x86"
+		      
+# Dynamic linker flags for executable files
+EXE_LINK_FLAGS := /libpath:"lib/plx" /libpath:"lib/igor" /libpath:"lib/jungo/x86" /libpath:"Debug"
+		      
+# Static linker flags
+STAT_LIB_LINK_FLAGS := 
+
+# Stock Win32 libraries
+SYSTEM_LIBS := user32.lib version.lib
+		
+EXTRA_LIBS := winmm.lib IGOR.lib "XOPSupport.lib"
+
+# Precompiled PLX library 
+PLX_LIB := PlxApi.lib
+
+# Precompiled Jungo library 
+JUNGO_LIB := wdapi1120.lib
+
+EXTRA_FILES := *.idb *.ilk *.pch *.exp *.lib *.pdb
+
+XOPLIBNAME = Pixie
+DLLLIBNAME = Pixie4DLL
+
+.SUFFIXES: .obj .res .rc
+
+# PIXIE-4 library object files to create
+LIBOBJS = Boot.$(OBJ) \
+          reader.$(OBJ) \
+          ua_par_io.$(OBJ) \
+          eeprom.$(OBJ) \
+          pixie_c.$(OBJ) \
+          utilities.$(OBJ) \
+          globals.$(OBJ) 
+
+P500ELIBOBJS = pixie500e_lib.$(OBJ)
+	  
+XOPLIBOBJS = pixie4_iface.$(OBJ) \
+             pixie4_igor.$(OBJ)
+
+
+VILIBOBJS = pixie4VI_DLL.$(OBJ)
+
+
+SAMPLEOBJ = SamplePrograms/SampleBoot.$(OBJ) \
+	    SamplePrograms/SampleADCTrace.$(OBJ) \
+	    SamplePrograms/SampleMCARun.$(OBJ) \
+	    SamplePrograms/SampleListMode.$(OBJ) \
+	    SamplePrograms/SampleListFileParser0x7001.$(OBJ) \
+	    SamplePrograms/SampleListFileParser0x7030.$(OBJ) 
+
+TOOLSOBJS = SamplePrograms/Pixie500e_program_EEPROM.$(OBJ)
+#	    SamplePrograms/SampleTests.$(OBJ) \
+#	    SamplePrograms/SampleTestDMA.$(OBJ)
+
+XOPRCOBJS = PixieWinCustom.res
+
+DYNXOPLIB  = Debug/$(PREFIX_LIB)$(XOPLIBNAME).$(XOPLIB)
+DYNDLLLIB  = Debug/$(PREFIX_LIB)$(DLLLIBNAME).$(DYNLIB)
+
+# Targets
+all: p500elib xoplib 
+.PHONY: all
+
+.rc.res: 
+	$(RC) $(RCFLAGS) $(RCINCFLAGS) $< 
+
+.c.$(OBJ):
+	$(CC) $(CFLAGS) $(INCFLAGS) $(CFLAG_COMPILE) $< $(CFLAG_OUT)$@
+
+.PHONY: cleanall	
+cleanall:
+	-rm $(LIBOBJS) $(VILIBOBJS) $(XOPLIBOBJS) $(XOPRCOBJS) $(SAMPLEOBJ) $(TOOLSOBJS) 
+	-rm $(P500ELIBOBJS)
+	-$(RM) Debug\pixie.$(STATLIB) 
+	-$(RM) Debug\p500e.$(STATLIB) 
+	-$(RM) Debug\SampleBoot.exe
+	-$(RM) Debug\SampleADCTrace.exe
+	-$(RM) Debug\SampleMCARun.exe
+	-$(RM) Debug\SampleListMode.exe 
+	-$(RM) Debug\SampleListFileParser0x7001.exe 
+	-$(RM) Debug\SampleListFileParser0x7030.exe 
+	-$(RM) Debug\Sample.exe 
+	-$(RM) Debug\SampleTestDMA.exe 
+	-$(RM) Debug\*.manifest $(EXTRA_FILES) Debug\*.xop Debug\Pixie4DLL.dll
+
+
+.PHONY: clean	
+clean:
+	-rm $(LIBOBJS) $(VILIBOBJS) $(XOPLIBOBJS) $(XOPRCOBJS) $(SAMPLEOBJ) $(TOOLSOBJS) 
+#	-$(RM) Debug\pixie.$(STATLIB) 
+	-$(RM) Debug\*.manifest $(EXTRA_FILES) 
+
+
+
+# for XIA to generate at release
+# XOP for Igor
+xoplib: CFLAGS = $(CFLAGS_XOPLIB)
+xoplib: clean $(LIBOBJS) $(XOPLIBOBJS) $(XOPRCOBJS)
+	$(LINK) $(LINK_PRE_FLAGS) $(DYN_LIB_LINK_FLAGS) \
+		$(LINK_FLAG_OUT)$(DYNXOPLIB) $(LIBOBJS) Debug\p500e.$(STATLIB) \
+		$(XOPLIBOBJS) $(XOPRCOBJS) $(PLX_LIB) $(JUNGO_LIB) $(EXTRA_LIBS) $(SYSTEM_LIBS)
+.PHONY: xoplib
+
+# for XIA to generate at release
+# DLL for LabView and user programs
+dlllib: CFLAGS = $(CFLAGS_DLLLIB)
+dlllib: clean $(LIBOBJS) $(VILIBOBJS)
+	$(LINK) $(LINK_PRE_FLAGS) $(DYN_LIB_LINK_FLAGS) \
+		$(LINK_FLAG_OUT)$(DYNDLLLIB) $(LIBOBJS) $(VILIBOBJS) Debug\p500e.$(STATLIB) \
+		$(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+.PHONY: dlllib
+
+# for XIA to generate at release
+# Jungo PCIe I/O library
+p500elib: CFLAGS = $(CFLAGS_P500ELIB)
+p500elib: cleanall $(P500ELIBOBJS)
+	$(AR) $(STAT_LIB_LINK_FLAGS) $(LINK_FLAG_OUT)Debug\p500e.$(STATLIB) $(P500ELIBOBJS)
+.PHONY: p500elib
+
+# for XIA to generate at release. Can be recompild by user if source code is modified
+# API library
+pixielib: CFLAGS = $(CFLAGS_P500ELIB) /U "COMPILE_IGOR_XOP"
+pixielib: clean $(LIBOBJS)
+	$(AR) $(STAT_LIB_LINK_FLAGS) $(LINK_FLAG_OUT)Debug\pixie.$(STATLIB) $(LIBOBJS)
+.PHONY: pixielib
+
+# sample end user application
+# using pixiedll.dll or pixie.lib
+sample: CFLAGS = $(CFLAGS_SAMPLE)
+sample: clean dlllib $(LIBOBJS) $(SAMPLEOBJ)
+	$(LINK) $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/SampleBoot.exe                   $(DLLLIBNAME).$(STATLIB) Debug/p500e.$(STATLIB) SamplePrograms/SampleBoot.$(OBJ)                 $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS) 
+	$(LINK) $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/SampleListFileParser0x7001.exe   pixie.$(STATLIB) Debug/p500e.$(STATLIB) SamplePrograms/SampleListFileParser0x7001.$(OBJ) $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS) 
+	$(LINK) $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/SampleListFileParser0x7030.exe   pixie.$(STATLIB) Debug/p500e.$(STATLIB) SamplePrograms/SampleListFileParser0x7030.$(OBJ) $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS) 
+#	$(LINK) $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/SampleADCTrace.exe               $(DLLLIBNAME).$(STATLIB) Debug/p500e.$(STATLIB) SamplePrograms/SampleADCTrace.$(OBJ)             $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+#	$(LINK) $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/SampleMCARun.exe                 $(DLLLIBNAME).$(STATLIB) Debug/p500e.$(STATLIB) SamplePrograms/SampleMCARun.$(OBJ)               $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+#	$(LINK) $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/SampleListMode.exe               $(DLLLIBNAME).$(STATLIB) Debug/p500e.$(STATLIB) SamplePrograms/SampleListMode.$(OBJ)             $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+#.PHONY: sample
+
+tools: CFLAGS = $(CFLAGS_SAMPLE)
+tools: clean pixielib $(TOOLSOBJS)
+	$(LINK)  $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/Pixie500e_program_EEPROM.exe p500e.$(STATLIB) pixie.$(STATLIB) SamplePrograms/Pixie500e_program_EEPROM.$(OBJ) $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+#	$(LINK)  $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/Sample.exe                   p500e.$(STATLIB) pixie.$(STATLIB) SamplePrograms/SampleTests.$(OBJ)              $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+#	$(LINK)  $(EXE_LINK_FLAGS) $(LINK_FLAG_OUT)Debug/TestDMA.exe                  p500e.$(STATLIB) pixie.$(STATLIB) SamplePrograms/SampleTestDMA.$(OBJ)            $(PLX_LIB) $(JUNGO_LIB) $(SYSTEM_LIBS)
+#.PHONY: tools
+
+.PHONY: printArch
+printArch:
+	@echo X86!
