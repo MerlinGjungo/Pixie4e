@@ -1,0 +1,1 @@
+cmd_/home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.ko /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.mod.o

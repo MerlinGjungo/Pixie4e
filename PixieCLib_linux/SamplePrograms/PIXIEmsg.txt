@@ -1,0 +1,121 @@
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 13
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 14
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 15
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 13
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 14
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 15
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 13
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 14
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 15
+*INFO* (Pixie_Scan_Crate_Slots): PCI Bus is REGULAR type
+*ERROR* (Pixie_Scan_Crate_Slots): PlxPci_PciRegisterRead_BypassOS() - 0x207  ?
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -8.
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 13
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 14
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 15
+*INFO* (Pixie_Scan_Crate_Slots): PCI Bus is REGULAR type
+*ERROR* (Pixie_Scan_Crate_Slots): PlxPci_PciRegisterRead_BypassOS() - 0x207  ?
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -8.
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 13
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 14
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 15
+*INFO* (Pixie_Scan_Crate_Slots): PCI Bus is REGULAR type
+*ERROR* (Pixie_Scan_Crate_Slots): PlxPci_PciRegisterRead_BypassOS() - 0x207  ?
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -8.
+*INFO* (Pixie_Scan_Crate_Slots): PCI Bus is REGULAR type
+*ERROR* (Pixie_Scan_Crate_Slots): PlxPci_PciRegisterRead_BypassOS() - 0x207  ?
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -8.
+*ERROR* (Pixie_Scan_Crate_Slots): Cannot find PXI initialization constants for selected chassis, retval = -2
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -2.
+*ERROR* (Pixie_Scan_Crate_Slots): Cannot find PXI initialization constants for selected chassis, retval = -2
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -2.
+*ERROR* (Pixie_Scan_Crate_Slots): Cannot find PXI initialization constants for selected chassis, retval = -2
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -2.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+*ERROR* (Pixie_Scan_Crate_Slots): Cannot find PXI initialization constants for selected chassis, retval = -2
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -2.
+*DEBUG* read DSP parameter values done from Configuration/default_125.set
+*DEBUG* init DSP variable names done
+*ERROR* (Find_Xact_Match): RUNTASK was not found
+*ERROR* (Find_Xact_Match): CONTROLTASK was not found
+*ERROR* (Find_Xact_Match): RESUME was not found
+*ERROR* (Find_Xact_Match): RUNTIMEA was not found
+*ERROR* (Find_Xact_Match): NUMEVENTSA was not found
+*ERROR* (Find_Xact_Match): SYNCHDONE was not found
+*ERROR* (Find_Xact_Match): FASTPEAKSA0 was not found
+*ERROR* (Find_Xact_Match): COUNTTIMEA0 was not found
+*ERROR* (Find_Xact_Match): FASTPEAKSA1 was not found
+*ERROR* (Find_Xact_Match): COUNTTIMEA1 was not found
+*ERROR* (Find_Xact_Match): FASTPEAKSA2 was not found
+*ERROR* (Find_Xact_Match): COUNTTIMEA2 was not found
+*ERROR* (Find_Xact_Match): FASTPEAKSA3 was not found
+*ERROR* (Find_Xact_Match): COUNTTIMEA3 was not found
+*Error* (Pixie_Define_Clocks): Unknown BoardRevision 0 (M 0 Ch 0), time constants defaulting to Pixie-500e
+*ERROR* (Find_Xact_Match): FILTERRANGE was not found
+*ERROR* (Find_Xact_Match): CCONTROL was not found
+*DEBUG* Init_Globals  done
+System started up successfully in offline mode
+*ERROR* (Pixie_Scan_Crate_Slots): Cannot find PXI initialization constants for selected chassis, retval = -2
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -2.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.

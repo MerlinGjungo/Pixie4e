@@ -1,0 +1,45 @@
+# Template file for configure script
+
+# TODO: Set INST_BASEDIR to the location of your KP installation
+# directory. For example: INST_BASEDIR=/home/john/KP_Install
+ifeq ($(INST_BASEDIR),)
+        INST_BASEDIR=@INST_BASEDIR@
+endif
+
+INST_BASEDIR:=$(wildcard $(INST_BASEDIR))
+
+CSRCS = @CSRCS@
+OD = @OD@
+LINK_OBJ = @LINK_OBJ@
+MODULE_NAME = @MODULE_NAME@
+TARGET = @TARGET@
+KERNEL_DIR = @KERNEL_DIR@
+EXTRA_CFLAGS = @EXTRA_CFLAGS@
+
+ifeq ($(DEBUG),1)
+        EXTRA_CFLAGS += -g -DDEBUG
+endif
+
+COBJS = $(patsubst %.c,/%.o,$(CSRCS))
+
+obj-m += $(MODULE_NAME).o
+$(MODULE_NAME)-objs := $(COBJS) $(notdir $(LINK_OBJ))
+
+all: $(OD)
+	cp -sf $(LINK_OBJ) .
+	ln -sf makefile.kp Makefile
+	make -C $(KERNEL_DIR) M=`pwd` modules
+	rm -f $(notdir $(LINK_OBJ))
+	mv -f *.ko *.o *.mod.c $(OD)/
+	rm Makefile
+
+$(OD):
+	-@mkdir $@
+	
+clean:
+	rm -rf core .*.cmd modules.order .tmp_versions $(OD)
+
+install: all
+	@ /sbin/rmmod $(MODULE_NAME) 2> /dev/null || echo -n
+	/sbin/insmod $(TARGET)
+

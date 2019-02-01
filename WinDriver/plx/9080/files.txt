@@ -1,0 +1,115 @@
+plx/9080 directory contents:
+
+This directory includes the source code for the p9080_diag sample.
+The source code was created by Jungo Connectivity using WinDriver's API.
+
+Files:
+======
+  - p9080_diag.c
+        A sample diagnostics program for accessing the PLX9080 board using
+        WinDriver's plx/lib and plx/plx_diag_lib libraries and the WDC API.
+        The sample demonstrates how you can:
+        - Scan the PCI bus and acquire resources information for the board
+        - Read/write the board's memory and I/O addresses
+        - Read/write the board's local addresses
+        - Read/write the board's run-time registers
+        - Read/write the board's configuration space
+        - Perform Direct Memory Access (DMA). The sample demonstrates using
+          either interrupts or a polling mechanism to determine DMA completion.
+        - Access the board's serial EEPROM
+        - Register to receive plug-n-play and power management notifications
+          for the board
+        - Reset the board
+    
+  - files.txt
+        Describes the sample files.
+
+
+  For Windows:
+  ------------
+  - x86/ directory - Windows x86 32-bit files:
+  
+    - msdev_2010/ sub-directory:
+      - p9080_diag.vcxproj
+            MSDEV 2010 (.NET) project file
+      - p9080_diag.sln
+            MSDEV 2010 (.NET) solution file
+
+  - amd64/ directory - Windows x64 64-bit files:
+  
+    - msdev_2010/ sub-directory:
+      - p9080_diag.vcxproj
+            MSDEV 2010 (.NET) project file
+      - p9080_diag.sln
+            MSDEV 2010 (.NET) solution file
+  
+  - WIN32/ sub-directory:
+    - p9080_diag.exe
+          The compiled sample program for Windows
+
+
+  For Windows 2k/XP/Server 2003:
+  ------------------------------------
+  - p9080.inf
+         A sample WinDriver INF file for registering the PLX9080 board with
+         WinDriver's kernel-mode driver (windrvr1281.sys).
+         NOTE: To use this file, change the vendor and device IDs in the file
+               to comply with those of your specific device.
+
+
+  For Linux:
+  ----------
+  - LINUX/ sub-directory:
+    - makefile
+          GNU make makefile for building the sample
+    - p9080_diag
+          The compiled sample program for Linux
+
+
+Compiling the sample:
+=====================
+To compile and build the sample application you need an appropriate C/C++
+compiler for your development platform.
+
+  - On Windows: If you are using one of the supported MSDEV or Borland C++
+    Builder IDEs (see above): open the sample project/workspace/solution
+    file from the relevant compiler sub-directory and simply build the project.
+    
+  - On Linux: If you are using GNU make, simply build the sample using the
+    makefile from the LINUX/ sub-directory.
+    
+  - If you are using a different C/C++ compiler or make utility:
+    - Create a new console mode project/makefile for your compiler.
+    - Add the following files to the project/makefile:
+      WinDriver/plx/p9080_diag/p9080_diag.c
+      WinDriver/plx/diag_lib/plx_diag_lib.c
+      WinDriver/plx/lib/plx_lib.c
+      WinDriver/samples/shared/wdc_diag_lib.c
+      WinDriver/samples/shared/diag_lib.c
+    - Link your project with the WinDriver/lib/wdapi<version>.lib (Windows)
+      or WinDriver/lib/libwdapi<version>.so (Linux) OR
+      add the following files (which are exported in the wdapi<version> DLL /
+      shared object) to your project/makefile:
+      WinDriver/src/wdapi/utils.c
+      WinDriver/src/wdapi/windrvr_int_thread.c
+      WinDriver/src/wdapi/windrvr_events.c
+      WinDriver/src/wdapi/status_strings.c
+      WinDriver/src/wdapi/wdc_general.c
+      WinDriver/src/wdapi/wdc_cfg.c
+      WinDriver/src/wdapi/wdc_mem_io.c
+      WinDriver/src/wdapi/wdc_ints.c
+      WinDriver/src/wdapi/wdc_events.c
+      WinDriver/src/wdapi/wdc_err.c
+      WinDriver/src/wdapi/wdc_dma.c
+    - Build your project.
+
+
+Converting to a GUI application:
+================================
+  This sample was written as a console mode application (rather than a GUI 
+  application) that uses standard input and standard output.
+  This was done in order to simplify the source code. You can change the sample
+  into a GUI application by replacing all calls to <stdio.h> functions such 
+  as printf(), sprintf(), scanf(), etc. with relevant GUI functions and
+  replacing the main() function in p9080_diag.c with a GUI equivalent.
+

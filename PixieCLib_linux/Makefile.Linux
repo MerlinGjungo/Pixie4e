@@ -1,0 +1,138 @@
+
+# -*- PIXIE-4 Makefile for Linux -*-
+# PLX build and load scripts need bash
+SHELL := /bin/bash
+
+# Root directory
+PIXIE_ROOT_DIR=$(shell pwd)
+# WinDriver SDK root dir
+WD_SDK_DIR=$(PIXIE_ROOT_DIR)/../WinDriver
+# PLX SDK root dir
+PLX_SDK_DIR=$(PIXIE_ROOT_DIR)/../PlxSdk
+# The archiver
+AR := ar
+# C compiler
+CC := gcc
+# C++ compiler
+CXX := g++
+# C flags
+# Don't forget KERNEL_64BIT for x86_64
+CFLAGS := -DXIA_LINUX -DPLX_LINUX -DLINUX -DWINDRIVER_API -DKERNEL_64BIT  -fPIC 
+CFLAG_COMPILE := -c
+CFLAG_OUT     := -o
+# C++ flags
+CXXFLAGS := $(shell root-config --cflags) $(CFLAGS)
+# Include flags
+INCFLAGS := -I. -I$(WD_SDK_DIR)/include -I$(WD_SDK_DIR)  -I$(PLX_SDK_DIR)/Include
+# This should be the linker
+LINK := ld
+# Linker flags
+LINK_PRE_FLAGS := -L. -Llib
+LINK_FLAG_OUT := -o
+DYN_LIB_LINK_FLAGS := -shared
+# System libraries
+SYSTEM_LIBS :=  -ldl  -lm -lpthread
+# Root libraries (for nscope)
+ROOT_LIBS := $(shell root-config --glibs)
+# Precompiled PLX library  (PlxApi.a to be renamed to libPlxApi.a)
+PLX_LIB := -lPlxApi
+# WinDriver API shared library
+#WD_LIB := -lwdapi1031
+WD_LIB := -lwdapi1281
+# WinDriver-based P500e api library name
+P500ELIBNAME = PIXIE500E
+# Pixie library name
+LIBNAME = Pixie4
+# PIXIE-4 library object files to create
+LIBOBJS = Boot.o \
+          ua_par_io.o \
+          eeprom.o \
+          pixie_c.o \
+          utilities.o \
+          globals.o \
+          reader.o \
+          pixie500e_lib_linux.o
+
+
+SAMPLEOBJ = ./SamplePrograms/SampleBoot.o \
+            ./SamplePrograms/SampleADCTrace.o \
+            ./SamplePrograms/SampleMCARun.o \
+            ./SamplePrograms/SampleListMode.o \
+            ./SamplePrograms/SampleListFileParser.o
+		
+            
+P500ELIBOBJS = pixie500e_lib.o
+
+# Targets
+all: lib
+.PHONY: all
+
+.c.o: 
+	$(CC) $(CFLAGS) $(INCFLAGS) $(CFLAG_COMPILE) $< $(CFLAG_OUT)$@
+
+.cpp.o: 
+	$(CXX) $(CXXFLAGS) $(INCFLAGS) $(CFLAG_COMPILE) $< $(CFLAG_OUT)$@
+
+lib: $(LIBOBJS)
+	$(AR) -rcv lib$(LIBNAME).a $(LIBOBJS)
+.PHONY: lib
+
+sample: lib $(SAMPLEOBJ)
+	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleBoot     SamplePrograms/SampleBoot.o    -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
+	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleADCTrace SamplePrograms/SampleADCTrace.o -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
+	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleMCARun SamplePrograms/SampleMCARun.o -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
+	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleListMode SamplePrograms/SampleListMode.o -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
+	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleListFileParser SamplePrograms/SampleListFileParser.o -l$(LIBNAME) $(WD_LIB) $(PLX_LIB) $(SYSTEM_LIBS)
+.PHONY: sample
+
+loadwindriver:
+	@echo "Loading WinDriver"; \
+	sudo -E $(WD_BASEDIR)/redist/wdreg windrvr6 auto; \
+	sudo chmod 666 /dev/windrvr6
+.PHONY: loadwindriver
+
+
+plxdriver:
+	@echo "Building PLX kernel module. Please wait ..."; \
+	export PLX_SDK_DIR=$(PLX_SDK_DIR); \
+	cd $(PLX_SDK_DIR)/Linux/Driver; \
+	$(SHELL)./builddriver 9054 cleanall; \
+	$(SHELL) ./builddriver 9054
+.PHONY: plxdriver
+
+
+loadplxdriver:
+	@export PLX_SDK_DIR=$(PLX_SDK_DIR); \
+	cd $(PLX_SDK_DIR)/Bin; \
+	sudo -E $(SHELL) ./Plx_load 9054
+.PHONY: loadplxdriver
+
+
+unloadplxdriver:
+	@export PLX_SDK_DIR=$(PLX_SDK_DIR); \
+	cd $(PLX_SDK_DIR)/Bin; \
+	sudo -E ./Plx_unload 9054
+.PHONY: unloadplxdriver
+
+
+plxlib:
+	@echo "Building PLX library. Please wait ..."
+	@export PLX_SDK_DIR=$(PLX_SDK_DIR); \
+	cd $(PLX_SDK_DIR)/Linux/PlxApi; \
+	make
+	@export PLX_SDK_DIR=$(PLX_SDK_DIR); \
+	cp $(PLX_SDK_DIR)/Linux/PlxApi/Library/PlxApi.a lib/libPlxApi.a
+.PHONY: plxlib
+
+
+clean:
+	-rm $(LIBOBJS) lib$(LIBNAME).a $(SAMPLEOBJ) 
+	-rm SamplePrograms/SampleBoot
+	-rm SamplePrograms/SampleADCTrace
+	-rm SamplePrograms/SampleMCARun
+	-rm SamplePrograms/SampleListMode
+	-rm SamplePrograms/SampleListFileParser
+	-rm $(P500ELIBOBJS) lib$(P500ELIBNAME).a $(P500ETESTOBJS)
+	-rm SamplePrograms/SampleP500eTest
+.PHONY: clean
+

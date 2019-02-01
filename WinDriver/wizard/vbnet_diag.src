@@ -1,0 +1,2912 @@
+%MSDEVNET2010AMD64%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2010AMD64.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>10.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\amd64\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2010AMD64%
+
+%MSDEVNET2010X86%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2010x86.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\%LIBARCHDIR%\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+
+%/MSDEVNET2010X86%
+%MSDEVNET2012AMD64%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2012AMD64.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>10.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\amd64\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2012AMD64%
+
+%MSDEVNET2012X86%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2012x86.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\%LIBARCHDIR%\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+
+%/MSDEVNET2012X86%
+
+%MSDEVNET2013AMD64%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2013AMD64.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>10.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\amd64\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2013AMD64%
+
+%MSDEVNET2013X86%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2013x86.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\%LIBARCHDIR%\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+
+%/MSDEVNET2013X86%
+
+%MSDEVNET2015AMD64%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2015AMD64.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>10.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\amd64\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2015AMD64%
+
+%MSDEVNET2015X86%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2015x86.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\%LIBARCHDIR%\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2015X86%
+
+%MSDEVNET2017AMD64%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2017AMD64.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>10.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\amd64\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2017AMD64%
+
+%MSDEVNET2017X86%
+===BEGIN MODULE diag/%LNAME%_diag_msdev_2017x86.vbproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55D2390A-5780-4669-BDDA-A24789DA7403}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>%LNAME%_diag</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>%LNAME%_diag</RootNamespace>
+    <StartupObject>%LNAME%_diag.%LNAME%</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>%LNAME%_diag.xml</DocumentationFile>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>42016,42017,42018,42019,42032</NoWarn>
+    <DebugType>none</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="%LNAME%_lib">
+      <Name>%LNAME%_lib</Name>
+      <HintPath>..\lib\bin\$(Configuration)\v4.0.30319\%LNAME%_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="wdapi_dotnet">
+      <Name>wdapi_dotnet</Name>
+      <HintPath>%BASEDIR%\lib\%LIBARCHDIR%\v4.0.30319\wdapi_dotnet%WDVER%.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeviceTabPage.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormChangeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTransfers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="%LNAME%_diag.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="FormChangeSettings.resx">
+      <DependentUpon>FormChangeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTransfers.resx">
+      <DependentUpon>FormTransfers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="%LNAME%_diag.resx">
+      <DependentUpon>%LNAME%_diag.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+%/MSDEVNET2017X86%
+
+%ASSEMBLYINFO%
+===BEGIN MODULE diag/AssemblyInfo.vb
+Imports System
+Imports System.Reflection
+Imports System.Runtime.InteropServices
+
+' General Information about an assembly is controlled through the following
+' set of attributes. Change these attribute values to modify the information
+' associated with an assembly.
+
+' Review the values of the assembly attributes
+
+<Assembly: AssemblyTitle("%NAME% Diag")>
+<Assembly: AssemblyDescription("%NAME% Diag")>
+<Assembly: AssemblyCompany("Jungo Connectivity")>
+<Assembly: AssemblyProduct("WinDriver")>
+<Assembly: AssemblyCopyright("Jungo Connectivity Confidential. Copyright (c) %YEAR% Jungo Connectivity Ltd.  https://www.jungo.com")>
+<Assembly: AssemblyTrademark("")>
+
+'The following GUID is for the ID of the typelib if this project is exposed to COM
+<Assembly: Guid("4F8C913C-E5D8-48E6-ABE9-88D76903B353")>
+
+' Version information for an assembly consists of the following four values:
+'
+'      Major Version
+'      Minor Version
+'      Build Number
+'      Revision
+'
+' You can specify all the values or you can default the Build and Revision Numbers
+' by using the '*' as shown below:
+
+<Assembly: AssemblyVersion("%VERSION%")>
+
+%/ASSEMBLYINFO%
+
+===BEGIN MODULE diag/%NAME%_diag.vb
+Option Explicit On
+Imports System.Windows.Forms
+Imports System.Drawing
+Imports Jungo.wdapi_dotnet
+Imports wdu_err = Jungo.wdapi_dotnet.WD_ERROR_CODES
+Imports Jungo.%LNAME%_lib
+
+Public Class %LNAME%
+    Inherits System.Windows.Forms.Form
+
+    Delegate Sub safeLogTextCallBack(ByVal sMsg As String)
+    Delegate Sub safeButtonsAccessCallBack()
+    Private Const APP_NAME As String = ".NET USB Sample"
+    Private Const DEFAULT_LICENSE_STRING As String = "%LICENSE%"
+    'TODO: If you have renamed the WinDriver kernel module
+    ' (windrvr1281.sys), change the driver name below accordingly
+    Private Const DEFAULT_DRIVER_NAME As String = "windrvr1281"
+    Private Const DEFAULT_VENDOR_ID As Short = 0
+    Private Const DEFAULT_PRODUCT_ID As Short = 0
+    Public Const TIME_OUT As Int32 = 30000
+    Private uDevManager As %NAME%_DeviceManager
+    Private Delegate Sub D_ATTACH_GUI_CALLBACK(ByVal pDev As %NAME%_Device)
+    Private Delegate Sub D_DETACH_GUI_CALLBACK(ByVal pDev As %NAME%_Device)
+
+
+#Region " Windows Form Designer generated code "
+
+    Public Sub New()
+        MyBase.New()
+
+        'This call is required by the Windows Form Designer.
+        InitializeComponent()
+    End Sub
+
+    'Form overrides dispose to clean up the component list.
+    Protected Overloads Overrides Sub Dispose(ByVal disposing As Boolean)
+        If disposing Then
+            If Not (components Is Nothing) Then
+                components.Dispose()
+            End If
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.
+    'Do not modify it using the code editor.
+    Friend WithEvents btExit As System.Windows.Forms.Button
+    Friend WithEvents lblNumDevices As System.Windows.Forms.Label
+    Friend WithEvents lblNumDevicesText As System.Windows.Forms.Label
+    Friend WithEvents btLogClear As System.Windows.Forms.Button
+    Friend WithEvents btActiveAltSetChange As System.Windows.Forms.Button
+    Friend WithEvents lbLog As System.Windows.Forms.Label
+    Friend WithEvents txtLog As System.Windows.Forms.TextBox
+    Friend WithEvents tabDevices As System.Windows.Forms.TabControl
+    Friend WithEvents btPipeWrite As System.Windows.Forms.Button
+    Friend WithEvents btPipeRead As System.Windows.Forms.Button
+    Friend WithEvents btPipeListen As System.Windows.Forms.Button
+    Friend WithEvents btPipeReset As System.Windows.Forms.Button
+    <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
+        Me.btExit = New System.Windows.Forms.Button
+        Me.lblNumDevices = New System.Windows.Forms.Label
+        Me.lblNumDevicesText = New System.Windows.Forms.Label
+        Me.btLogClear = New System.Windows.Forms.Button
+        Me.btActiveAltSetChange = New System.Windows.Forms.Button
+        Me.lbLog = New System.Windows.Forms.Label
+        Me.txtLog = New System.Windows.Forms.TextBox
+        Me.tabDevices = New System.Windows.Forms.TabControl
+        Me.btPipeWrite = New System.Windows.Forms.Button
+        Me.btPipeRead = New System.Windows.Forms.Button
+        Me.btPipeListen = New System.Windows.Forms.Button
+        Me.btPipeReset = New System.Windows.Forms.Button
+        Me.SuspendLayout()
+        '
+        'btExit
+        '
+        Me.btExit.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.btExit.Location = New System.Drawing.Point(688, 536)
+        Me.btExit.Name = "btExit"
+        Me.btExit.Size = New System.Drawing.Size(88, 40)
+        Me.btExit.TabIndex = 35
+        Me.btExit.Text = "&Exit"
+        '
+        'lblNumDevices
+        '
+        Me.lblNumDevices.Font = New System.Drawing.Font( _
+            "Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblNumDevices.Location = New System.Drawing.Point(172, 26)
+        Me.lblNumDevices.Name = "lblNumDevices"
+        Me.lblNumDevices.Size = New System.Drawing.Size(16, 16)
+        Me.lblNumDevices.TabIndex = 25
+        Me.lblNumDevices.Text = "0"
+        Me.lblNumDevices.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'lblNumDevicesText
+        '
+        Me.lblNumDevicesText.ImageAlign = _
+            System.Drawing.ContentAlignment.MiddleLeft
+        Me.lblNumDevicesText.Location = New System.Drawing.Point(20, 18)
+        Me.lblNumDevicesText.Name = "lblNumDevicesText"
+        Me.lblNumDevicesText.Size = New System.Drawing.Size(152, 32)
+        Me.lblNumDevicesText.TabIndex = 24
+        Me.lblNumDevicesText.Text = "Number of attached devices:"
+        Me.lblNumDevicesText.TextAlign = _
+            System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'btLogClear
+        '
+        Me.btLogClear.Location = New System.Drawing.Point(684, 394)
+        Me.btLogClear.Name = "btLogClear"
+        Me.btLogClear.Size = New System.Drawing.Size(88, 40)
+        Me.btLogClear.TabIndex = 32
+        Me.btLogClear.Text = "&Clear Log"
+        '
+        'btActiveAltSetChange
+        '
+        Me.btActiveAltSetChange.Location = New System.Drawing.Point(780, 298)
+        Me.btActiveAltSetChange.Name = "btActiveAltSetChange"
+        Me.btActiveAltSetChange.Size = New System.Drawing.Size(88, 48)
+        Me.btActiveAltSetChange.TabIndex = 31
+        Me.btActiveAltSetChange.Text = "Change active &alternate setting"
+        '
+        'lbLog
+        '
+        Me.lbLog.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, _
+            System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbLog.Location = New System.Drawing.Point(20, 378)
+        Me.lbLog.Name = "lbLog"
+        Me.lbLog.Size = New System.Drawing.Size(72, 16)
+        Me.lbLog.TabIndex = 33
+        Me.lbLog.Text = "Log"
+        '
+        'txtLog
+        '
+        Me.txtLog.AutoSize = False
+        Me.txtLog.Location = New System.Drawing.Point(20, 394)
+        Me.txtLog.Multiline = True
+        Me.txtLog.Name = "txtLog"
+        Me.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.txtLog.Size = New System.Drawing.Size(648, 192)
+        Me.txtLog.TabIndex = 34
+        Me.txtLog.Text = ""
+        '
+        'tabDevices
+        '
+        Me.tabDevices.ItemSize = New System.Drawing.Size(350, 18)
+        Me.tabDevices.Location = New System.Drawing.Point(20, 66)
+        Me.tabDevices.Name = "tabDevices"
+        Me.tabDevices.RightToLeft = System.Windows.Forms.RightToLeft.No
+        Me.tabDevices.SelectedIndex = 0
+        Me.tabDevices.Size = New System.Drawing.Size(738, 280)
+        Me.tabDevices.SizeMode = System.Windows.Forms.TabSizeMode.Fixed
+        Me.tabDevices.TabIndex = 26
+        '
+        'btPipeWrite
+        '
+        Me.btPipeWrite.Location = New System.Drawing.Point(780, 138)
+        Me.btPipeWrite.Name = "btPipeWrite"
+        Me.btPipeWrite.Size = New System.Drawing.Size(88, 40)
+        Me.btPipeWrite.TabIndex = 28
+        Me.btPipeWrite.Text = "&Write To Pipe"
+        '
+        'btPipeRead
+        '
+        Me.btPipeRead.Location = New System.Drawing.Point(780, 90)
+        Me.btPipeRead.Name = "btPipeRead"
+        Me.btPipeRead.Size = New System.Drawing.Size(88, 40)
+        Me.btPipeRead.TabIndex = 27
+        Me.btPipeRead.Text = "&Read From Pipe"
+        '
+        'btPipeListen
+        '
+        Me.btPipeListen.Location = New System.Drawing.Point(780, 186)
+        Me.btPipeListen.Name = "btPipeListen"
+        Me.btPipeListen.Size = New System.Drawing.Size(88, 48)
+        Me.btPipeListen.TabIndex = 29
+        Me.btPipeListen.Text = "&Listen To Pipe"
+        '
+        'btPipeReset
+        '
+        Me.btPipeReset.Location = New System.Drawing.Point(780, 242)
+        Me.btPipeReset.Name = "btPipeReset"
+        Me.btPipeReset.Size = New System.Drawing.Size(88, 48)
+        Me.btPipeReset.TabIndex = 30
+        Me.btPipeReset.Text = "Re&set Pipe"
+        '
+        '%LNAME%
+        '
+        Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
+        Me.ClientSize = New System.Drawing.Size(888, 605)
+        Me.Controls.Add(Me.btExit)
+        Me.Controls.Add(Me.lblNumDevices)
+        Me.Controls.Add(Me.lblNumDevicesText)
+        Me.Controls.Add(Me.btLogClear)
+        Me.Controls.Add(Me.btActiveAltSetChange)
+        Me.Controls.Add(Me.lbLog)
+        Me.Controls.Add(Me.txtLog)
+        Me.Controls.Add(Me.tabDevices)
+        Me.Controls.Add(Me.btPipeWrite)
+        Me.Controls.Add(Me.btPipeRead)
+        Me.Controls.Add(Me.btPipeListen)
+        Me.Controls.Add(Me.btPipeReset)
+        Me.Name = "%LNAME%"
+        Me.Text = "USB .NET Sample"
+        Me.ResumeLayout(False)
+
+    End Sub
+
+#End Region
+
+    Private Sub %LNAME%_Load(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles MyBase.Load
+
+        Dim dDeviceAttachCb As D_USER_ATTACH_CALLBACK = AddressOf _
+            UserDeviceAttach
+        Dim dDeviceDetachCb As D_USER_DETACH_CALLBACK = AddressOf _
+            UserDeviceDetach
+        uDevManager = New %NAME%_DeviceManager(dDeviceAttachCb, _
+            dDeviceDetachCb, Convert.ToUInt16(DEFAULT_VENDOR_ID), _
+            Convert.ToUInt16(DEFAULT_PRODUCT_ID), DEFAULT_DRIVER_NAME, _
+            DEFAULT_LICENSE_STRING)
+
+        UpdateButtons()
+
+    End Sub
+
+    Private Sub UserDeviceAttach(ByVal pDev As %NAME%_Device)
+        Dim AttachCb As D_ATTACH_GUI_CALLBACK = AddressOf DeviceAttachGuiCb
+        Invoke(AttachCb, New Object() {pDev})
+    End Sub
+
+    Private Sub DeviceAttachGuiCb(ByVal pDev As %NAME%_Device)
+        lblNumDevices.Text = uDevManager.GetNumOfDevicesAttached().ToString()
+        Dim tabPage As New DeviceTabPage(Me, pDev)
+        tabDevices.Controls.Add(tabPage)
+    End Sub
+
+    Private Sub UserDeviceDetach(ByVal pDev As %NAME%_Device)
+        Dim DetachCb As D_DETACH_GUI_CALLBACK = AddressOf DeviceDetachGuiCb
+        Invoke(DetachCb, New Object() {pDev})
+    End Sub
+
+    Private Sub DeviceDetachGuiCb(ByVal pDev As %NAME%_Device)
+        Dim numTabs As Int32 = tabDevices.TabCount
+        Dim i As Int32 = 0
+        Dim temp As DeviceTabPage
+
+        lblNumDevices.Text = uDevManager.GetNumOfDevicesAttached().ToString()
+        Do
+            temp = CType(tabDevices.TabPages(i), DeviceTabPage)
+            i = i + 1
+        Loop Until (temp.GetUsbDev() Is pDev)
+        tabDevices.Controls.Remove(temp)
+    End Sub
+
+    Private Sub %LNAME%_Closing(ByVal eventSender As System.Object, _
+        ByVal eventArgs As System.EventArgs) Handles MyBase.Closed
+
+        Dim lblClose As New Label
+        lblClose.Text = "Please wait untill " & APP_NAME & "." & _
+            Environment.NewLine & "shuts down..."
+        lblClose.Font = New System.Drawing.Font(lblClose.Font.FontFamily, 18, _
+           FontStyle.Bold)
+        lblClose.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        lblClose.Size = New System.Drawing.Size(400, 200)
+        lblClose.BorderStyle = System.Windows.Forms.BorderStyle.None
+        lblClose.Location = New System.Drawing.Point(200, 100)
+
+        DisableButtons()
+        tabDevices.Visible = False
+        Me.Controls.Add(lblClose)
+        Refresh()
+        uDevManager.Dispose()
+    End Sub
+
+    Public Function GetActiveTab() As DeviceTabPage
+        If (tabDevices.TabCount = 0) Then
+            Return Nothing
+        End If
+
+        Return CType(tabDevices.GetControl(tabDevices.SelectedIndex), _
+            DeviceTabPage)
+    End Function
+
+    Private Sub tabDevices_SelectedIndexChanged(ByVal sender As System.Object, _
+        ByVal e As System.EventArgs) Handles tabDevices.SelectedIndexChanged
+
+        UpdateButtons()
+    End Sub
+
+    Private Sub DisableButtons()
+        btPipeWrite.Enabled = False
+        btPipeRead.Enabled = False
+        btPipeListen.Enabled = False
+        btPipeReset.Enabled = False
+        btActiveAltSetChange.Enabled = False
+    End Sub
+
+    Public Sub UpdateButtons()
+        If (tabDevices.InvokeRequired()) Then
+            Dim cb As New safeButtonsAccessCallBack(AddressOf UpdateButtons)
+            Me.Invoke(cb)
+
+        Else
+            If (tabDevices.TabCount = 0) Then
+                DisableButtons()
+                Return
+            End If
+            Dim activePage As DeviceTabPage = GetActiveTab()
+            If (activePage Is Nothing) Then
+                Return
+            End If
+            Dim pipe As %NAME%_Pipe = activePage.GetActivePipe()
+
+            btPipeWrite_Update(pipe)
+            btPipeRead_Update(pipe)
+            btPipeListen_Update(pipe)
+            btPipeReset_Update(pipe)
+            btActiveAltSetChange_Update(activePage)
+        End If
+    End Sub
+
+    Private Sub btPipeWrite_Update(ByVal Pipe As %NAME%_Pipe)
+        btPipeWrite.Enabled = Not (Pipe.IsPipeDirectionIn())
+
+        If (Pipe.IsInUse() AndAlso btPipeWrite.Enabled) Then
+            btPipeWrite.Text = "Stop &Writing"
+        Else
+            btPipeWrite.Text = "&Write To Pipe"
+        End If
+
+    End Sub
+
+    Private Sub btPipeRead_Update(ByVal Pipe As %NAME%_Pipe)
+        btPipeRead.Enabled = Not (Pipe.IsPipeDirectionOut()) AndAlso _
+            Not (Pipe.IsContiguous())
+
+        If (Pipe.IsInUse() AndAlso btPipeRead.Enabled) Then
+            btPipeRead.Text = "Stop &Reading"
+        Else
+            btPipeRead.Text = "&Read From Pipe"
+        End If
+
+    End Sub
+
+    Private Sub btPipeListen_Update(ByVal Pipe As %NAME%_Pipe)
+        btPipeListen.Enabled = Not (Pipe.IsPipeDirectionOut() OrElse _
+           Pipe.IsControlPipe()) AndAlso Not (Pipe.IsInUse() AndAlso _
+           Not (Pipe.IsContiguous()))
+
+        If (Pipe.IsInUse() AndAlso btPipeListen.Enabled) Then
+            btPipeListen.Text = "Stop &Listening"
+        Else
+            btPipeListen.Text = "&Listen To Pipe"
+        End If
+
+    End Sub
+
+    Private Sub btPipeReset_Update(ByVal Pipe As %NAME%_Pipe)
+        btPipeReset.Enabled = Not (Pipe.IsControlPipe()) AndAlso Not _
+        (Pipe.IsInUse())
+    End Sub
+
+    Public Sub btActiveAltSetChange_Update(ByVal activePage As DeviceTabPage)
+        Dim dwNumOfAltSettings As UInt32 = _
+            activePage.GetUsbDev().GetNumOfAlternateSettingsTotal()
+        btActiveAltSetChange.Enabled = ((Convert.ToInt32(dwNumOfAltSettings) _
+            > 1) AndAlso Not (activePage.GetUsbDev().IsDeviceTransferring()))
+    End Sub
+
+    Private Sub TransferCompletion(ByVal pipe As %NAME%_Pipe)
+        UpdateButtons()
+
+        Dim transferType As String
+        If (pipe.GetfRead()) Then
+            transferType = "read"
+        Else
+            transferType = "written"
+        End If
+
+        If (Convert.ToInt64(pipe.GetTransferStatus()) = _
+            wdu_err.WD_STATUS_SUCCESS) Then
+            TraceMsg(String.Format("Transfer completed successfully! " & _
+                "Data {0}: {1} ", transferType, _
+                DisplayHexBuffer(pipe.GetBuffer(), pipe.GetBytesTransferred())))
+        Else
+            Dim dwStatus As UInt32 = pipe.GetTransferStatus()
+            ErrMsg(String.Format("Transfer Failed! Error {0}: {1} ", _
+                dwStatus.ToString("X"), _
+                utils.Stat2Str(dwStatus)))
+        End If
+
+    End Sub
+
+    Private Sub ListenCompletion(ByVal pipe As %NAME%_Pipe)
+        Dim dwStatus As UInt32 = pipe.GetTransferStatus()
+        Dim IsListenStopped As Boolean = ((Convert.ToInt64(dwStatus) _
+            = wdu_err.WD_IRP_CANCELED) AndAlso (Not pipe.IsContiguous()))
+        If (Convert.ToInt64(dwStatus) <> wdu_err.WD_STATUS_SUCCESS AndAlso _
+            Not IsListenStopped) Then
+
+            ErrMsg(String.Format("Transfer Failed! Error {0}: {1} ", _
+                dwStatus.ToString("X"), utils.Stat2Str(dwStatus)))
+            UpdateButtons()
+        Else
+            TraceMsg(String.Format("{0}", DisplayHexBuffer(pipe.GetBuffer(), _
+                pipe.GetBytesTransferred())))
+        End If
+    End Sub
+
+    Private Sub SingleTransfer(ByVal fRead As Boolean)
+        Dim activeTab As DeviceTabPage = GetActiveTab()
+        If (activeTab Is Nothing) Then
+            Return
+        End If
+
+        Dim currUsbDev As %NAME%_Device = activeTab.GetUsbDev()
+        Dim activePipe As %NAME%_Pipe = activeTab.GetActivePipe()
+        Dim dwPipeNum As UInt32 = activeTab.GetActivePipeNum()
+        Dim fControl As Boolean = activePipe.IsControlPipe()
+        Dim dwBuffSize As UInt32 = Convert.ToUInt32(0)
+        Dim buffer() As Byte = Nothing
+        Dim pSetupPacket(7) As Byte
+        Dim dwOptions As UInt32 = Convert.ToUInt32(0)
+        Dim userTransCompletion As D_USER_TRANSFER_COMPLETION = AddressOf _
+            TransferCompletion
+    Dim dwTimeOut As UInt32 = Convert.ToUInt32(TIME_OUT)
+
+        Dim frmTransfers As New FormTransfers(fRead, fControl)
+
+        If (frmTransfers.GetInput(dwBuffSize, buffer, pSetupPacket) = False) _
+            Then
+            Return
+        End If
+
+        Dim transferType As String
+        If (fRead) Then
+            transferType = "reading from"
+        Else
+            transferType = "writing to"
+        End If
+
+        TraceMsg(String.Format("began {0} {1} pipe number 0x{2:X}", _
+            transferType, activeTab.GetUsbDev().DeviceDescription(), dwPipeNum))
+
+        If (activePipe.IsControlPipe()) Then
+            Dim dwBytesTransferred As UInt32 = Convert.ToUInt32(0)
+            activePipe.UsbPipeTransfer(fRead, dwOptions, buffer, dwBuffSize, _
+                dwBytesTransferred, pSetupPacket, dwTimeOut)
+            TransferCompletion(activePipe)
+        Else
+            activePipe.UsbPipeTransferAsync(fRead, dwOptions, buffer, _
+                dwBuffSize, dwTimeOut, userTransCompletion)
+        End If
+
+    End Sub
+    Private Function DisplayHexBuffer(ByVal buff() As Byte, ByVal dwBuffSize _
+        As UInt32) As String
+
+        Dim i As Int32
+        Dim display As String = ""
+        For i = 0 To (Convert.ToInt32(dwBuffSize) - 1)
+            display = String.Concat(display, buff(i).ToString("X"), " ")
+        Next i
+
+        display = String.Concat(display, Environment.NewLine)
+        Return display
+    End Function
+
+    Private Sub btPipeRead_Click(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles btPipeRead.Click
+        Dim activePage As DeviceTabPage = GetActiveTab()
+        If (activePage Is Nothing) Then
+            Return
+        End If
+        Dim activePipe As %NAME%_Pipe = activePage.GetActivePipe()
+
+        If (activePipe.IsInUse()) Then
+            activePipe.HaltTransferOnPipe()
+        Else
+            SingleTransfer(True)
+        End If
+
+        UpdateButtons()
+    End Sub
+
+    Private Sub btPipeWrite_Click(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles btPipeWrite.Click
+
+        Dim activePage As DeviceTabPage = GetActiveTab()
+        If (activePage Is Nothing) Then
+            Return
+        End If
+
+        Dim activePipe As %NAME%_Pipe = activePage.GetActivePipe()
+
+        If (activePipe.IsInUse()) Then
+            activePipe.HaltTransferOnPipe()
+        Else
+            SingleTransfer(False)
+        End If
+
+        UpdateButtons()
+    End Sub
+
+    Private Sub btPipeListen_Click(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles btPipeListen.Click
+
+        Dim activePage As DeviceTabPage = GetActiveTab()
+        If (activePage Is Nothing) Then
+            Return
+        End If
+
+        Dim activePipe As %NAME%_Pipe = activePage.GetActivePipe()
+        Dim userTransCompletion As D_USER_TRANSFER_COMPLETION = AddressOf _
+            ListenCompletion
+
+        If (activePipe.IsInUse()) Then
+            activePipe.SetContiguous(False)
+            activePipe.HaltTransferOnPipe()
+        Else
+            Dim dwOptions As UInt32 = Convert.ToUInt32(0)
+            activePipe.SetContiguous(True)
+            TraceMsg(String.Format("began listening to {0} pipe number 0x{1:X}", _
+                activePage.GetUsbDev().DeviceDescription(), _
+                activePipe.GetPipeNum()))
+            activePipe.UsbPipeTransferAsync(True, dwOptions, _
+                Convert.ToUInt32(TIME_OUT), userTransCompletion)
+
+        End If
+        UpdateButtons()
+
+    End Sub
+
+    Private Sub btPipeReset_Click(ByVal sender As System.Object, ByVal e As _
+    System.EventArgs) Handles btPipeReset.Click
+        Dim activePage As DeviceTabPage = GetActiveTab()
+        If (activePage Is Nothing) Then
+            Return
+        End If
+
+        Dim activePipe As %NAME%_Pipe = activePage.GetActivePipe()
+        TraceMsg(String.Format("reseting {0} pipe number 0x{1:X}", _
+            activePage.GetUsbDev().DeviceDescription(), _
+            activePipe.GetPipeNum()))
+        activePipe.ResetPipe()
+    End Sub
+
+    Private Sub btActiveAltSetChange_Click(ByVal sender As System.Object, _
+        ByVal e As System.EventArgs) Handles btActiveAltSetChange.Click
+
+        Dim activePage As DeviceTabPage = GetActiveTab()
+        If (activePage Is Nothing) Then
+            Return
+        End If
+
+        Dim currUsbDev As %NAME%_Device = activePage.GetUsbDev()
+        Dim result As DialogResult
+        Dim frmChangeSettings As New FormChangeSettings(currUsbDev)
+
+        result = frmChangeSettings.ShowDialog()
+        If (result = System.Windows.Forms.DialogResult.OK) Then
+            Dim newInterface As UInt32 = frmChangeSettings.GetChosenInterface()
+            Dim newSetting As UInt32 = frmChangeSettings.GetChosenSetting()
+            Dim dwStatus As UInt32 = _
+                currUsbDev.ChangeAlternateSetting(newInterface, newSetting)
+            If (Convert.ToInt64(dwStatus) <> wdu_err.WD_STATUS_SUCCESS) Then
+                ErrMsg(String.Format("Failed to change the device's " & _
+                    "setting to the one chosen: {0}", _
+                    utils.Stat2Str(dwStatus)))
+            Else
+                activePage.UpdateAlternateSettings()
+            End If
+        End If
+
+    End Sub
+
+    Private Sub btLogClear_Click(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles btLogClear.Click
+        txtLog.Clear()
+    End Sub
+
+    Private Sub btExit_Click(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles btExit.Click
+        Close()
+        Dispose()
+    End Sub
+
+    Private Sub SafeLogText(ByVal sMsg as String)
+        ' InvokeRequired required compares the thread ID of the
+        ' calling thread to the thread ID of the creating thread.
+        ' If these threads are different, it returns true.
+        if txtLog.InvokeRequired Then
+            Dim cb As New safeLogTextCallBack(AddressOf SafeLogText)
+            Me.Invoke(cb, new object() { sMsg })
+        Else
+            txtLog.AppendText(sMsg)
+        End If
+    End Sub
+
+    Public Sub TraceMsg(ByVal sMsg As String)
+        SafeLogText(sMsg)
+        SafeLogText(Environment.NewLine)
+    End Sub
+
+    Public Sub ErrMsg(ByVal sMsg As String)
+        SafeLogText(sMsg)
+        SafeLogText(Environment.NewLine)
+    End Sub
+End Class
+
+===BEGIN MODULE diag/DeviceTabPage.vb
+Option Explicit On
+Imports System
+Imports System.Drawing
+Imports System.Collections
+Imports System.ComponentModel
+Imports System.Windows.Forms
+Imports Jungo.wdapi_dotnet
+Imports Jungo.%LNAME%_lib
+
+Public Class DeviceTabPage
+    Inherits System.Windows.Forms.TabPage
+
+    Private usbDev As %NAME%_Device
+    Private pipesListView As System.Windows.Forms.ListView
+    Private iSelectedPipeIndex As Int32 = -1
+    Private ParentForm As %LNAME%
+
+    Public Sub New(ByRef Parent As %LNAME%, ByRef pUsbDev As %NAME%_Device)
+
+        ParentForm = Parent
+        pipesListView = New System.Windows.Forms.ListView
+        usbDev = pUsbDev
+
+        RightToLeft = System.Windows.Forms.RightToLeft.No
+        Text = usbDev.DeviceDescription()
+        CreateListViewSettings()
+        UpdatePipesListView()
+        Controls.Add(pipesListView)
+        AddHandler pipesListView.SelectedIndexChanged, AddressOf _
+            PipeListSelectedIndexChanged
+
+    End Sub
+
+    Private Sub CreateListViewSettings()
+
+        pipesListView.Location = New Point(8, 8)
+        pipesListView.Name = "pipesListView"
+        pipesListView.HideSelection = False
+        pipesListView.Size = New _
+            System.Drawing.Size(ParentForm.tabDevices.Width - 16, _
+            ParentForm.tabDevices.Height - 16)
+        pipesListView.View = View.Details
+        pipesListView.MultiSelect = False
+        pipesListView.GridLines = False
+        pipesListView.FullRowSelect = True
+        pipesListView.LabelEdit = False
+        pipesListView.HeaderStyle = ColumnHeaderStyle.Nonclickable
+        pipesListView.Columns.Add("Pipe", CType(pipesListView.Width / 4 - 1, _
+            Integer), HorizontalAlignment.Left)
+        pipesListView.Columns.Add("Type", CType(pipesListView.Width / 4 - 1, _
+            Integer), HorizontalAlignment.Left)
+        pipesListView.Columns.Add("Direction", _
+            CType(pipesListView.Width / 4 - 1, Integer), _
+            HorizontalAlignment.Left)
+        pipesListView.Columns.Add("Max Packet Size", _
+            CType(pipesListView.Width / 4 - 1, Integer), _
+            HorizontalAlignment.Left)
+
+    End Sub
+
+
+    Public Sub UpdatePipesListView()
+
+        Dim index As Int32 = 0
+        Dim currUsbPipe As %NAME%_Pipe
+
+        pipesListView.BeginUpdate()
+        pipesListView.Items.Clear()
+
+        For Each currUsbPipe In usbDev.GetpPipesList()
+            Dim pipeListItem As New ListViewItem("0x" & _
+                currUsbPipe.GetPipeNum().ToString("X"))
+            pipeListItem.SubItems.Add(PipeTypeToString(currUsbPipe))
+            pipeListItem.SubItems.Add(PipeDirectionToString(currUsbPipe))
+            pipeListItem.SubItems.Add(String.Concat("0x", _
+                (currUsbPipe.GetPipeMaxPacketSz()).ToString("X")))
+            pipesListView.Items.Add(pipeListItem)
+            index = index + 1
+        Next
+
+        pipesListView.Items(0).Selected = True
+        pipesListView.EndUpdate()
+
+    End Sub
+
+    Sub PipeListSelectedIndexChanged(ByVal sender As System.Object, _
+        ByVal e As System.EventArgs) 'Handles pipesListView.SelectedIndexChanged
+
+        If (pipesListView.SelectedItems.Count > 0) Then
+            Dim Index As Int32 = pipesListView.SelectedItems(0).Index
+            If (iSelectedPipeIndex = -1 OrElse iSelectedPipeIndex <> Index) Then
+                iSelectedPipeIndex = Index
+                If (ParentForm.GetActiveTab() Is Me) Then
+                    ParentForm.UpdateButtons()
+                End If
+            End If
+        End If
+
+    End Sub
+
+    Public Sub UpdateAlternateSettings()
+
+        UpdatePipesListView()
+        Text = usbDev.DeviceDescription()
+
+    End Sub
+
+    Public Function GetActivePipe() As %NAME%_Pipe
+        Return CType((usbDev.GetpPipesList())(iSelectedPipeIndex), %NAME%_Pipe)
+    End Function
+
+    Public Function GetActivePipeNum() As UInt32
+        Return (CType((usbDev.GetpPipesList())(iSelectedPipeIndex), _
+            %NAME%_Pipe)).GetPipeNum()
+    End Function
+
+    Public Function GetUsbDev() As %NAME%_Device
+        Return usbDev
+    End Function
+
+    Public Sub SetUsbDev(ByRef newUsbDev As %NAME%_Device)
+        usbDev = newUsbDev
+    End Sub
+
+    Private Function PipeTypeToString(ByVal pipe As %NAME%_Pipe) As String
+        Dim strPipeType As String
+
+        If (pipe.IsControlPipe()) Then
+            strPipeType = "Control"
+        ElseIf (pipe.IsBulkPipe()) Then
+            strPipeType = "Bulk"
+
+        ElseIf (pipe.IsInterruptPipe()) Then
+            strPipeType = "Interrupt"
+
+        ElseIf (pipe.IsIsochronousPipe()) Then
+            strPipeType = "Isochronous"
+
+        Else
+            strPipeType = "N/A"
+        End If
+        Return strPipeType
+
+    End Function
+
+    Private Function PipeDirectionToString(ByVal pipe As %NAME%_Pipe) As String
+        Dim strPipeDirection As String
+
+        If (pipe.IsPipeDirectionIn()) Then
+            strPipeDirection = "In"
+
+        ElseIf (pipe.IsPipeDirectionOut()) Then
+            strPipeDirection = "Out"
+
+        ElseIf (pipe.IsPipeDirectionInOut()) Then
+            strPipeDirection = "In/Out"
+
+        Else
+            strPipeDirection = "N/A"
+        End If
+        Return strPipeDirection
+
+    End Function
+
+End Class
+
+===BEGIN MODULE diag/FormTransfers.vb
+Imports System.Windows.Forms
+
+Public Class FormTransfers
+    Inherits System.Windows.Forms.Form
+
+    Private m_bIsControl As Boolean
+    Private m_bIsRead As Boolean
+    Private m_dwBuffSize As UInt32
+    Private m_buffer() As Byte
+    Private m_pSetupPacket(7) As Byte
+
+#Region " Windows Form Designer generated code "
+
+    Public Sub New(ByVal bIsRead As Boolean, ByVal bIsControl As Boolean)
+        MyBase.New()
+
+        'This call is required by the Windows Form Designer.
+        InitializeComponent()
+
+        pnlBufSize.Enabled = Not (bIsControl)
+        txtBufSize.Enabled = Not (bIsControl)
+
+        pnlData.Enabled = Not (bIsRead)
+        txtData.Enabled = Not (bIsRead)
+
+        pnlSetupPacket.Enabled = bIsControl
+        txtRequest.Enabled = bIsControl
+        txtType.Enabled = bIsControl
+        txtwIndex.Enabled = bIsControl
+        txtwLength.Enabled = bIsControl
+        txtwValue.Enabled = bIsControl
+        m_bIsControl = bIsControl
+        m_bIsRead = bIsRead
+
+    End Sub
+
+    'Form overrides dispose to clean up the component list.
+    Protected Overloads Overrides Sub Dispose(ByVal disposing As Boolean)
+        If disposing Then
+            If Not (components Is Nothing) Then
+                components.Dispose()
+            End If
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.
+    'Do not modify it using the code editor.
+    Friend WithEvents pnlData As System.Windows.Forms.Panel
+    Friend WithEvents txtData As System.Windows.Forms.TextBox
+    Friend WithEvents lblData As System.Windows.Forms.Label
+    Friend WithEvents pnlBufSize As System.Windows.Forms.Panel
+    Friend WithEvents txtBufSize As System.Windows.Forms.TextBox
+    Friend WithEvents lblBufSize As System.Windows.Forms.Label
+    Friend WithEvents btCancel As System.Windows.Forms.Button
+    Friend WithEvents pnlSetupPacket As System.Windows.Forms.Panel
+    Friend WithEvents txtwLength As System.Windows.Forms.TextBox
+    Friend WithEvents lblwLength As System.Windows.Forms.Label
+    Friend WithEvents txtwIndex As System.Windows.Forms.TextBox
+    Friend WithEvents lblwIndex As System.Windows.Forms.Label
+    Friend WithEvents txtwValue As System.Windows.Forms.TextBox
+    Friend WithEvents lblwValue As System.Windows.Forms.Label
+    Friend WithEvents txtRequest As System.Windows.Forms.TextBox
+    Friend WithEvents lblRequest As System.Windows.Forms.Label
+    Friend WithEvents txtType As System.Windows.Forms.TextBox
+    Friend WithEvents lblType As System.Windows.Forms.Label
+    Friend WithEvents lblSetupPacket As System.Windows.Forms.Label
+    Friend WithEvents btSubmit As System.Windows.Forms.Button
+    <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
+        Me.pnlData = New System.Windows.Forms.Panel
+        Me.txtData = New System.Windows.Forms.TextBox
+        Me.lblData = New System.Windows.Forms.Label
+        Me.pnlBufSize = New System.Windows.Forms.Panel
+        Me.txtBufSize = New System.Windows.Forms.TextBox
+        Me.lblBufSize = New System.Windows.Forms.Label
+        Me.btCancel = New System.Windows.Forms.Button
+        Me.pnlSetupPacket = New System.Windows.Forms.Panel
+        Me.txtwLength = New System.Windows.Forms.TextBox
+        Me.lblwLength = New System.Windows.Forms.Label
+        Me.txtwIndex = New System.Windows.Forms.TextBox
+        Me.lblwIndex = New System.Windows.Forms.Label
+        Me.txtwValue = New System.Windows.Forms.TextBox
+        Me.lblwValue = New System.Windows.Forms.Label
+        Me.txtRequest = New System.Windows.Forms.TextBox
+        Me.lblRequest = New System.Windows.Forms.Label
+        Me.txtType = New System.Windows.Forms.TextBox
+        Me.lblType = New System.Windows.Forms.Label
+        Me.lblSetupPacket = New System.Windows.Forms.Label
+        Me.btSubmit = New System.Windows.Forms.Button
+        Me.pnlData.SuspendLayout()
+        Me.pnlBufSize.SuspendLayout()
+        Me.pnlSetupPacket.SuspendLayout()
+        Me.SuspendLayout()
+        '
+        'pnlData
+        '
+        Me.pnlData.Controls.Add(Me.txtData)
+        Me.pnlData.Controls.Add(Me.lblData)
+        Me.pnlData.Location = New System.Drawing.Point(12, 46)
+        Me.pnlData.Name = "pnlData"
+        Me.pnlData.Size = New System.Drawing.Size(360, 32)
+        Me.pnlData.TabIndex = 26
+        '
+        'txtData
+        '
+        Me.txtData.Enabled = False
+        Me.txtData.Location = New System.Drawing.Point(112, 8)
+        Me.txtData.Name = "txtData"
+        Me.txtData.Size = New System.Drawing.Size(240, 20)
+        Me.txtData.TabIndex = 3
+        Me.txtData.Text = ""
+        '
+        'lblData
+        '
+        Me.lblData.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, CType((System.Drawing.FontStyle.Bold Or _
+            System.Drawing.FontStyle.Underline), System.Drawing.FontStyle), _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblData.Location = New System.Drawing.Point(8, 8)
+        Me.lblData.Name = "lblData"
+        Me.lblData.Size = New System.Drawing.Size(64, 16)
+        Me.lblData.TabIndex = 2
+        Me.lblData.Text = "Data (hex):"
+        '
+        'pnlBufSize
+        '
+        Me.pnlBufSize.Controls.Add(Me.txtBufSize)
+        Me.pnlBufSize.Controls.Add(Me.lblBufSize)
+        Me.pnlBufSize.Location = New System.Drawing.Point(12, 14)
+        Me.pnlBufSize.Name = "pnlBufSize"
+        Me.pnlBufSize.Size = New System.Drawing.Size(168, 32)
+        Me.pnlBufSize.TabIndex = 25
+        '
+        'txtBufSize
+        '
+        Me.txtBufSize.Location = New System.Drawing.Point(112, 8)
+        Me.txtBufSize.Name = "txtBufSize"
+        Me.txtBufSize.Size = New System.Drawing.Size(40, 20)
+        Me.txtBufSize.TabIndex = 1
+        Me.txtBufSize.Text = ""
+        Me.txtBufSize.TextAlign = _
+            System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblBufSize
+        '
+        Me.lblBufSize.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, CType((System.Drawing.FontStyle.Bold Or _
+            System.Drawing.FontStyle.Underline), System.Drawing.FontStyle), _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblBufSize.Location = New System.Drawing.Point(8, 8)
+        Me.lblBufSize.Name = "lblBufSize"
+        Me.lblBufSize.Size = New System.Drawing.Size(96, 16)
+        Me.lblBufSize.TabIndex = 0
+        Me.lblBufSize.Text = "Buffer size (hex):"
+        '
+        'btCancel
+        '
+        Me.btCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.btCancel.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btCancel.Location = New System.Drawing.Point(108, 166)
+        Me.btCancel.Name = "btCancel"
+        Me.btCancel.Size = New System.Drawing.Size(75, 32)
+        Me.btCancel.TabIndex = 24
+        Me.btCancel.Text = "Cancel"
+        '
+        'pnlSetupPacket
+        '
+        Me.pnlSetupPacket.Controls.Add(Me.txtwLength)
+        Me.pnlSetupPacket.Controls.Add(Me.lblwLength)
+        Me.pnlSetupPacket.Controls.Add(Me.txtwIndex)
+        Me.pnlSetupPacket.Controls.Add(Me.lblwIndex)
+        Me.pnlSetupPacket.Controls.Add(Me.txtwValue)
+        Me.pnlSetupPacket.Controls.Add(Me.lblwValue)
+        Me.pnlSetupPacket.Controls.Add(Me.txtRequest)
+        Me.pnlSetupPacket.Controls.Add(Me.lblRequest)
+        Me.pnlSetupPacket.Controls.Add(Me.txtType)
+        Me.pnlSetupPacket.Controls.Add(Me.lblType)
+        Me.pnlSetupPacket.Controls.Add(Me.lblSetupPacket)
+        Me.pnlSetupPacket.Location = New System.Drawing.Point(12, 78)
+        Me.pnlSetupPacket.Name = "pnlSetupPacket"
+        Me.pnlSetupPacket.Size = New System.Drawing.Size(312, 72)
+        Me.pnlSetupPacket.TabIndex = 22
+        '
+        'txtwLength
+        '
+        Me.txtwLength.Enabled = False
+        Me.txtwLength.Location = New System.Drawing.Point(248, 48)
+        Me.txtwLength.MaxLength = 4
+        Me.txtwLength.Name = "txtwLength"
+        Me.txtwLength.Size = New System.Drawing.Size(48, 20)
+        Me.txtwLength.TabIndex = 8
+        Me.txtwLength.Text = ""
+        Me.txtwLength.TextAlign = _
+            System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblwLength
+        '
+        Me.lblwLength.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblwLength.Location = New System.Drawing.Point(248, 32)
+        Me.lblwLength.Name = "lblwLength"
+        Me.lblwLength.Size = New System.Drawing.Size(48, 16)
+        Me.lblwLength.TabIndex = 12
+        Me.lblwLength.Text = "wLength"
+        '
+        'txtwIndex
+        '
+        Me.txtwIndex.Enabled = False
+        Me.txtwIndex.Location = New System.Drawing.Point(184, 48)
+        Me.txtwIndex.MaxLength = 4
+        Me.txtwIndex.Name = "txtwIndex"
+        Me.txtwIndex.Size = New System.Drawing.Size(48, 20)
+        Me.txtwIndex.TabIndex = 7
+        Me.txtwIndex.Text = ""
+        Me.txtwIndex.TextAlign = _
+            System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblwIndex
+        '
+        Me.lblwIndex.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblwIndex.Location = New System.Drawing.Point(184, 32)
+        Me.lblwIndex.Name = "lblwIndex"
+        Me.lblwIndex.Size = New System.Drawing.Size(48, 16)
+        Me.lblwIndex.TabIndex = 11
+        Me.lblwIndex.Text = "wIndex"
+        '
+        'txtwValue
+        '
+        Me.txtwValue.Enabled = False
+        Me.txtwValue.Location = New System.Drawing.Point(120, 48)
+        Me.txtwValue.MaxLength = 4
+        Me.txtwValue.Name = "txtwValue"
+        Me.txtwValue.Size = New System.Drawing.Size(48, 20)
+        Me.txtwValue.TabIndex = 6
+        Me.txtwValue.Text = ""
+        Me.txtwValue.TextAlign = _
+            System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblwValue
+        '
+        Me.lblwValue.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblwValue.Location = New System.Drawing.Point(120, 32)
+        Me.lblwValue.Name = "lblwValue"
+        Me.lblwValue.Size = New System.Drawing.Size(48, 16)
+        Me.lblwValue.TabIndex = 10
+        Me.lblwValue.Text = "wValue"
+        '
+        'txtRequest
+        '
+        Me.txtRequest.Enabled = False
+        Me.txtRequest.Location = New System.Drawing.Point(64, 48)
+        Me.txtRequest.MaxLength = 2
+        Me.txtRequest.Name = "txtRequest"
+        Me.txtRequest.Size = New System.Drawing.Size(32, 20)
+        Me.txtRequest.TabIndex = 5
+        Me.txtRequest.Text = ""
+        Me.txtRequest.TextAlign = _
+            System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblRequest
+        '
+        Me.lblRequest.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblRequest.Location = New System.Drawing.Point(56, 32)
+        Me.lblRequest.Name = "lblRequest"
+        Me.lblRequest.Size = New System.Drawing.Size(48, 16)
+        Me.lblRequest.TabIndex = 9
+        Me.lblRequest.Text = "Request"
+        '
+        'txtType
+        '
+        Me.txtType.Enabled = False
+        Me.txtType.Location = New System.Drawing.Point(8, 48)
+        Me.txtType.MaxLength = 2
+        Me.txtType.Name = "txtType"
+        Me.txtType.Size = New System.Drawing.Size(32, 20)
+        Me.txtType.TabIndex = 4
+        Me.txtType.Text = ""
+        Me.txtType.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblType
+        '
+        Me.lblType.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblType.Location = New System.Drawing.Point(8, 32)
+        Me.lblType.Name = "lblType"
+        Me.lblType.Size = New System.Drawing.Size(32, 16)
+        Me.lblType.TabIndex = 3
+        Me.lblType.Text = "Type"
+        '
+        'lblSetupPacket
+        '
+        Me.lblSetupPacket.Font = New System.Drawing.Font( _
+            "Microsoft Sans Serif", 8.25!, _
+            CType((System.Drawing.FontStyle.Bold Or _
+            System.Drawing.FontStyle.Underline), System.Drawing.FontStyle), _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblSetupPacket.Location = New System.Drawing.Point(8, 8)
+        Me.lblSetupPacket.Name = "lblSetupPacket"
+        Me.lblSetupPacket.Size = New System.Drawing.Size(296, 16)
+        Me.lblSetupPacket.TabIndex = 17
+        Me.lblSetupPacket.Text = "Setup Packet:"
+        '
+        'btSubmit
+        '
+        Me.btSubmit.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btSubmit.Location = New System.Drawing.Point(20, 166)
+        Me.btSubmit.Name = "btSubmit"
+        Me.btSubmit.Size = New System.Drawing.Size(75, 32)
+        Me.btSubmit.TabIndex = 23
+        Me.btSubmit.Text = "Submit"
+        '
+        'FormTransfers
+        '
+        Me.AcceptButton = Me.btSubmit
+        Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
+        Me.CancelButton = Me.btCancel
+        Me.ClientSize = New System.Drawing.Size(384, 213)
+        Me.Controls.Add(Me.pnlData)
+        Me.Controls.Add(Me.pnlBufSize)
+        Me.Controls.Add(Me.btCancel)
+        Me.Controls.Add(Me.pnlSetupPacket)
+        Me.Controls.Add(Me.btSubmit)
+        Me.Name = "FormTransfers"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.Text = "Read/Write device's Pipes"
+        Me.pnlData.ResumeLayout(False)
+        Me.pnlBufSize.ResumeLayout(False)
+        Me.pnlSetupPacket.ResumeLayout(False)
+        Me.ResumeLayout(False)
+
+    End Sub
+
+#End Region
+
+    Public Function GetInput(ByRef dwBuffSize As UInt32, ByRef buffer() As _
+        Byte, ByRef pSetupPacket() As Byte) As Boolean
+
+        Dim result As DialogResult = ShowDialog()
+        While (result = System.Windows.Forms.DialogResult.Retry)
+            result = ShowDialog()
+        End While
+        If (result <> System.Windows.Forms.DialogResult.OK) Then
+            Return False
+        End If
+
+        dwBuffSize = m_dwBuffSize
+        buffer = m_buffer
+        pSetupPacket = m_pSetupPacket
+
+        Return True
+
+    End Function
+
+    Private Sub TranslateInput()
+
+    Dim iBuffSize As Int32
+        If (m_bIsControl) Then
+            GetSetupPacketData()
+            iBuffSize = Convert.ToInt32(txtwLength.Text, 16)
+            ReDim m_buffer(iBuffSize - 1)
+        Else
+            iBuffSize = Convert.ToInt32(txtBufSize.Text, 16)
+            ReDim m_buffer(iBuffSize - 1)
+        End If
+
+        If (Not (m_bIsRead)) Then
+            'padding the first bytes if necessary
+            Dim str As String = PadBuffer(txtData.Text, txtData.Text.Length, _
+                2 * iBuffSize)
+            Dim i As Int32
+            For i = 0 To (iBuffSize - 1)
+                m_buffer(i) = Convert.ToByte(str.Substring(2 * i, 2), 16)
+            Next i
+        End If
+    m_dwBuffSize = Convert.ToUInt32(iBuffSize)
+    End Sub
+
+    Private Function PadBuffer(ByVal str As String, ByVal fromIndex As Int32, _
+        ByVal toIndex As Int32) As String
+        Dim i As Int32
+
+        For i = fromIndex To (toIndex - 1)
+            str = "0" & str
+        Next i
+
+        Return str
+    End Function
+
+    Private Sub GetSetupPacketData()
+        Dim _type As String = PadBuffer(txtType.Text, txtType.Text.Length, 2)
+        Dim _request As String = PadBuffer(txtRequest.Text, _
+            txtRequest.Text.Length, 2)
+        Dim _wValue As String = PadBuffer(txtwValue.Text, _
+            txtwValue.Text.Length, 4)
+        Dim _wIndex As String = PadBuffer(txtwIndex.Text, _
+            txtwIndex.Text.Length, 4)
+        Dim _wLength As String = PadBuffer(txtwLength.Text, _
+            txtwLength.Text.Length, 4)
+
+
+        m_pSetupPacket(0) = Convert.ToByte(_type, 16)
+        m_pSetupPacket(1) = Convert.ToByte(_request, 16)
+        m_pSetupPacket(2) = Convert.ToByte(_wValue.Substring(2, 2), 16)
+        m_pSetupPacket(3) = Convert.ToByte(_wValue.Substring(0, 2), 16)
+        m_pSetupPacket(4) = Convert.ToByte(_wIndex.Substring(2, 2), 16)
+        m_pSetupPacket(5) = Convert.ToByte(_wIndex.Substring(0, 2), 16)
+        m_pSetupPacket(6) = Convert.ToByte(_wLength.Substring(2, 2), 16)
+        m_pSetupPacket(7) = Convert.ToByte(_wLength.Substring(0, 2), 16)
+    End Sub
+
+    Private Sub btSubmit_Click(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles btSubmit.Click
+        DialogResult = System.Windows.Forms.DialogResult.OK
+        Try
+            TranslateInput()
+        Catch ex As Exception
+            MessageBox.Show(String.Concat( _
+                "The text is not a valid hex number.", _
+                "Please re-enter, or press Cancel to exit"), _
+                "Input Entry Error", MessageBoxButtons.OK, _
+                MessageBoxIcon.Exclamation)
+            DialogResult = System.Windows.Forms.DialogResult.Retry
+        End Try
+    End Sub
+
+    Private Sub SetupPacketInputChanged(ByVal txtInput As TextBox)
+        If (txtInput.Text.Length = txtInput.MaxLength) Then
+            SelectNextControl(txtInput, True, True, True, False)
+        End If
+    End Sub
+
+    Private Sub txtType_TextChanged(ByVal sender As System.Object, ByVal e As _
+        System.EventArgs) Handles txtType.TextChanged
+        SetupPacketInputChanged(txtType)
+    End Sub
+
+    Private Sub txtRequest_TextChanged(ByVal sender As System.Object, ByVal e _
+        As System.EventArgs) Handles txtRequest.TextChanged
+        SetupPacketInputChanged(txtRequest)
+    End Sub
+
+    Private Sub txtwValue_TextChanged(ByVal sender As System.Object, ByVal e _
+        As System.EventArgs) Handles txtwValue.TextChanged
+        SetupPacketInputChanged(txtwValue)
+    End Sub
+
+    Private Sub txtwIndex_TextChanged(ByVal sender As System.Object, ByVal e _
+        As System.EventArgs) Handles txtwIndex.TextChanged
+        SetupPacketInputChanged(txtwIndex)
+    End Sub
+
+    Private Sub txtwLength_TextChanged(ByVal sender As System.Object, ByVal e _
+        As System.EventArgs) Handles txtwLength.TextChanged
+        SetupPacketInputChanged(txtwLength)
+    End Sub
+End Class
+
+===BEGIN MODULE diag/FormChangeSettings.vb
+Imports System
+Imports System.Drawing
+Imports System.Collections
+Imports System.ComponentModel
+Imports System.Windows.Forms
+Imports Jungo.wdapi_dotnet
+Imports Jungo.%LNAME%_lib
+
+
+Public Class FormChangeSettings
+    Inherits System.Windows.Forms.Form
+
+    Private settingsArr(,) As Int32
+    Private i32ChosenInterface As Int32
+    Private i32ChosenSetting As Int32
+#Region " Windows Form Designer generated code "
+
+    Public Sub New(ByRef usbDev As %NAME%_Device)
+        MyBase.New()
+
+        'This call is required by the Windows Form Designer.
+        InitializeComponent()
+
+        Dim numOfAltSettings As Int32 = _
+            Convert.ToInt32(usbDev.GetNumOfAlternateSettingsTotal())
+        Dim currInterfaceIndex As Int32 = _
+            Convert.ToInt32(usbDev.GetCurrInterfaceIndex())
+        Dim currAltSetting As Int32 = _
+            Convert.ToInt32(usbDev.GetCurrAlternateSettingNum())
+        ReDim settingsArr(numOfAltSettings, 1)
+
+        Dim currIndex As Int32 = 0
+        Dim i As Int32 = 0
+        Dim interfac As Int32
+        Dim altSetting As Int32
+
+        For interfac = 0 To (Convert.ToInt32(usbDev.GetNumOfInteraces) - 1)
+            Dim interfaceNumber As Int32 = _
+                usbDev.GetInterfaceNumberByIndex(Convert.ToUInt32(interfac))
+
+            For altSetting = 0 To (Convert.ToInt32( _
+                usbDev.GetNumOfAlternateSettingsPerInterface( _
+                Convert.ToUInt32(interfaceNumber))) - 1)
+                cmboAltSettings.Items.Add("Interface " & _
+                    interfaceNumber.ToString() & ", Alternate Setting " & _
+                    altSetting.ToString())
+
+                settingsArr(i, 0) = interfaceNumber
+                settingsArr(i, 1) = altSetting
+                i = i + 1
+
+                If interfac <= currInterfaceIndex And altSetting < currAltSetting Then
+                    currIndex = currIndex + 1
+                End If
+
+            Next altSetting
+
+        Next interfac
+
+        cmboAltSettings.SelectedIndex = currIndex
+    End Sub
+
+    'Form overrides dispose to clean up the component list.
+    Protected Overloads Overrides Sub Dispose(ByVal disposing As Boolean)
+        If disposing Then
+            If Not (components Is Nothing) Then
+                components.Dispose()
+            End If
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.
+    'Do not modify it using the code editor.
+    Friend WithEvents btCancel As System.Windows.Forms.Button
+    Friend WithEvents btSubmit As System.Windows.Forms.Button
+    Friend WithEvents cmboAltSettings As System.Windows.Forms.ComboBox
+    <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
+        Me.btCancel = New System.Windows.Forms.Button
+        Me.btSubmit = New System.Windows.Forms.Button
+        Me.cmboAltSettings = New System.Windows.Forms.ComboBox
+        Me.SuspendLayout()
+        '
+        'btCancel
+        '
+        Me.btCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.btCancel.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btCancel.Location = New System.Drawing.Point(120, 88)
+        Me.btCancel.Name = "btCancel"
+        Me.btCancel.Size = New System.Drawing.Size(64, 24)
+        Me.btCancel.TabIndex = 22
+        Me.btCancel.Text = "Cancel"
+        '
+        'btSubmit
+        '
+        Me.btSubmit.Font = New System.Drawing.Font("Microsoft Sans Serif", _
+            8.25!, System.Drawing.FontStyle.Bold, _
+            System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btSubmit.Location = New System.Drawing.Point(32, 88)
+        Me.btSubmit.Name = "btSubmit"
+        Me.btSubmit.Size = New System.Drawing.Size(64, 24)
+        Me.btSubmit.TabIndex = 21
+        Me.btSubmit.Text = "Submit"
+        '
+        'cmboAltSettings
+        '
+        Me.cmboAltSettings.ItemHeight = 13
+        Me.cmboAltSettings.Location = New System.Drawing.Point(32, 32)
+        Me.cmboAltSettings.Name = "cmboAltSettings"
+        Me.cmboAltSettings.Size = New System.Drawing.Size(152, 21)
+        Me.cmboAltSettings.TabIndex = 24
+        Me.cmboAltSettings.Text = "Choose Setting"
+        '
+        'FormChangeSettings
+        '
+        Me.AcceptButton = Me.btSubmit
+        Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
+        Me.CancelButton = Me.btCancel
+        Me.ClientSize = New System.Drawing.Size(232, 149)
+        Me.Controls.Add(Me.cmboAltSettings)
+        Me.Controls.Add(Me.btCancel)
+        Me.Controls.Add(Me.btSubmit)
+        Me.Name = "FormChangeSettings"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.Text = "Change device's Settings"
+        Me.ResumeLayout(False)
+    End Sub
+
+#End Region
+
+    Public Function GetChosenInterface() As UInt32
+        Return Convert.ToUInt32(i32ChosenInterface)
+    End Function
+
+    Public Function GetChosenSetting() As UInt32
+        Return Convert.ToUInt32(i32ChosenSetting)
+    End Function
+
+    Private Sub btSubmit_Click(ByVal sender As System.Object, _
+        ByVal e As System.EventArgs) Handles btSubmit.Click
+
+        Dim index As Int32 = cmboAltSettings.SelectedIndex
+        i32ChosenInterface = settingsArr(index, 0)
+        i32ChosenSetting = settingsArr(index, 1)
+        DialogResult = System.Windows.Forms.DialogResult.OK
+
+    End Sub
+End Class
+

@@ -1,0 +1,1 @@
+cmd_/home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.o := ld -m elf_x86_64   -r -o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.o /home/wuhongyi/Pixie4e/WinDriver/redist/linux_wrappers.o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr_gcc_v3.a ; scripts/mod/modpost /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281.o

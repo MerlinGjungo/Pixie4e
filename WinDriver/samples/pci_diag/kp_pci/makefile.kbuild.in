@@ -1,0 +1,67 @@
+# Template file for configure script
+
+# TODO: Set WD_BASEDIR to the location of your WinDriver installation directory.
+#       For example: WD_BASEDIR=/home/john/WinDriver
+ifeq ($(WD_BASEDIR),)
+        WD_BASEDIR=@basedir@
+endif
+
+WD_BASEDIR:=$(wildcard $(WD_BASEDIR))
+
+ifeq ($(wildcard $(WD_BASEDIR)/include/windrvr.h),)
+        $(error Please edit the makefile and set the WD_BASEDIR variable \
+        to point to the location of your WinDriver installation directory)
+endif
+
+LIB_CSRCS = @LIB_CSRCS@
+MOD_CSRCS = @MOD_CSRCS@
+
+OD = @OD@
+LIB_LINK_OBJ = @LIB_LINK_OBJ@
+MOD_LINK_OBJ = @MOD_LINK_OBJ@
+MODULE_NAME = @MODULE_NAME@
+LIB_TARGET = @LIB_TARGET@
+MOD_TARGET = @MOD_TARGET@
+KERNEL_DIR = @KERNEL_DIR@
+EXTRA_CFLAGS = @EXTRA_CFLAGS@
+LIB_CFLAGS = @LIB_CFLAGS@
+MODULE_SYMVERS = @MODULE_SYMVERS@
+
+ifeq ($(DEBUG),1)
+        EXTRA_CFLAGS += -g -DDEBUG
+endif
+
+LIB_COBJS = $(patsubst %.c,$(OD)/%.o,$(notdir $(LIB_CSRCS)))
+MOD_COBJS = $(patsubst %.c,/%.o,$(MOD_CSRCS))
+
+obj-m += $(MODULE_NAME).o
+$(MODULE_NAME)-objs := $(MOD_COBJS) $(notdir $(MOD_LINK_OBJ))
+
+all: $(OD) $(LIB_TARGET)
+	cp -sf $(MOD_LINK_OBJ) .
+	ln -sf $(MODULE_SYMVERS) Module.symvers
+	make -C $(KERNEL_DIR) M=`pwd` modules
+	rm -f $(notdir $(MOD_LINK_OBJ))
+	mv -f *.ko *.o *.mod.c $(OD)/
+
+$(OD):
+	-@mkdir $@
+
+$(LIB_COBJS): $(OD)/%.o : %.c
+	@LIB_COBJS_RULE@
+
+$(LIB_TARGET): @LIB_TARGET_DEPS@
+	@LIB_TARGET_RULE@
+
+clean:
+	rm -rf core $(OD)/
+	make -C $(KERNEL_DIR) M=`pwd` clean
+	rm -rf Module.symvers
+
+install: all
+	@ /sbin/rmmod $(MODULE_NAME) 2> /dev/null || echo -n
+	/sbin/insmod $(MOD_TARGET)
+
+# make sure the gmake thinks the source files exist
+$(notdir $(LIB_CSRCS)):
+

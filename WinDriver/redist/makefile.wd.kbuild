@@ -1,0 +1,38 @@
+# Template file for configure script
+
+CSRCS = linux_wrappers.c
+OD = LINUX.3.10.0-514.21.1.el7.x86_64.x86_64
+MODDIR = /lib/modules/3.10.0-514.21.1.el7.x86_64/kernel/drivers/misc
+LINK_OBJ = windrvr_gcc_v3.a
+MODULE_NAME = windrvr1281
+EXTRA_CFLAGS = -fno-omit-frame-pointer -O2 -DLINUX -DWINDRIVER_KERNEL  -DLINUX_USB_SUPPORT -I/lib/modules/3.10.0-514.21.1.el7.x86_64/source/include -I/home/wuhongyi/Pixie4e/WinDriver/include -I/home/wuhongyi/Pixie4e/WinDriver 
+ROOT_DIR = /home/wuhongyi/Pixie4e/WinDriver
+KERNEL_DIR = /lib/modules/3.10.0-514.21.1.el7.x86_64/build
+TARGET = $(OD)/$(MODULE_NAME).ko
+SHARED_OBJECT = libwdapi1281
+
+ifeq ($(DEBUG),1)
+        EXTRA_CFLAGS += -g -DDEBUG
+endif
+
+COBJS = $(patsubst %.c,%.o,$(CSRCS))
+
+obj-m += $(MODULE_NAME).o
+$(MODULE_NAME)-objs := $(COBJS) $(LINK_OBJ)
+
+all: $(OD)
+	ln -sf makefile.wd.kbuild Makefile
+	make -C $(KERNEL_DIR) M=`pwd` modules
+	mv -f *.ko *.o *.mod.c $(OD)/
+	rm Makefile
+
+$(OD):
+	-@ mkdir $@
+
+clean:
+	rm -rf core .*.cmd Module.symvers modules.order .tmp_versions .*o.d $(OD)
+
+install: all
+	ln -sf $(ROOT_DIR)/lib/$(SHARED_OBJECT)_32.so /usr/lib/$(SHARED_OBJECT)_32.so; ln -sf $(ROOT_DIR)/lib/$(SHARED_OBJECT).so /usr/lib64/$(SHARED_OBJECT).so
+	./setup_inst_dir $(ROOT_DIR) $(MODDIR) $(TARGET) no "change the permissions of /dev/windrvr1281"
+

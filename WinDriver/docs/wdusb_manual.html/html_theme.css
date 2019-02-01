@@ -1,0 +1,553 @@
+
+/* TODO: Be sure to specify attribute values using em or percentage (%) units,
+ * especially for font sizes, to support font resizing. See, e.g.,
+ * http://www.sitepoint.com/forums/showthread.php?389839-Best-Practice-for-font-size
+ * and the pages it references, including
+ * http://www.thenoodleincident.com/tutorials/typography/ (and the related
+ * http://www.thenoodleincident.com/tutorials/typography/template.html
+ * template) and  http://clagnut.com/blog/348/. */
+
+body {
+    font-family: verdana, arial;
+    font-size: 12pt;
+    margin-right: 10%;  margin-left: 10%;
+    line-height: 1.25em;
+    width: 80%;
+}
+
+/* Paragraphs */
+p {
+    margin-top: 1.25em;    margin-bottom: 1.25em;
+}
+
+img {
+    border: 0px solid red;
+}
+
+/* h1 Book Titles - the  Main Book Title & Part Titles */
+.book .titlepage h1 {
+    display: block;
+    font: bold 2.5em verdana;
+    color: #563D7E; /* &j_heading_color; */
+    margin-top: 0.0625em;
+
+    /* Book-title-only customization, overridden later for Part titles: */
+    text-align: center;
+}
+
+.title a {
+    text-decoration: none;
+}
+
+.title a:active {
+    text-decoration: none;
+}
+
+.title a:visited {
+    text-decoration: none;
+}
+hr {
+    display: none;
+}
+
+/* Book Subtitle */
+.book .subtitle {
+    display: block;
+    text-align: center;
+    font: bold 2.0833em verdana,arial;
+    font-style: italic;
+    color: #563D7E; /* &j_heading_color; */
+    margin-top:  0.0625em;
+}
+
+/* Book Release Information */
+.book_releaseinfo {
+    display: block;
+    text-align: center;
+    font: bold 1.1875em verdana,arial;
+    color: #563D7E; /* &j_heading_color; */
+    text-align: center;
+    margin-top:  0.0625em;
+}
+
+/* Author */
+.author {
+    display: block;
+    text-align: center;
+    font: bold 1.25em verdana,arial;
+    color: #563D7E; /* &j_heading_color; */
+    margin-top:  0.0625em;
+}
+
+/* Article Title */
+.article .titlepage h2 {
+    display: block;
+    font: bold 2.5em verdana,arial;
+    text-align: center;
+    color: #563D7E; /* &j_heading_color; */
+    margin-top: 0.0625em;
+}
+
+/* Article Subtitle */
+.article .subtitle {
+    display: block;
+    font: bold 2.0833em verdana,arial;
+    text-align: center;
+    font-style: italic;
+    color: #563D7E; /* &j_heading_color; */
+    margin-top: 0.0625em;
+}
+
+/* Article Release Information */
+.article_releaseinfo {
+    display: block;
+    text-align: center;
+    font: bold 1.1875em verdana,arial;
+    color: #563D7E; /* &j_heading_color; */
+    border-bottom: 6px solid #E7E9EF;*/ /* a light shade of gray */
+    margin-top: 0.3125em;   margin-bottom: 0.625em;
+}
+
+/* Part Title (book) */
+.part .titlepage h1 {
+    font-size: 2.0833em;
+    text-align: left;
+    margin-top: 1.875em;    margin-bottom: 1em;
+}
+
+/* Chapter Title (book) */
+/* (This style is also applied to book h2 Section titles, but it's later
+ * overridden for such sections in the section titlepage style below.) */
+.chapter .titlepage h2 {
+    display: block;
+    font: bold 1.833em verdana,arial;
+    color: #563D7E; /* &j_heading_color; */
+    text-align: left;
+    border-bottom: thick solid #E7E9EF; /* a light shade of gray */
+    margin-top: 1.875em;    margin-bottom: 1em;
+}
+
+/* Section Titles (for all section levels except h1) */
+.section .titlepage h2, h3, h4, h5, h6 {
+    font-weight: bold;  font-style: verdana,arial;
+    color: #563D7E; /* &j_heading_color; */
+    text-align: left;
+    border: none;
+    margin-top: 1.375em;    margin-bottom: 1em;
+}
+
+/* Section-Level 1 (h2) Specific Customization */
+.section .titlepage h2 {
+    font-size: 1.66em;
+    margin-top: 1.0625em;
+}
+
+/* Section-Level 2 (h3) Specific Customization */
+.section .titlepage h3 {
+    font-size: 1.5em;
+}
+
+/* Section-Level 3 (h4) Specific Customization */
+.section .titlepage h4 {
+    font-size: 1.33em;
+}
+
+/* Section-Level 4 (h5) Specific Customization */
+.section .titlepage h5 {
+    font-size: 1.166em;
+}
+
+/* Section-Level 5 (h6) Specific Customization */
+.section .titlepage h6 {
+    font-size: 1em;
+}
+
+/* Bridgehead */
+.bridgehead {
+    display: block;
+    font-weight: bold;  font-family: verdana, arial;
+    /* @font-size is set in the html_common.xsl bridgehead definition. */
+    color: #563D7E; /* &j_heading_color; */
+    margin-top: 1.25em; margin-bottom: 1.25em;
+}
+
+/* Admonitions */
+/* Note: Some of the customizations done in this style are overridden later on
+ * in the specific admonition-type styles, which also add type-specific
+ * customizations.
+ * The admonition frame is built in the form of a table; font and color
+ * customizations are done within the admon-type table/th/td styles. */
+.caution, .important, .info, .note, .tip, .warning {
+    font-size: 12pt;
+    border: 1px solid black;
+    background: #D0D0D0; /* dark gray */
+    margin-left: 0em !important;
+      /* "!important" removes the compiler-imposed right indentation. */
+    margin-top: 1em;    margin-bottom: 1em;
+}
+
+/* Information Admonition Specific Customizations */
+.info {
+    border: none;
+    background: none;
+    margin-left: -0.29em !important;
+      /* "!important" removes the compiler-imposed right indentation. */
+}
+
+/* Admonition Table */
+.caution table, .important table, .info table, .note table, .tip table,
+.warning table {
+    /* Remove extra space imposed by the default table margin-top definition */
+    margin-top: 0.125em;
+}
+
+/* Admonition Title (Table Header) */
+.caution th, .important th, .info th, .note th, .tip th, .warning th {
+    font-size: 1em;
+    border: none;
+    padding-top: 0em;   padding-bottom: 0em;
+    padding-left: 0.5em;
+}
+
+/* Information Admonition Title (Table Header) Specific Customizations */
+.info th {
+    background: none;
+}
+
+/* Admonition Content (Table Cells) */
+.caution td, .important td, .info td, .note td, .tip td, .warning td {
+    font-size: 1em;
+    line-height: 1.125em;
+    padding-top: 0em;   padding-bottom: 0.125em;
+    padding-left: 0.5em;
+}
+
+/* Variable List */
+/*
+.variablelist {
+    font-family: sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    padding-left: 1.25em;
+}
+*/
+
+/* The following doesn't seem to have any effect.
+ * (#A0A0D0 and #606090 are shades of purple; the latter is darker):
+.varlistentry {
+    font-weight: bold;
+    margin-top: 0.625em;
+    color: white;
+    background-color: #A0A0D0;
+    border: solid 1px #606090;
+    padding: 0.0625em;
+    vertical-align: top;
+}
+
+/* List (Unordered or Ordered) */
+ul, ol {
+    padding-left: 0em;
+}
+
+/* Unordered (Itemized) List */
+ul {
+    list-style: url("scripts/images/bullet_arrow.gif"); /* list-item marker */
+    margin-left:  1.1em;
+}
+
+/* Ordered (Enumerated) List */
+ol {
+    margin-left:  1.8em;
+}
+
+/* List Item */
+li {
+    margin-top:  0.9375em;  margin-bottom: 0.9375em;
+}
+
+/* Table */
+table {
+    font-family: verdana, arial;
+    font-size: 1em;
+    margin-top: 0.5em;
+    border-color: black;
+}
+
+/* Table Header */
+th {
+    padding-top:  0.375em;  padding-bottom: 0.375em;
+    padding-left: 0.5em;    padding-right:  0.5em;
+}
+
+/* See also the ".navheader table th" style later on. */
+
+/* Table Cell */
+td {
+    padding-top:  0.375em;  padding-bottom: 0.375em;
+    padding-left: 0.5em;    padding-right:  0.5em;
+}
+
+/* Verbatim Environments */
+/* Screen */
+.screen {
+    background-color: LightYellow; /* #FFFFE0 */
+    font-size: 0.833em;
+}
+/* Program Listing */
+.programlisting {
+    background-color: LightYellow; /* #FFFFE0 */
+    font-size: 0.833em;
+}
+/* Synopsis */
+.synopsis {
+    background-color: LightYellow; /* #FFFFE0 */
+    font-size: 0.833em;
+}
+/* For literallayout we rely on the default -- no background color and regula
+ * font size. */
+
+/* Q&A Sets */
+/* Q&A Title */
+.qandaset h2.title {
+    color: #563D7E; /* &j_heading_color; */
+}
+
+/* Q&A Table-Cell Paragraph */
+.qandaset td p {
+    /* Eliminate extra space before question and answer elements (see, .e.g,
+     * https://lists.oasis-open.org/archives/docbook-apps/201010/msg00084.html
+     * and http://www.sourceware.org/ml/docbook-apps/2004-q4/msg00512.html).
+     * Note that this style applies to any para in a question or answer
+     * element, not just the opening/closing para; adding @margin-bottom=0em
+     * will eliminate any spacing between paras contained in a Q&A element. */
+    margin-top: 0em;
+}
+
+/* Links */
+a {
+    /* font: bold 11px/140% verdana; */
+    color: #563D7E; /* &j_heading_color; */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Link Hover */
+a:hover {
+    border-bottom: 1px dashed #000;
+}
+
+/* Add an external-link icon to absolute links */
+a[href^="http:"] {
+    background: url(scripts/images/remote.gif) right center no-repeat;
+}
+
+a[href^="http:"]:hover {
+    background: url(scripts/images/remote_a.gif) right center no-repeat;
+}
+
+
+/* Add a note icon to footnote links */
+a[href^="#ftn"] {
+    background: url(scripts/images/qbullet-note.gif) right center no-repeat;
+    padding-right: 0.75em;
+}
+
+a[href^="#ftn"]:hover {
+    background: url(scripts/images/qbullet-note_a.gif) right center no-repeat;
+}
+
+/* ...and a back icon to the backlinks in the footnotes themselves */
+a[name^="ftn"] {
+    background: url(scripts/images/scrollup.gif) right center no-repeat;
+    padding-right: 0.75em;
+}
+
+a[name^="ftn"]:hover {
+    background: url(scripts/images/scrollup_a.gif) right center no-repeat;
+}
+
+/* Add a download icon to .gz links */
+a[href$=".gz"],a[href$=".tar"],a[href$=".zip"] {
+    background: url(scripts/images/disk.gif) right center no-repeat;
+    padding-right: 0.75em;
+}
+
+/* Add an Acrobat Reader icon to PDF links */
+a[href$=".pdf"] {
+    background: url(scripts/images/acrobat.gif) right center no-repeat;
+    padding-right: 0.75em;
+}
+
+a[href$=".pdf"]:hover {
+    background: url(scripts/images/acrobat_a.gif) right center no-repeat;
+}
+
+/* Add a Word icon to RTF links */
+a[href$=".rtf"] {
+    background: url(scripts/images/word.gif) right center no-repeat;
+    padding-right: 0.75em;
+}
+
+/* ...but not to absolute links in this domain... */
+a[href^="http://www.karakas-online.de"] {
+    background: transparent;
+    padding-right: 0em;
+}
+
+a[href^="http://www.karakas-online.de"]:hover {
+    background: transparent;
+}
+
+/* ...or to the translation links on each page */
+.translatelink > a[href^="http:"] {
+    background: transparent;
+    padding-right: 0em;
+}
+
+.translatelink > a[href^="http:"]:hover {
+    background: transparent;
+}
+
+/* ...or to any images  */
+.imagelink  a[href^="http:"] {
+    background: transparent;
+    padding-right: 0em;
+}
+
+.imagelink  a[href^="http:"]:hover {
+    background: transparent;
+}
+
+p.c2 {
+    color: white; /* #FFFFFF */
+    background-color: #A0A0D0;
+    border: solid 1px #606090;
+    padding: 1px
+}
+
+.nukefooter {
+    color: #000000;
+    background-color: #B0E0E6;
+    padding: 0.3125em;
+    margin-top: 0.625em;
+    width: 100%;
+    border: thin solid #A0A0D0;
+}
+
+/* Multi-page (chunk) HTML Navigation Header */
+.navheader {
+    /* Top navigation-header row background image */
+    /*
+    background: url(scripts/images/top_back.png) left top;
+    background-repeat: no-repeat;
+    */
+    /* Bottom navigation-header row background image */
+    /*
+    background: url(scripts/images/top_back.png) left bottom repeat-x;
+    */
+    /* The text font color is customized in the ".navheader table th" style. */
+    margin-top: 0.625em;
+}
+
+/* Multi-Page (Chunk) HTML Navigation-Header Table Header */
+.navheader table th {
+    border: none;
+    background: none;
+    color: #666666; /* a dark gray */
+    padding-top:  0.375em;  padding-bottom: 2.6875em;
+    padding-left: 0.375em;  padding-right:  0.375em;
+}
+
+/* Multi-Page (Chunk) HTML Navigation Footer */
+.navfooter {
+    background: url(scripts/images/bottom_back.png) left top;
+    font: 0.6875em verdana;
+    /* You can set the different navigation-footer text color by setting @color
+     * within a ".navfooter table td" style; the default color is black. */
+}
+
+/* HTML Footer */
+.footer {
+    border-top: 1px solid #CCCCCC;
+    font: 0.625em verdana;
+    color: gray;
+}
+
+/* Table-of-Contents, List-of-Figures, and List-of-Examples */
+/* [Additional specific TOC/LOF/LOE customizations are done via specific styles
+ * below.] */
+.toc, .list-of-figures, .example {
+    border: thin solid #CCCCCC; /* #CCCCCC = a shade of gray */
+    color: #563D7E; /* &j_heading_color; */
+    background-color: #E9EFF1; /* a very light gray */
+    padding-left: 1em;  padding-right: 1em;
+    margin-top: 1.25em; margin-bottom: 1.25em;
+}
+
+/* Table-of-Contents, List-of-Figures, and List-of-Examples Title */
+.toc p, .list-of-figures p, .example p {
+    font: bold 1.0625em verdana,verdana;
+}
+
+/* Table-of-Contents and List-of-Figures Additional Customization */
+.toc, .list-of-figures {
+    border-bottom: 1px solid #D1D1D1; /* #D1D1D1 = a light shade of gray */
+}
+
+/* Formal (Captioned) Figures -- currently use defaults:
+.figure {
+}
+*/
+
+/*  Title (Caption) of Formal Object (Figure, Table, Procedure-Step, etc.) */
+/* [Specific customization may be done separately -- for example, via the
+ *  .figure p.title / .figure / .informalfigure,  and/or
+ *  .table p.title / .table / .informaltable styles.] */
+p.title {
+     color: #563D7E;        /* &j_heading_color; */
+     text-align: center;    /* center the title text */
+    /* Remove extra space between the title and the object */
+     /* The space above the title can be customized using @margin-top, and the
+      * space below it (e.g., between a table and its title) via @margin-bottom.
+      * It's also possible to use @padding attributes.
+      * In addition, it's possible to use @line-height to set the height of the
+      * title line, thus affecting the space above and below the title.
+      * We currently rely on the default padding of formal-object titles. */
+}
+
+/* Procedure-Step Title Specific Customization */
+.step p.title {
+    text-align: left;
+    color: black;
+}
+
+/* Informal Figures and Tables */
+.informalfigure, .informaltable {
+    margin-top: 0.3125em;
+}
+
+/* Informal Figures & Tables in List Items */
+.listitem .informalfigure, .listitem .informaltable {
+    margin-top: 1.25em; margin-bottom: 1.25em;
+}
+
+/* Copyright */
+.copyright {
+    display: block;
+    border-top: 1px solid #CCCCCC; /* 0xCCCCCC = a shade of gray */
+    font: 0.625em verdana;
+    color: gray;
+    padding-top: 0.625em;   padding-bottom: 0.625em;
+}
+
+/* Web-Site-Link Footer Entry */
+.j_footer_web_link a
+{
+    color: gray;
+}
+
+/* Smallcaps */
+.smallcaps {
+    font-variant: small-caps;
+}
+

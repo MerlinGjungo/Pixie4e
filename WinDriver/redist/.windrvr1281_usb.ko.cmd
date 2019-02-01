@@ -1,0 +1,1 @@
+cmd_/home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.ko /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.mod.o

@@ -1,0 +1,10 @@
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 13
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 14
+*ERROR* Pixie_Hand_Down_Names(ALL_FILES): null array element 15
+Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+*ERROR* (Pixie_Scan_Crate_Slots): Failed to initialize the PIXIE5000E library: Failed to initialize the WDC library. Error 0x20000001 - Invalid handle
+
+
+*ERROR* (Pixie_Scan_Crate_Slots): System has no devices
+*ERROR* (Pixie_Boot_System): Scanning crate slots unsuccessful, error -4.

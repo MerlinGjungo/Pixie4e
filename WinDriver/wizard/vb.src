@@ -1,0 +1,123 @@
+===BEGIN MODULE %NAME%.vbw
+%NAME%_Form = 88, 88, 635, 548, C, 22, 22, 580, 555, C
+%NAME%_lib = 26, 23, 719, 547,
+%NAME%_diag = 25, 19, 682, 526,
+windrvr = 59, 172, 717, 526, C
+?IfPCI? pci_diag_lib = 88, 88, 635, 548,
+
+===BEGIN MODULE %NAME%.vbp
+Type=Exe
+Form=%NAME%_Form.frm
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#\Windows\System32\stdole2.tlb#OLE Automation
+Module=%NAME%_lib; %NAME%_lib.bas
+Module=%NAME%_diag; %NAME%_diag.bas
+Module=windrvr; %BASEDIR%\vb\include\windrvr.bas
+Module=wdutils_dll; %BASEDIR%\vb\include\wd_utils.bas
+?IfPCI? Module=pci_diag_lib; %BASEDIR%\vb\include\pci_diag_lib.bas
+?IfPCI? Module=print_struct; %BASEDIR%\vb\include\print_struct.bas
+Module=bits; %BASEDIR%\vb\include\bits.bas
+?IfPCI? Module=pci_regs; %BASEDIR%\vb\include\pci_regs.bas
+IconForm="%NAME%_Form"
+Startup="%NAME%_Form"
+Command32=""
+Name="%NAME%_Proj"
+HelpContextID="0"
+CompatibleMode="0"
+MajorVer=1
+MinorVer=0
+RevisionVer=0
+AutoIncrementVer=0
+ServerSupportFiles=0
+VersionCompanyName="Jungo Connectivity"
+CompilationType=0
+OptimizationType=0
+FavorPentiumPro(tm)=0
+CodeViewDebugInfo=0
+NoAliasing=0
+BoundsCheck=0
+OverflowCheck=0
+FlPointCheck=0
+FDIVCheck=0
+UnroundedFP=0
+StartMode=0
+Unattended=0
+Retained=0
+ThreadPerObject=0
+MaxNumberOfThreads=1
+
+[MS Transaction Server]
+AutoRefresh=1
+
+===BEGIN MODULE %NAME%_Form.frm
+VERSION 5.00
+Begin VB.Form %NAME%_Form
+   Caption         =   "%NAME%_Form"
+   ClientHeight    =   7845
+   ClientLeft      =   60
+   ClientTop       =   345
+   ClientWidth     =   7125
+   LinkTopic       =   "%NAME%_Form"
+   ScaleHeight     =   7845
+   ScaleWidth      =   7125
+   StartUpPosition =   3  'Windows Default
+   Begin VB.TextBox Text1
+      Height          =   6975
+      Left            =   120
+      MultiLine       =   -1  'True
+      ScrollBars      =   2  'Vertical
+      TabIndex        =   1
+      Top             =   120
+      Width           =   6855
+   End
+   Begin VB.CommandButton MainMenuCommand
+      Caption         =   "Main Menu"
+      Height          =   495
+      Left            =   1440
+      TabIndex        =   0
+      Top             =   7200
+      Width           =   4575
+   End
+End
+Attribute VB_Name = "%NAME%_Form"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+
+Private Sub Form_Activate()
+    Call main
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+    Call mainend
+End Sub
+
+Private Sub MainMenuCommand_Click()
+    Call main
+End Sub
+
+===BEGIN MODULE %NAME%_files.txt
+The DriverWizard has created a Visual Basic application that
+communicates with your device using WinDriver.
+
+  %PATH%/%NAME%_files.txt
+         A detailed overview of all the files generated.
+
+  %PATH%/%NAME%_Form.frm
+         Contains the implementation of the application form.
+
+  %PATH%/%NAME%_diag.bas
+         Contains the implementation of the test diagnostics
+         application that accesses the device.
+
+  %PATH%/%NAME%_lib.bas
+         Contains sample library functions for accessing the device.
+
+  %PATH%/%NAME%.vbp
+         Contains the Visual Basic project file
+
+Compiling this project:
+  Open Visual Basic, load
+  %PATH%/%NAME%.vbp
+  and compile
+

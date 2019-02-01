@@ -1,0 +1,1508 @@
+===BEGIN MODULE %NAME%.vbp
+Type=Exe
+Form=%NAME%_diag.frm
+Module=%NAME%_lib; %NAME%_lib.bas
+Module=windrvr; %BASEDIR%\vb\include\windrvr.bas
+Module=wdutils_dll; %BASEDIR%\vb\include\wd_utils.bas
+IconForm="%NAME%_diag"
+Startup="%NAME%_diag"
+ExeName32="%NAME%.exe"
+Command32=""
+Name="prj%NAME%"
+HelpContextID="0"
+CompatibleMode="0"
+MajorVer=1
+MinorVer=0
+RevisionVer=0
+AutoIncrementVer=0
+ServerSupportFiles=0
+VersionCompanyName="Jungo Connectivity"
+CompilationType=0
+OptimizationType=0
+FavorPentiumPro(tm)=0
+CodeViewDebugInfo=0
+NoAliasing=0
+BoundsCheck=0
+OverflowCheck=0
+FlPointCheck=0
+FDIVCheck=0
+UnroundedFP=0
+StartMode=0
+Unattended=0
+Retained=0
+ThreadPerObject=0
+MaxNumberOfThreads=1
+
+[MS Transaction Server]
+AutoRefresh=1
+
+===BEGIN MODULE %NAME%_diag.frm
+VERSION 5.00
+Begin VB.Form %NAME%_diag
+   Caption         =   "%NAME% Driver"
+   ClientHeight    =   8490
+   ClientLeft      =   60
+   ClientTop       =   345
+   ClientWidth     =   10395
+   LinkTopic       =   "Form1"
+   ScaleHeight     =   8490
+   ScaleWidth      =   10395
+   StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton cmdStopListen
+      Caption         =   "&Stop listening to pipe"
+      BeginProperty Font
+         Name            =   "Arial"
+         Size            =   9.75
+         Charset         =   177
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   495
+      Left            =   4680
+      TabIndex        =   14
+      Top             =   7200
+      Visible         =   0   'False
+      Width           =   2055
+   End
+   Begin VB.CommandButton cmdClearLog
+      Caption         =   "Clear L&og"
+      Height          =   495
+      Left            =   8640
+      TabIndex        =   13
+      Top             =   7200
+      Width           =   1215
+   End
+   Begin VB.Frame frMainMenu
+      Caption         =   "Main menu"
+      BeginProperty Font
+         Name            =   "Arial"
+         Size            =   12
+         Charset         =   177
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   3975
+      Left            =   360
+      TabIndex        =   3
+      Top             =   600
+      Width           =   3975
+      Begin VB.CommandButton cmdMainMenu
+         Caption         =   "&Quit"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   4
+         Left            =   240
+         TabIndex        =   15
+         Top             =   3240
+         Width           =   3255
+      End
+      Begin VB.CommandButton cmdMainMenu
+         Caption         =   "&Read / Write from pipe"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   3
+         Left            =   240
+         TabIndex        =   12
+         Top             =   2520
+         Width           =   3255
+      End
+      Begin VB.CommandButton cmdMainMenu
+         Caption         =   "R&eset pipe"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   2
+         Left            =   240
+         TabIndex        =   11
+         Top             =   1800
+         Width           =   3255
+      End
+      Begin VB.CommandButton cmdMainMenu
+         Caption         =   "&Change interface / alternate setting"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   1
+         Left            =   240
+         TabIndex        =   10
+         Top             =   1080
+         Width           =   3255
+      End
+      Begin VB.CommandButton cmdMainMenu
+         Caption         =   "&Display device configurations"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   0
+         Left            =   240
+         TabIndex        =   5
+         Top             =   360
+         Width           =   3255
+      End
+   End
+   Begin VB.TextBox txtLog
+      Height          =   5775
+      Left            =   4680
+      Locked          =   -1  'True
+      MultiLine       =   -1  'True
+      ScrollBars      =   2  'Vertical
+      TabIndex        =   1
+      Top             =   960
+      Width           =   5415
+   End
+   Begin VB.Frame frReadWritePipe
+      Caption         =   "Read/Write Pipe Menu"
+      BeginProperty Font
+         Name            =   "Arial"
+         Size            =   12
+         Charset         =   177
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   3975
+      Left            =   360
+      TabIndex        =   0
+      Top             =   4440
+      Visible         =   0   'False
+      Width           =   3975
+      Begin VB.CommandButton cmdReadWritePipe
+         Caption         =   "Return to &main menu"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   3
+         Left            =   360
+         TabIndex        =   9
+         Top             =   2460
+         Width           =   2055
+      End
+      Begin VB.CommandButton cmdReadWritePipe
+         Caption         =   "&Listen to pipe"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   2
+         Left            =   360
+         TabIndex        =   8
+         Top             =   1800
+         Width           =   2055
+      End
+      Begin VB.CommandButton cmdReadWritePipe
+         Caption         =   "&Write to pipe"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   1
+         Left            =   360
+         TabIndex        =   7
+         Top             =   1140
+         Width           =   2055
+      End
+      Begin VB.CommandButton cmdReadWritePipe
+         Caption         =   "&Read from pipe"
+         BeginProperty Font
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Index           =   0
+         Left            =   360
+         TabIndex        =   6
+         Top             =   480
+         Width           =   2055
+      End
+      Begin VB.Label lblMsg
+         BeginProperty Font
+            Name            =   "Arial"
+            Size            =   9.75
+            Charset         =   177
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   495
+         Left            =   360
+         TabIndex        =   4
+         Top             =   3240
+         Visible         =   0   'False
+         Width           =   3255
+         WordWrap        =   -1  'True
+      End
+   End
+   Begin VB.Label lblLog
+      AutoSize        =   -1  'True
+      Caption         =   "Log:"
+      BeginProperty Font
+         Name            =   "Arial"
+         Size            =   12
+         Charset         =   177
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   285
+      Left            =   4680
+      TabIndex        =   2
+      Top             =   600
+      Width           =   540
+   End
+End
+Attribute VB_Name = "%NAME%_diag"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+' -----------------------------------------------------------------------------
+'
+' File - %NAME%_diag.frm
+'
+' This is a diagnostics Visual Basic application for accessing your USB device.
+' Code was generated by DriverWizard %WDVER% - https://www.jungo.com.
+' The code accesses the hardware via WinDriver functions.
+'
+' Jungo Connectivity Confidential. Copyright (c) %YEAR% Jungo Connectivity Ltd.  https://www.jungo.com
+'
+' -----------------------------------------------------------------------------
+
+Option Explicit
+
+Const USB_DIAG_SAMPLE As Boolean = False
+Const DEFAULT_VENDOR_ID As Long = %VID%
+Const DEFAULT_PRODUCT_ID As Long = %PID%
+Const DEFAULT_INTERFACE_NUM As Long = %INTERFACENUM%
+Const DEFAULT_ALTERNATE_SETTING As Long = %INTERFACENUMALTERNATE%
+Const DEFAULT_LICENSE_STRING As String = "%LICENSE%"
+'TODO: Change the following constant to your driver's name
+Const DEFAULT_DRIVER_NAME As String = "windrvr1281"
+
+Const ATTACH_EVENT_TIMEOUT = 30 ' In seconds
+
+Const PRINT_CONFIGS As Byte = 0
+Const CHANGE_ALT As Byte = 1
+Const RESET_PIPE As Byte = 2
+Const READ_WRITE_PIPE As Byte = 3
+Const EXIT_APP As Byte = 4
+
+Const READ_PIPE As Byte = 0
+Const WRITE_PIPE As Byte = 1
+Const LISTEN_PIPE As Byte = 2
+Const EXIT_MENU As Byte = 3
+
+'Global variables
+Dim dwError As Long
+Dim wVendorId As Integer
+Dim wProductId As Integer
+Dim hDriver As Long
+Dim DevCtx As DEVICE_CONTEXT
+Dim dwDevAddr As Long
+
+Dim matchTable As WDU_MATCH_TABLE
+Dim eventTable As WDU_EVENT_TABLE
+
+'Read/Write Pipe global variables:
+Dim hDevice As Long
+Dim pAltset As WDU_ALTERNATE_SETTING
+Dim pPipes() As WDU_PIPE_INFO
+Dim iPipe As Integer
+Dim SetupPacket(0 To 7) As Byte
+Dim dwPipeNum As Long
+Dim dwSize As Long, dwBytesTransferred As Long
+Dim pBuffer() As Byte
+Dim listenPipe As USB_LISTEN_PIPE
+
+Private Sub Form_Initialize()
+    'The vendor and device ID assignments below are written so as to avoid
+    'a possible overflow in case of large unsigned ID values (due to the lack
+    'of inherent support for unsigned numbers in Visual Basic):
+    wVendorId = (DEFAULT_VENDOR_ID And &H7FFF&) - (DEFAULT_VENDOR_ID And &H8000&)
+    wProductId = (DEFAULT_PRODUCT_ID And &H7FFF&) - (DEFAULT_PRODUCT_ID And &H8000&)
+    DevCtx.dwInterfaceNum = DEFAULT_INTERFACE_NUM
+    DevCtx.dwAlternateSetting = DEFAULT_ALTERNATE_SETTING
+End Sub
+
+Private Sub Form_Load()
+    Call MainMenuSetControlsState(True, False)
+    Call RWPipeMenuSetControlsState(False, False)
+    frReadWritePipe.Top = 600
+End Sub
+
+Private Sub Form_Activate()
+    'Set driver name
+    If (WD_DriverName(DEFAULT_DRIVER_NAME) = "") Then
+        VB_ERR "Form_Activate(): Failed to set driver name to " & _
+            DEFAULT_DRIVER_NAME & vbCrLf & "(" & Stat2Str(dwError) & ")"
+        GoTo Handler
+    End If
+
+    If (USB_DIAG_SAMPLE) Then
+        If (Not (InputNumber("Enter device vendor id (hex):", _
+            "Enter Vendor ID", wVendorId, True, _
+            "You did not enter a valid vendor ID", _
+            Hex(DEFAULT_VENDOR_ID)))) Then
+            GoTo InputError
+        End If
+        If (Not (InputNumber("Enter device product id (hex):", _
+            "Enter Product ID", wProductId, True, _
+            "You did not enter a valid product ID", _
+            Hex(DEFAULT_PRODUCT_ID)))) Then
+            GoTo InputError
+        End If
+        If (Not (InputNumber("Enter interface number (dec):", _
+            "Enter Interface", DevCtx.dwInterfaceNum, False, _
+            "You did not enter a interface number", _
+            Hex(DEFAULT_INTERFACE_NUM)))) Then
+            GoTo InputError
+        End If
+        If (Not (InputNumber("Enter alternate setting number (dec):", _
+            "Enter Interface", DevCtx.dwAlternateSetting, False, _
+            "You did not enter a valid alternate setting value", _
+            Hex(DEFAULT_ALTERNATE_SETTING)))) Then
+            GoTo InputError
+        End If
+    End If
+
+    matchTable.wVendorId = wVendorId
+    matchTable.wProductId = wProductId
+
+    Call SetEventTable(eventTable, AddressOf DeviceAttach, _
+        AddressOf DeviceDetach)
+    eventTable.pUserData = WD_VB_GetAddress(DevCtx, 1, 1)
+
+    WriteLog "Please verify that the device is attached..." & vbCrLf
+
+    dwError = WDU_Init(hDriver, matchTable, 1, eventTable, _
+        DEFAULT_LICENSE_STRING, WD_ACKNOWLEDGE, Me.hWnd)
+
+    If (dwError) Then
+        VB_ERR "Form_Activate(): Failed to initialize USB driver: error &H" & _
+            Hex(dwError) & vbCrLf & "(" & Stat2Str(dwError) & ")"
+        GoTo Handler
+    End If
+
+    Exit Sub
+
+InputError:
+    Message "Did not receive the required input." & vbCrLf & _
+        "Exiting the program...", vbExclamation + vbOKOnly, _
+        "Cancel"
+    Unload Me
+Handler:
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+    If (hDriver > 0) Then
+        WDU_Uninit (hDriver)
+    End If
+End Sub
+
+Private Sub cmdMainMenu_Click(Index As Integer)
+    Select Case (Index)
+        Case PRINT_CONFIGS  'Print device configurations
+            PrintDeviceConfigurations (DevCtx.hDev)
+        Case CHANGE_ALT  'Change interface / alternate setting
+            Dim dwInterfaceNumber As Long
+            Dim dwAlternateSetting As Long
+
+            TRACE "DiagMenu - Change interface / alternate setting:"
+
+            If Not (InputNumber("Please enter the interface number (dec): ", _
+                "Select Interface", dwInterfaceNumber, False)) Then
+                TRACE "No valid interface number entered - menu option abandoned." & _
+                    vbCrLf
+                Exit Sub
+            End If
+
+            If Not (InputNumber("Please enter the alternate setting index (dec): ", _
+                "Select Alternate Setting", dwAlternateSetting, False)) Then
+                TRACE "No valid alternate setting entered - menu option abandoned." & _
+                    vbCrLf
+                Exit Sub
+            End If
+
+            dwError = WDU_SetInterface(DevCtx.hDev, dwInterfaceNumber, _
+                dwAlternateSetting)
+            If (dwError) Then
+                VB_ERR "WDU_SetInterface() for interface " & dwInterfaceNumber & _
+                    " alternate setting " & dwAlternateSetting & " failed:" & vbCrLf & _
+                    "error &H" & Hex(dwError) & " (" & Stat2Str(dwError) & ")" & vbCrLf
+            Else
+                TRACE "WDU_SetInterface() for interface " & dwInterfaceNumber & _
+                    " alternate setting " & dwAlternateSetting & _
+                    " completed successfully." & vbCrLf
+            End If
+        Case RESET_PIPE  'Reset Pipe
+            If Not (InputNumber("Please enter the pipe number (hex): ", _
+                "Select Pipe to Reset", dwPipeNum, True)) Then
+                TRACE "DiagMenu - Reset Pipe: No valid pipe number entered." & vbCrLf
+                GoTo Error
+            End If
+
+            dwError = WDU_ResetPipe(DevCtx.hDev, dwPipeNum)
+            If (dwError) Then
+                VB_ERR "DiagMenu: WDU_ResetPipe() for pipe &H" & Hex(dwPipeNum) & " failed:" & vbCrLf & _
+                    "error &H" & Hex(dwError) & " (" & Stat2Str(dwError) & ")" & vbCrLf
+            Else
+                TRACE "DiagMenu - Reset Pipe: WDU_ResetPipe() for pipe &H" & _
+                    Hex(dwPipeNum) & " completed successfully." & vbCrLf
+            End If
+        Case READ_WRITE_PIPE  'Read/Write from/to pipes
+            Call ReadWritePipeMenuDisplay
+        Case EXIT_APP  'Exit
+            Unload Me
+    End Select
+
+    Exit Sub
+
+Error:
+    WriteLog "Read/Write Pipe failed"
+End Sub
+
+Private Sub ReadWritePipeMenuDisplay()
+    Dim pDevice As WDU_DEVICE
+
+    hDevice = DevCtx.hDev
+
+    dwError = WDU_GetDeviceInfo(hDevice, dwDevAddr)
+    If (dwError) Then
+        VB_ERR "ReadWritePipeMenuDisplay: WDU_GetDeviceInfo() failed:" & vbCrLf & _
+            "error &H" & dwError & " (" & Stat2Str(dwError) & ")" & vbCrLf
+        GoTo Error
+    End If
+
+    Call memcpy(VarPtr(pDevice), dwDevAddr, LenB(pDevice))
+
+    Dim pActiveInterface As WDU_INTERFACE
+    Call memcpy(VarPtr(pActiveInterface), pDevice.pActiveInterface, LenB(pActiveInterface))
+    Call memcpy(VarPtr(pAltset), pActiveInterface.pActiveAltSetting, LenB(pAltset))
+
+    If Not (SetPipesInfo(pAltset, pPipes)) Then
+        GoTo Error
+    End If
+
+    WriteLog vbCrLf & "Alternate Setting: " & pAltset.Descriptor.bAlternateSetting
+
+    Call PrintPipesInfo(pPipes, pAltset.Descriptor.bNumEndpoints)
+
+    If (Not (InputNumber("Please enter the pipe number (hex): ", _
+        "Enter Pipe Number", dwPipeNum, True, _
+        "You did not enter a valid pipe number. Pleasy try again."))) Then
+        VB_ERR "Read/Write Pipes: No valid pipe number entered."
+        GoTo Error
+    End If
+
+    If (dwPipeNum <> 0) Then ' search for the pipe
+        Dim cont As Boolean
+        cont = True
+        iPipe = 0
+
+        Do While ((iPipe < pAltset.Descriptor.bNumEndpoints) And cont)
+            If (pPipes(iPipe).dwNumber = dwPipeNum) Then
+                cont = False
+            Else
+                iPipe = iPipe + 1
+            End If
+        Loop
+
+        If (iPipe >= pAltset.Descriptor.bNumEndpoints) Then
+            Message "There is no pipe &H" & Hex(dwPipeNum) & _
+                " for the active alternate setting." & vbCrLf & _
+                "Please try again."
+            VB_ERR "Read/Write Pipe: Selected pipe does not exist."
+            GoTo Error
+        End If
+    End If
+
+    Call MainMenuSetControlsState(False, False)
+    Call RWPipeMenuSetControlsState(True, True)
+
+    Exit Sub
+
+Error:
+    VB_ERR "Read/Write Pipe failed"
+    If dwDevAddr <> 0 Then
+        Call WDU_PutDeviceInfo(dwDevAddr)
+    End If
+End Sub
+
+Private Sub cmdReadWritePipe_Click(Index As Integer)
+    Select Case (Index)
+        Case READ_PIPE, WRITE_PIPE  'Read from pipe / Write to pipe
+            Dim strReadWrite As String
+            If (Index = READ_PIPE) Then
+                strReadWrite = "Read from pipe"
+            Else
+                strReadWrite = "Write to pipe"
+            End If
+
+            If ((dwPipeNum = 0) Or pPipes(iPipe).type = PIPE_TYPE_CONTROL) Then
+                dwError = GetHexBuffer(SetupPacket, 8, _
+                    "Enter setup packet string " & _
+                    "(Type Request Value Index Length)" & _
+                    " [hexadecimal values; insert as a single string, no spaces.]")
+
+                If (dwError = -1) Then
+                    GoTo Error
+                End If
+            'Verify that the operation is supported for the specified pipe:
+            ElseIf (((Index = READ_PIPE) And (pPipes(iPipe).direction = WDU_DIR_OUT)) Or _
+                   ((Index = WRITE_PIPE) And (pPipes(iPipe).direction = WDU_DIR_IN))) Then
+                Message "The selected pipe (&H" & Hex(dwPipeNum) & _
+                    ") does not support transfers " & vbCrLf & _
+                    "in this direction"
+                VB_ERR strReadWrite & _
+                    " error: Transfer direction not supported for the selected pipe"
+                GoTo Error
+            End If
+
+            Do
+                If (Not (InputNumber("Please enter the size of the buffer (dec):  ", _
+                    "Enter Buffer Size", dwSize, False, _
+                    "You did not enter a valid buffer size."))) Then
+                    GoTo Error
+                ElseIf (dwSize < 0) Then
+                    Message "Buffer size must be bigger than 0." & vbCrLf & _
+                        "Please try again.", vbCritical, "Incorrect buffer size"
+                End If
+            Loop Until (dwSize >= 0)
+
+            If (dwSize > 0) Then ReDim pBuffer(0 To dwSize - 1)
+
+            Dim fRead As Boolean
+
+            If (Index = WRITE_PIPE) Then 'Write to pipe
+                Call GetHexBuffer(pBuffer, dwSize, "Enter buffer to write:")
+                lblMsg.Caption = "Writing to pipe &&H" & Hex(dwPipeNum) & " ..."
+            Else
+                fRead = True
+                lblMsg.Caption = "Reading from pipe &&H" & Hex(dwPipeNum) & _
+                    " ..."
+            End If
+            lblMsg.Visible = True
+            Refresh
+
+            Dim addrBuffer As Long
+            If (dwSize > 0) Then
+                addrBuffer = VarPtr(pBuffer(0))
+            End If
+
+            cmdClearLog.Enabled = False
+            dwError = WDU_Transfer(hDevice, dwPipeNum, fRead, 0, addrBuffer, _
+                dwSize, dwBytesTransferred, VarPtr(SetupPacket(0)), _
+                TRANSFER_TIMEOUT)
+
+            lblMsg.Caption = ""
+            lblMsg.Visible = False
+            cmdClearLog.Enabled = True
+            Refresh
+
+            If (dwError) Then
+                VB_ERR strReadWrite & _
+                    " error: WDU_Transfer() failed: error &H" & Hex(dwError) & _
+                    " (" & Stat2Str(dwError) & ")"
+                GoTo Error
+            Else
+                WriteLog "Transferred " & dwBytesTransferred & " bytes."
+            End If
+
+            If (Index = READ_PIPE) Then 'Read
+                Call PrintHexBuffer(pBuffer, dwBytesTransferred)
+            End If
+        Case LISTEN_PIPE  'Listen to pipe (continuous read)
+            If ((dwPipeNum = 0) Or pPipes(iPipe).type = PIPE_TYPE_CONTROL) Then
+                WriteLog "Cannot listen to control pipes"
+                GoTo Error
+            End If
+
+            'Verify that the selected pipe supports IN transfers:
+            If (pPipes(iPipe).direction = WDU_DIR_OUT) Then
+                Message "The selected pipe (&H" & Hex(dwPipeNum) & _
+                    ") does not support In transfers"
+                VB_ERR "Read/Write Pipes error: Cannot listen to Out pipe"
+                GoTo Error
+            End If
+
+            listenPipe.pPipe = pPipes(iPipe)
+            listenPipe.hDevice = DevCtx.hDev
+
+            Call ListenToPipe(listenPipe)
+
+            cmdStopListen.Visible = True
+            Call RWPipeMenuSetControlsState(True, False)
+            cmdClearLog.Enabled = False
+            Refresh
+        Case EXIT_MENU  'Exit Read/Write Pipes Menu
+            If dwDevAddr <> 0 Then
+                Call WDU_PutDeviceInfo(dwDevAddr)
+            End If
+            Call RWPipeMenuSetControlsState(False, False)
+            Call MainMenuSetControlsState(True, True)
+    End Select
+
+    Exit Sub
+
+
+Error:
+    VB_ERR "Read/Write Pipe failed"
+End Sub
+
+' Sub: cmdStopListen_Click()
+'   Stop listening to USB device pipe (pListenPipe)
+Private Sub cmdStopListen_Click()
+    Call WDU_HaltTransfer(listenPipe.hDevice, listenPipe.pPipe.dwNumber)
+    ThreadLoopStop (listenPipe.hThread)
+    listenPipe.hThread = 0
+
+    cmdStopListen.Visible = False
+    Call RWPipeMenuSetControlsState(True, True)
+    cmdClearLog.Enabled = True
+    Refresh
+
+    If (listenPipe.dwError) Then
+        VB_ERR "Listen to pipe: Error listening to pipe &H" & _
+            Hex(dwPipeNum) & ": error &H" & Hex(listenPipe.dwError) & vbCrLf & _
+            "(" & Stat2Str(listenPipe.dwError) & ")"
+    End If
+End Sub
+
+Private Sub cmdClearLog_Click()
+    txtLog.Text = ""
+    txtLog.Refresh
+End Sub
+
+===BEGIN MODULE %NAME%_lib.bas
+Attribute VB_Name = "%NAME%_lib"
+' -----------------------------------------------------------------
+'
+' File - %NAME%_lib.bas
+'
+' This is a sample Visual Basic library for accessing
+' USB devices with WinDriver.
+'
+' Code was generated by DriverWizard %WDVER% - https://www.jungo.com.
+' The library accesses the hardware via WinDriver functions.
+'
+' Jungo Connectivity Confidential. Copyright (c) %YEAR% Jungo Connectivity Ltd.  https://www.jungo.com
+'
+' -----------------------------------------------------------------
+
+Option Explicit
+
+Public Const MAX_BUFFER_SIZE = 4096
+Public Const TRANSFER_TIMEOUT = 30000 ' In msecs
+Public Const PIPE_LISTEN_TIMEOUT = 50 ' In msecs
+Public Const MY_DRIVER As String = "%NAME%"
+Public Const STR_QUIT = "&Quit"
+
+Public Type DEVICE_CONTEXT
+    dwInterfaceNum As Long
+    dwAlternateSetting As Long
+    hDev As Long
+    hEvent As Long
+    dwAttachError As Long
+End Type
+
+Public Type USB_LISTEN_PIPE
+    hDevice As Long
+    pPipe As WDU_PIPE_INFO
+    pContext As Long
+    hThread As Long
+    dwError As Long
+End Type
+
+' Function: DeviceAttach()
+'   Callback function, which will be executed when the device is attached.
+' Parameters:
+'   hDevice [in] handle to the device
+'   pDeviceInfo [in] device information
+'   pUserData [in/out] data for device attach
+' Return Value:
+'   True if control was accepted for the attached device, False otherwise.
+Public Function DeviceAttach(ByVal hDevice As Long, _
+    ByRef pDeviceInfo As WDU_DEVICE, _
+    ByRef pUserData As DEVICE_CONTEXT) As Boolean
+
+    Dim bAcceptControl As Boolean
+
+    Dim pActiveInterface As WDU_INTERFACE
+    Dim pActiveAltSetting As WDU_ALTERNATE_SETTING
+
+    bAcceptControl = False
+
+    TRACE "DeviceAttach: Received attach for " & vbCrLf & _
+        "vendor ID &H" & Hex(pDeviceInfo.Descriptor.idVendor) & _
+        " product ID &H" & Hex(pDeviceInfo.Descriptor.idProduct) & vbCrLf & _
+        "device handle &H" & Hex(pUserData.hDev)
+
+    If (pUserData.hDev) Then
+        TRACE "DeviceAttach: Previous attached already accepted control of the device - " & vbCrLf & _
+            "control is rejected because only one device control is supported"
+        GoTo Exit_Func
+    End If
+
+    pUserData.hDev = hDevice
+
+    ' Set the active alternate setting (alternate setting 0 is already set by default)
+    If (pUserData.dwAlternateSetting <> 0) Then
+        pUserData.dwAttachError = WDU_SetInterface(pUserData.hDev, _
+            pUserData.dwInterfaceNum, pUserData.dwAlternateSetting)
+
+        If (pUserData.dwAttachError) Then
+            VB_ERR "DeviceAttach: WDU_SetInterface failed" & vbCrLf & _
+                "(num. " & str(pUserData.dwInterfaceNum) & " alternate " & _
+                str(pUserData.dwAlternateSetting) & ")" & vbCrLf & _
+                "device &H" & Hex(pUserData.hDev) & ": error &H" & _
+                Hex(pUserData.dwAttachError) & vbCrLf & _
+                "(" & Stat2Str(pUserData.dwAttachError) & ")"
+                pUserData.hDev = 0
+            GoTo Exit_Func
+        End If
+    End If
+
+    bAcceptControl = True ' Accept control over this device
+
+Exit_Func:
+    If (bAcceptControl) Then
+        TRACE "DeviceAttach: Accepting control of the device"
+        WriteLog ""
+    Else
+        VB_ERR "DeviceAttach: Rejecting control of the device"
+    End If
+
+    Call MainMenuSetControlsState(True, bAcceptControl)
+
+    DeviceAttach = bAcceptControl
+End Function
+
+' Sub DeviceDetach()
+'   Callback function (sub), which will be executed when the device is detached.
+' Parameters:
+'   hDevice [in] handle to the device
+'   pUserData [in/out] data for device detach
+Public Sub DeviceDetach(ByVal hDevice As Long, _
+    ByRef pUserData As DEVICE_CONTEXT)
+    Dim DevCtx As DEVICE_CONTEXT
+    DevCtx = pUserData
+
+    DevCtx.hDev = 0
+    TRACE "DeviceDetach: Received detach for device handle &H" & _
+        Hex(hDevice)
+
+    pUserData = DevCtx
+    Call RWPipeMenuSetControlsState(False, False)
+    Call MainMenuSetControlsState(True, False)
+End Sub
+
+'Sub: MainMenuSetControlsState
+'   Sets status of Main Menu controls in %NAME%_diag.frm
+'Parameters:
+'   fSetVisible [in] determines the controls' visibility
+'   fSetEnabled [in] determines the controls' enable/disable state
+Public Sub MainMenuSetControlsState(fSetVisible As Boolean, _
+    fSetEnabled As Boolean)
+    %NAME%_diag.frMainMenu.Visible = fSetVisible
+
+    Dim cmd As CommandButton
+    For Each cmd In %NAME%_diag.cmdMainMenu
+        cmd.Enabled = fSetEnabled
+        cmd.Visible = fSetVisible
+        If ((cmd.Caption = STR_QUIT) And (Not (fSetEnabled))) Then
+            cmd.Enabled = True
+        End If
+    Next cmd
+
+    If (fSetEnabled) Then
+        %NAME%_diag.cmdMainMenu(0).SetFocus
+    End If
+End Sub
+
+'Sub: RWPipeMenuSetControlsState
+'   Sets status of Read/Write Pipe Menu controls in %NAME%_diag.frm
+'   fSetVisible [in] determines the controls' visibility
+'   fSetEnabled [in] determines the controls' enable/disable state
+Public Sub RWPipeMenuSetControlsState(fSetVisible As Boolean, _
+    fSetEnabled As Boolean)
+    %NAME%_diag.frReadWritePipe.Enabled = fSetEnabled
+    %NAME%_diag.frReadWritePipe.Visible = fSetVisible
+
+    Dim cmd As CommandButton
+    For Each cmd In %NAME%_diag.cmdReadWritePipe
+        cmd.Enabled = fSetEnabled
+        cmd.Visible = fSetVisible
+    Next cmd
+
+    If (fSetEnabled) Then
+        %NAME%_diag.cmdReadWritePipe(0).SetFocus
+    End If
+End Sub
+
+
+' General USB VB procedures:
+' --------------------------
+
+' Function: pipeType2Str()
+'   Returns a string identifying the pipe type
+' Parameters:
+'   pipeType [in] pipe type
+' Return Value:
+'   String containing the description of the pipe
+Public Function pipeType2Str(pipeType As Long) As String
+    Select Case pipeType
+            Case Is = PIPE_TYPE_CONTROL
+            pipeType2Str = "Control"
+        Case Is = PIPE_TYPE_ISOCHRONOUS
+            pipeType2Str = "Isochronous"
+        Case Is = PIPE_TYPE_BULK
+            pipeType2Str = "Bulk"
+        Case Is = PIPE_TYPE_INTERRUPT
+            pipeType2Str = "Interrupt"
+    End Select
+End Function
+
+' Sub: PrintHexBuffer()
+'   Print a buffer in hexadecimal format
+' Parameters:
+'   pBuffer [in] pointer to buffer
+'   dwBytes [in] number of bytes to print
+Public Sub PrintHexBuffer(ByRef pBuffer() As Byte, dwBytes As Long)
+    Dim i As Long
+    For i = 0 To dwBytes - 1
+        Call WriteLogHex(str(pBuffer(i)), " ")
+    Next i
+    WriteLog ""
+End Sub
+
+' Sub: SetPipesInfo()
+'   Set pipes information from specified alternate setting
+' Parameters:
+'   pAltSet [in] pointer to the alternate setting information
+'   pPipes() [out] array of pipe information structs to be updated
+Public Function SetPipesInfo(pAltset As WDU_ALTERNATE_SETTING, _
+    ByRef pPipes() As WDU_PIPE_INFO) As Boolean
+
+    Dim bNumPipes As Byte
+    bNumPipes = pAltset.Descriptor.bNumEndpoints
+
+    If (bNumPipes < 0) Then
+        VB_ERR "SetPipesInfo Error:  Illegal pipes number."
+        GoTo Error
+    End If
+
+    If (bNumPipes = 0) Then
+        WriteLog "  No pipes are defined for this device " & vbCrLf & _
+            "other than the default pipe (number 0)"
+        Exit Function
+    End If
+
+    ReDim pPipes(0 To bNumPipes - 1)
+
+    Dim p As Integer
+    Dim pipeAddr As Long
+    Dim lenPipe As Long
+
+    pipeAddr = pAltset.pPipes
+    lenPipe = LenB(pPipes(0))
+
+    For p = 0 To bNumPipes - 1
+        Call memcpy(VarPtr(pPipes(p)), pipeAddr + lenPipe * p, lenPipe)
+    Next p
+
+    SetPipesInfo = True
+    Exit Function
+
+Error:
+    VB_ERR "SetPipesInfo() failed"
+End Function
+
+' Sub: PrintPipesInfo()
+'   Prints the pipes information for the specified pPipes array
+' Parameters:
+'   pPipes() [in] array of pipe information structs
+'   bNumPipes [in] number of pipes in the array
+Public Sub PrintPipesInfo(pPipes() As WDU_PIPE_INFO, ByVal bNumPipes As Byte)
+    If (bNumPipes < 0) Then
+        VB_ERR "PrintPipesInfo Error:  Illegal pipes number."
+        GoTo Error
+    End If
+
+    If (bNumPipes = 0) Then
+        WriteLog "  No pipes are defined for this device " & vbCrLf & _
+            "other than the default pipe (number 0)"
+        Exit Sub
+    End If
+
+    Dim p As Integer
+
+    WriteLog "Pipes Information:"
+
+    Dim sDirection As String * 4
+    For p = 0 To bNumPipes - 1
+        If (pPipes(p).direction = WDU_DIR_IN) Then
+            sDirection = "In"
+        Else
+            sDirection = "Out"
+        End If
+
+        WriteLog "  Pipe num. &H" & Hex(pPipes(p).dwNumber) & ":" & vbCrLf & _
+            vbTab & "size " & pPipes(p).dwMaximumPacketSize & _
+            ", type " & pipeType2Str(pPipes(p).type) & ", dir " & sDirection & _
+            ", interval " & pPipes(p).dwInterval & "(ms)"
+    Next p
+
+    WriteLog ""
+
+    Exit Sub
+
+Error:
+    VB_ERR "PrintPipesInfo() failed"
+End Sub
+
+' Sub: PrintDeviceConfigurations()
+'   Prints a device's configurations information
+' Parameters:
+'   hDevice [in] handle to the USB device
+Public Sub PrintDeviceConfigurations(ByVal hDevice As Long)
+    Dim dwError As Long
+    Dim pDevice As WDU_DEVICE
+    Dim devAddr As Long
+    Dim iConf As Long, ifc As Long, alt As Long
+
+    Dim pConf As WDU_CONFIGURATION
+    Dim pInterface As WDU_INTERFACE
+    Dim pAltset As WDU_ALTERNATE_SETTING
+
+    Dim strErrorMsg As String
+
+    dwError = WDU_GetDeviceInfo(hDevice, devAddr)
+    If (dwError) Then
+        WriteLog "PrintDeviceConfigurations: WDU_GetDeviceInfo failed: error &H" & _
+            Hex(dwError) & " (" & Stat2Str(dwError) & ")"
+        GoTo Error
+    End If
+
+    Call memcpy(VarPtr(pDevice), devAddr, LenB(pDevice))
+
+    Dim bNumConfigs As Byte
+    bNumConfigs = pDevice.Descriptor.bNumConfigurations
+
+    If (bNumConfigs < 0) Then
+        VB_ERR "Illegal configurations number detected: " & bNumConfigs
+        GoTo Error
+    End If
+
+    WriteLog ""
+    WriteLog "This device has " & bNumConfigs & " configuration(s):"
+
+    Dim pConfigs() As WDU_CONFIGURATION
+    ReDim pConfigs(0 To bNumConfigs - 1)
+
+    Dim configAddr As Long
+    Dim lenConf As Long
+
+    configAddr = pDevice.pConfigs
+    lenConf = CLng(LenB(pConfigs(0)))
+
+    For iConf = 0 To bNumConfigs - 1
+        Call memcpy(VarPtr(pConfigs(iConf)), configAddr + lenConf * iConf, _
+            lenConf)
+        WriteLog "  " & iConf & ". configuration value " & _
+            pConfigs(iConf).Descriptor.bConfigurationValue & _
+            " (has " & pConfigs(iConf).dwNumInterfaces & " interface(s))"
+    Next iConf
+
+    iConf = 0
+
+    If (bNumConfigs > 1) Then
+        If (InputNumber("Please enter the configuration " & vbCrLf & _
+            "index to display (dec - zero based): ", _
+            "Enter configuration index", iConf, False, _
+            "You have not entered a valid configuration index." & vbCrLf & _
+            "Valid values are 0 to " & Str(bNumConfigs) & _
+            " (dec). Please try again") = False) Then
+            GoTo Error
+        End If
+
+        If (iConf >= bNumConfigs) Then
+            WriteLog "PrintDeviceConfigurations: Invalid configuration number selected."
+            GoTo Error
+        End If
+    End If
+
+    pConf = pConfigs(iConf)
+
+    Dim bNumInterfaces As Byte
+    bNumInterfaces = pConf.dwNumInterfaces
+
+    WriteLog "The configuration indexed " & iConf & " has " & _
+        bNumInterfaces & " interface(s):"
+
+    Dim interAddr As Long
+    Dim lenInt As Long
+
+    interAddr = pConf.pInterfaces
+    lenInt = CLng(LenB(pInterface))
+
+    For ifc = 0 To bNumInterfaces - 1
+        Call memcpy(VarPtr(pInterface), interAddr + lenInt * ifc, lenInt)
+
+        Dim pActiveAltSetting As WDU_ALTERNATE_SETTING
+        Call memcpy(VarPtr(pActiveAltSetting), pInterface.pActiveAltSetting, _
+            LenB(pActiveAltSetting))
+        WriteLog "interface no. " & _
+            str(pActiveAltSetting.Descriptor.bInterfaceNumber) & ":"
+
+        Dim altAddr As Long
+        Dim lenAlt As Long
+
+        altAddr = pInterface.pAlternateSettings
+        lenAlt = CLng(LenB(pAltset))
+
+        For alt = 0 To pInterface.dwNumAltSettings - 1
+            Call memcpy(VarPtr(pAltset), altAddr + lenAlt * alt, lenAlt)
+
+            WriteLog "    alternate: " & pAltset.Descriptor.bAlternateSetting _
+                & ",  endpoints: " & pAltset.Descriptor.bNumEndpoints & _
+                ",  class: &H" & Hex(pAltset.Descriptor.bInterfaceClass) & _
+                ",  subclass: &H" & _
+                Hex(pAltset.Descriptor.bInterfaceSubClass) & "," & vbCrLf & _
+                "    protocol: &H" & Hex(pAltset.Descriptor.bInterfaceProtocol)
+            Call PrintEndpoints(pAltset)
+        Next alt
+    Next ifc
+
+    WriteLog ""
+
+    GoTo Exit_Sub
+
+Error:
+    VB_ERR "PrintDeviceConfigurations() failed"
+Exit_Sub:
+    If devAddr <> 0 Then
+        Call WDU_PutDeviceInfo(devAddr)
+    End If
+End Sub
+
+' Sub: ListenToPipe()
+'   Start listening to a USB device pipe
+' Parameters:
+'   pListenPipe [in] pipe to listen to
+Public Sub ListenToPipe(ByRef pListenPipe As USB_LISTEN_PIPE)
+    Dim dwStatus As Long
+    'Spawn a thread in the DLL, which calls PipeListenHandler() in a loop
+    'to listen on the pipe, until the user selects to stop listening
+    'or until an error (other than timeout expiration) occurrs:
+    dwStatus = ThreadLoopStart(pListenPipe.hThread, _
+        AddressOf PipeListenHandler, VarPtr(pListenPipe), %NAME%_diag.hWnd)
+    If (dwStatus <> WD_STATUS_SUCCESS) Then
+        Call VB_ERR("ListenToPipe: ThreadLoopStart() failed." & vbCrLf & _
+            "Error: &H" & dwStatus & "(" & Stat2Str(dwStatus) & ")")
+    Else
+        WriteLog "Start listening to pipe"
+    End If
+End Sub
+
+
+' Internal USB VB procedures:
+' ---------------------------
+
+' Sub: SetEventTable()
+'   Set the callback functions' addresses in an event table struct
+' Parameters:
+'   eventTable [out] WDU_EVENT_TABLE struct to be updated
+'   attachCb [in] address of device attach callback function
+'   detachCb [in] address of device detach callback function
+' [Sub can be modified to set power change callback function as well].
+Public Sub SetEventTable(ByRef eventTable As WDU_EVENT_TABLE, _
+    attachCb As Long, detachCb As Long)
+    eventTable.pfDeviceAttach = attachCb
+    eventTable.pfDeviceDetach = detachCb
+End Sub
+
+' Function: PipeListenHandler()
+'   Callback function, which reads from an IN pipe
+' Parameters:
+'   pListenPipe [in] contains the relevant pipe information
+'       (including pipe number, etc)
+' Return Value:
+'   WinDriver status code (WD_STATUS_SUCCESS on success)
+Public Function PipeListenHandler(ByRef pListenPipe As USB_LISTEN_PIPE) As Long
+    Dim buf() As Byte
+
+    If (pListenPipe.pPipe.dwMaximumPacketSize <= 0) Then
+        VB_ERR "PipeListenHandler: Error - incorrect packet size specified (" _
+            & Hex(pListenPipe.pPipe.dwMaximumPacketSize) & ")"
+        GoTo Error
+    End If
+
+
+    Dim dwBytesTransferred As Long
+    Dim dwBufSize As Long
+    Dim dwOptions As Long
+
+    dwBufSize = pListenPipe.pPipe.dwMaximumPacketSize
+    dwOptions = 0
+
+    If (pListenPipe.pPipe.type = PIPE_TYPE_ISOCHRONOUS) Then
+        dwBufSize = _
+            dwBufSize * 8 ' suit 8 minimum packets for high speed transfers
+        dwOptions = dwOptions Or USB_ISOCH_FULL_PACKETS_ONLY
+    End If
+
+    ReDim buf(0 To dwBufSize)
+
+    pListenPipe.dwError = WDU_Transfer(pListenPipe.hDevice, _
+        pListenPipe.pPipe.dwNumber, True, dwOptions, VarPtr(buf(0)), _
+        dwBufSize, dwBytesTransferred, 0, PIPE_LISTEN_TIMEOUT)
+
+    If (pListenPipe.dwError = WD_STATUS_SUCCESS) Then 'Transfer succeeded
+         Call PrintHexBuffer(buf, dwBytesTransferred)
+    End If
+
+    PipeListenHandler = pListenPipe.dwError
+    Exit Function
+
+Error:
+    PipeListenHandler = WD_WINDRIVER_STATUS_ERROR
+End Function
+
+' Function: GetHexChar()
+'   Translates a character to a hexadecimal number.
+' Parameters:
+'   line [in] - character to be translated to hexadecimal number
+'       [If input string contains more than one char, the leftmost char is evaluated].
+' Return Value:
+'   Integer value of character received; -1 if the char is not a hexadecimal digit.
+Public Function GetHexChar(line As String) As Integer
+    Dim bMakeHex As Boolean
+    bMakeHex = True
+
+    If (Len(line) >= 3) Then
+        If (StrConv(Left(line, 2), vbUpperCase) = "&H") Then
+            bMakeHex = False
+        End If
+    End If
+    If (bMakeHex) Then
+        line = "&H" & line
+    End If
+    If (IsNumeric(line)) Then
+        GetHexChar = CInt(line)
+    Else
+        Error "GetHexChar: Error - character (" & line & _
+            ") does not represent a numeric value"
+        GetHexChar = 0
+    End If
+End Function
+
+
+' General utility procedures:
+' ---------------------------
+
+' Function: GetHexBuffer()
+'   Get hexadecimal buffer from user
+' Parameters:
+'   pBuffer [out] pointer to buffer to be filled with the data
+'   dwBytes [in] length of buffer
+' Return Value:
+'   Size of buffer that was filled or -1 in case of an error
+Public Function GetHexBuffer(pBuffer() As Byte, dwSize As Long, _
+    Optional strInputBuffer As String = "Enter buffer:") As Long
+
+    Dim str As String
+    Dim strLen As Long
+    Dim strBufSize As Long
+    Dim i As Integer, j As Integer
+
+    str = InputBox(strInputBuffer)
+    strLen = Len(str)
+
+    If (strLen = 0) Then 'Empty string
+        VB_ERR "GetHexBuffer error - received empty string"
+        GoTo Error
+    End If
+
+    If (strLen >= 3) Then
+        If (StrConv(Left(str, 2), vbUpperCase) = "&H") Then
+            strLen = strLen - 2
+            str = Right(str, strLen - 2)
+        End If
+    End If
+
+    'TODO: add sanitiy check for parameter values
+
+    strBufSize = strLen / 2 'Each two characters in the string represent 1 byte
+    If (strBufSize > dwSize) Then
+        VB_ERR "GetHexBuffer failed - input buffer is not big enough for specified string buffer."
+        GoTo Error
+    End If
+
+    For i = 0 To strBufSize - 1
+        pBuffer(i) = CByte(GetHexChar(Mid(str, j + 1, 2)))
+        j = j + 2
+    Next i
+    GetHexBuffer = i
+
+    Exit Function
+
+Error:
+    GetHexBuffer = -1
+End Function
+
+' Function: InputNumber()
+'   Gets number from the user (using an input box).
+'   The input box is displayed in a loop until the
+'   user enters a valid number or selects to quit.
+' Parameters:
+'   sInput [in] - input string to be displayed in the input box
+'   sTitle [in] - title of the input box
+'   num [out] - the number the user submitted (will not be modified
+'               if the user did not submit a valid numeric value)
+'   bHex [in] - True if expected a hexadecimal value (default - False)
+'   sErrorMssg - Error message to be displayed if invalid value is entered
+' Return Value:
+'   True if a valid number was submitted; False otherwise.
+Public Function InputNumber(sInput As String, sTitle As String, _
+    ByRef num As Variant, _
+    Optional bHex As Boolean = False, Optional sErrorMssg As String = _
+    "You entered an invalid value." & vbCrLf & "Please try again.", _
+    Optional Default As Variant = 0) As Boolean
+
+    Dim res As Integer
+    Dim sNum As String
+
+    Do
+        sNum = InputBox(sInput, sTitle, Default)
+
+        If (sNum = "") Then 'Cancel
+            Exit Function
+        End If
+
+        If bHex Then
+            If (Len(sNum) <= 2) Then
+                sNum = "&H" & sNum
+            ElseIf StrConv(Left(sNum, 2), vbUpperCase) <> "&H" Then
+                sNum = "&H" + sNum
+            End If
+        End If
+
+        If IsNumeric(sNum) Then
+            If bHex And (Right(sNum, 1) <> "&") Then
+                 sNum = sNum & "&"
+            End If
+            num = (Val(sNum) And &H7FFF&) - (Val(sNum) And &H8000&)
+            '[The assignment above is written so as to avoid a possible
+            'overflow in cases of large unsigned input numbers (due to the lack
+            'of inherent support for unsigned numbers in Visual Basic).]
+            InputNumber = True
+        Else
+            res = Message(sErrorMssg, vbExclamation + vbRetryCancel, _
+                "Invalid Value")
+        End If
+    Loop Until (InputNumber = True) Or (res = vbCancel)
+End Function
+
+' Function: Message
+'   Displays a message box according to input information
+' Parameters:
+'   prompt [in] - message prompt
+'   msgStyle [in] - message stype (default values set for information icon
+'                   and OK button)
+'   title [in] - title of message box (default title - string set in MY_DRIVER const)
+' Return Value:
+'   Message box result, as returned by the MessageBox function.
+Public Function Message(prompt As String, _
+    Optional msgStyle As VbMsgBoxStyle = vbInformation + vbOKOnly, _
+    Optional title As String = MY_DRIVER) As VbMsgBoxResult
+    Message = MsgBox(prompt, msgStyle, title)
+End Function
+
+' Sub: WriteControl()
+'   Writes a string to the specified destination control
+' Parameters:
+'   s [in] - string to write
+'   sep [in] - separator string to be added at the end of the input string
+'              (default - new line)
+'   bReplace [in] - If True - replace current control contents;
+'                   Otherwise - add to it. (Default - add to current text).
+Public Sub WriteControl(dest As Control, s As String, _
+    Optional sep As String = vbCrLf, Optional bReplace As Boolean = False)
+    If (bReplace) Then dest = ""
+    dest = dest & s & sep
+    dest.SelStart = Len(dest.Text)
+End Sub
+
+' Sub: WriteLog()
+'   Writes a string to %NAME%_diag.txtLog (adds to current log text)
+' Parameters:
+'   s [in] - string to write
+'   sep [in] - separator string to be added at the end of the input string
+'              (default - new line)
+Public Sub WriteLog(s As String, Optional sep As String = vbCrLf)
+    Call WriteControl(%NAME%_diag.txtLog, s, sep)
+End Sub
+
+' Sub: WriteLogHex()
+'   Converts a number to a hexadecimal and writes the result to %NAME%_diag.txtLog (adds to current log text)
+' Parameters:
+'   num [in] - number to write as hexadecimal string
+'   sep [in] - separator string to be added at the end of the output string
+'              (default - new line)
+Public Sub WriteLogHex(num As Variant, Optional sep As String = vbCrLf)
+    If (IsNumeric(num)) Then
+        Call WriteLog(Hex(num), sep)
+    Else
+        VB_ERR "WriteLogHex error: input num is not a number"
+    End If
+End Sub
+
+' Sub: VB_ERR()
+'   Writes a string to %NAME%_diag.txtLog (adds to current log text)
+' Parameters:
+'   s [in] - string to write
+'   sep [in] - separator string to be added at the end of the input string
+'              (default - new line)
+Public Sub VB_ERR(s As String)
+    Call WriteControl(%NAME%_diag.txtLog, s)
+End Sub
+
+' Sub: TRACE()
+'   Writes a string to %NAME%_diag.txtLog (adds to current log text)
+' Parameters:
+'   s [in] - string to write
+'   sep [in] - separator string to be added at the end of the input string
+'              (default - new line)
+Public Sub TRACE(s As String)
+    Call WriteControl(%NAME%_diag.txtLog, s)
+End Sub
+
+' Sub: PrintEndpoints()
+'   Prints endpoints information for specified alternate setting
+' Parameters:
+'   pAltSet [in] - pointer to alternate setting
+Private Sub PrintEndpoints(ByRef pAltset As WDU_ALTERNATE_SETTING)
+    Dim endp As Long
+    Dim pEndp As WDU_ENDPOINT_DESCRIPTOR
+    Dim endpAddr As Long
+    Dim lenEndPoint As Long
+    Dim bNumPipes As Byte
+    Dim pEndpoints() As WDU_ENDPOINT_DESCRIPTOR
+
+    bNumPipes = pAltset.Descriptor.bNumEndpoints
+
+    If (bNumPipes <= 0) Then
+        VB_ERR "PrintEndpoints: No pipes were detected for the device other than " & _
+            "the default pipe (number 0)." & vbCrLf
+        GoTo Error
+    End If
+
+    ReDim pEndpoints(0 To bNumPipes - 1)
+
+    endpAddr = pAltset.pEndpointDescriptors
+    lenEndPoint = CLng(LenB(pEndp))
+
+    For endp = 0 To bNumPipes - 1
+        Call memcpy(VarPtr(pEndpoints(endp)), endpAddr + lenEndPoint * endp, _
+            lenEndPoint)
+        pEndp = pEndpoints(endp)
+        WriteLog "    end-point address: &H" & Hex(pEndp.bEndpointAddress) & _
+            ",  attributes: &H" & Hex(pEndp.bmAttributes) & _
+            ",  max packet: &H" & Hex(pEndp.wMaxPacketSize) & "," & vbCrLf & _
+            "    Interval: &H" & Hex(pEndp.bInterval)
+    Next endp
+
+Error:
+End Sub
+
+
+===BEGIN MODULE %NAME%_files.txt
+The DriverWizard has created a Visual Basic application that
+communicates with your USB device using WinDriver.
+
+  %PATH%/%NAME%_files.txt
+         A detailed overview of all the files generated.
+
+  %PATH%/%NAME%_diag.frm
+         Contains the implementation of the application form.
+         Implements the Windows test application that accesses
+         the device together with %NAME%_lib.bas.
+
+  %PATH%/%NAME%_lib.bas
+         Contains a sample library for accessing the device.
+
+  %PATH%/%NAME%.vbp
+         Contains the Visual Basic project file
+
+Compiling this project:
+  Open Visual Basic, load
+  %PATH%/%NAME%.vbp
+  and compile
+

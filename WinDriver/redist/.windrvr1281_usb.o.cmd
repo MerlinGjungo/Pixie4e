@@ -1,0 +1,1 @@
+cmd_/home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.o := ld -m elf_x86_64   -r -o /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.o /home/wuhongyi/Pixie4e/WinDriver/redist/wdusb_linux.o ; scripts/mod/modpost /home/wuhongyi/Pixie4e/WinDriver/redist/windrvr1281_usb.o
