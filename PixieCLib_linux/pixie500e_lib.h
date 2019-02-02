@@ -17,7 +17,7 @@
 *************************************************************************/
 
 /* Fixing problems with UINT8 and UINT16 under Linux */
-
+//
 #if !defined(UINT8)
 	typedef unsigned char UINT8;
 #endif
@@ -44,12 +44,13 @@
 #include "wdc_defs.h"
 // For WinDriver 11.2 (Windows) pci_regs.h and bits.h are in samples/shared
 // For Linux (12.21) they are along with other headers
-#ifdef XIA_WINDOWS
+#ifdef XIA_WINDOZE
 #include "samples/shared/pci_regs.h"
 #include "samples/shared/bits.h"
-#endif
+#else
 #include "pci_regs.h"
 #include "bits.h"
+#endif
 #include "samples/shared/wdc_diag_lib.h" // needed for WDC_REG definition
 #include "status_strings.h"
 #include "utils.h"
@@ -479,6 +480,7 @@ extern "C" {
 	// FPGA programming
 	//UINT32 PIXIE500E_ProgramFPGA(WDC_DEVICE_HANDLE hDev, char const * filename, UINT32 fcl_clk_div);
 	UINT32 PIXIE500E_ProgramFPGA(WDC_DEVICE_HANDLE hDev, UINT32 fcl_clk_div, UINT32 type);
+	UINT32 PIXIE4E_ProgramFPGA(WDC_DEVICE_HANDLE hDev, UINT32 fcl_clk_div, UINT32 type);
 	UINT32 PIXIE4E_FPGApostboot_IO(WDC_DEVICE_HANDLE hDev);
 	void PIXIE500E_LBClkReset(WDC_DEVICE_HANDLE hDev);
 	// DMA tests
@@ -495,11 +497,11 @@ extern "C" {
 	// vdma.h of GenDialog
 
 	/* Start VDMA using current DPTRx value */
-	void VDMADriver_Go(WDC_DEVICE_HANDLE hDev);
+	DWORD VDMADriver_Go(WDC_DEVICE_HANDLE hDev);
 	/* Single step sequencer instruction */
 //	void VDMADriver_Step(WDC_DEVICE_HANDLE hDev);
 	/* Halt VDMA */
-	void VDMADriver_Halt(WDC_DEVICE_HANDLE hDev);
+	DWORD VDMADriver_Halt(WDC_DEVICE_HANDLE hDev);
 	/* VDMA idle ? */
 	BOOL VDMADriver_isIdle(WDC_DEVICE_HANDLE hDev);
 	/* Set DPTRx value */

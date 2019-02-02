@@ -313,7 +313,7 @@ U32 ErrorChecking (U16 *ChannelHeader, U16 direction, U16 RunType,  FILE *ListMo
 
 	/* checking channel number ( ChannelHeader[9] )*/
 	// no matter if checksum is good or bad, 
-	if(RunType != 0x402) {		// no channel number in 0x402 record
+	if((RunType & 0xFF0F) != 0x402) {		// no channel number in 0x402 record
 		if (ChannelHeader[9] > (NUMBER_OF_CHANNELS - 1)) { 
 			sprintf(ErrMSG, "*ERROR* (ErrorChecking): wrong channel number: %hu",ChannelHeader[9]);
 			Pixie_Print_MSG(ErrMSG,PrintDebugMsg_QCerror);
@@ -480,8 +480,37 @@ U32 ErrorChecking (U16 *ChannelHeader, U16 direction, U16 RunType,  FILE *ListMo
 *                           Extended PSA #3.
 *       Task 0x7007: report event position in the binary file
 *                    and the event length.
+*		Task 0x7011: for 0x400 and 0x402 types, write to ASCII file,
+*		    first line, header data: event, channel, Trigger times (LO, MI, Hi), trace length
+*		    second line, trace: waveform samples
 *		Task 0x7020: write data corrected by QC process
 *		Task 0x7021: write data in Pixie-4 style .bin file 
+*		Taks 0x7030 Mode 3: for 0x400 write to ASCII file, similar to 0x7001,
+*		                Event, channel, time stamp, Energy,
+*		                computed from trace Rise Time,
+*		                computed from trace Amplitude,
+*		                computed from trace pre-peak base line,
+*		                computed from trace Q0 sum,
+*		                computed from trace Q1 sum,
+*		                computed from trace PSA value
+*		                UserData should be of length 17:
+*		                word 0: number of processed events,
+*		                word 1: input Q0 length,
+*		                word 2: input Q1 length,
+*		                word 3: input Q0 delay,
+*		                word 4: input Q1 delay,
+*		                word 5: input rise-time start, percent
+*		                word 6: input rise-time stop, percent
+*		                word 7: input PSA compuptation 0: Q1/Q0, 1: (Q1-Q0)/Q0
+*		                word 8: input 1: divide Q-sums by 8
+*		                word 9: input 1: use leading edge trigger
+*		                word 10: input leading edge trigger threshold in ADC steps
+*		                word 11: output Rise Time
+*		                word 12: output Amplitude
+*		                word 13: output Baseline
+*		                word 14: output Q0 sum
+*		                word 15: output Q1 sum
+*		                word 16: output 1000*(Q1-Q0/Q0 or 1000*Q1/Q0
 *
 *		Return Value:
 *			 0 - success
@@ -491,6 +520,8 @@ U32 ErrorChecking (U16 *ChannelHeader, U16 direction, U16 RunType,  FILE *ListMo
 *			-4 - invalid data pointer for return data
 *			-5 - invalid run type in file
 *
+* KS NB: TracePos is still 32-bit, so, expect the reader to fail (not show correct data) for big (>2GB) files!
+
 ****************************************************************/
 
 
@@ -515,7 +546,6 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 	U32  EHR;
 	U16  *P4headers = NULL;
 	U32  TotalShift      =  0;
-	static U32 MODULE_EVENTS[2*PRESET_MAX_MODULES];	
 	S64  EventPos = RUN_HEAD_LENGTH;
 	S64  GoodHeaderPos = 0;
 	S64  offset16 = 0;
@@ -583,8 +613,8 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 	fread (LMP5->FirstHeader, sizeof(U16), FIRST_HEAD_LENGTH, LMP5->ListModeFile);
 	RunType = LMP5->FirstHeader[2];
 
-		// Check for valid runType
-	if (RunType < 0x400 || RunType > 0x410) { /* If run type is bogus then finish processing */
+		// Check for valid RunType
+	if (RunType < 0x400 || RunType > 0x4F3) { /* If run type is bogus then finish processing */
 		sprintf(ErrMSG, "*ERROR* (Pixie_List_Mode_Parser): wrong run type 0x%x", RunType);
 		Pixie_Print_MSG(ErrMSG,1);
 		fclose(LMP5->ListModeFile);
@@ -595,7 +625,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 		return (-5);
 	} 
 	else {
-		sprintf(ErrMSG, "*INFO* (Pixie_List_Mode_Parser): runtype = 0x%x", RunType);
+		sprintf(ErrMSG, "*INFO* (Pixie_List_Mode_Parser): RunType = 0x%x", RunType);
 		Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
 	}
 
@@ -604,7 +634,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 	rewind(LMP5->ListModeFile);
 
 	/* Pixie-500 Express List Mode Format Mapping */
-	if(RunType == 0x402)
+	if((RunType & 0xFF0F) == 0x402)
 		P500E_Format_Map_402 (LMP5, P500E);
 	else
 		P500E_Format_Map_400 (LMP5, P500E);
@@ -636,7 +666,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			  }
 
 				// fill run type dependent event parameters
-				if(RunType == 0x402) {	
+				if((RunType & 0xFF0F) == 0x402) {	
 					ChannelNo = 0;// default to zero
 					EventLengthRH = *P500E->SumChanLen - 3; // EventLengthTotal = 4x (header + TL), in blocks; so subtract 3 for actual length in runtype 0x402
 				}
@@ -704,7 +734,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			}
 
 			/* checking channel number, even if checksums are ok */
-			if(RunType != 0x402) {	
+			if((RunType & 0xFF0F) != 0x402) {	
 				if (ChannelNo > (NUMBER_OF_CHANNELS - 1)) { 
 					sprintf(ErrMSG, "*ERROR* (Pixie_List_Mode_Parser): wrong channel number: %hu, event %d",*P500E->ChanNo, LMP5->TotalEvents);
 					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_QCerror);
@@ -830,7 +860,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_QCerror);
 				}
 				*P500E->NumTraceBlks = (U16)(offset16  - (S64)WATERMARKINDEX16) / *P500E->BlockSize;	// update trace blocks to follow
-				*P500E->NumTraceBlks = MAX(*P500E->NumTraceBlks, 1);	// ensure it's in legal limits if some really crazy values have been read
+				*P500E->NumTraceBlks = MAX(*P500E->NumTraceBlks, 0);	// ensure it's in legal limits if some really crazy values have been read
 				*P500E->NumTraceBlks = MIN(*P500E->NumTraceBlks, *P500E->SumChanLen);
 				MyNumTraceBlksPrev = *P500E->NumTraceBlks;									// update "known" value of last event for next event
 
@@ -875,9 +905,11 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			}		*/
 
 			/* Read trace if it is run 0x400, 0x402, or 0x403*/
-			if (RunType == 0x400 || RunType == 0x402 || RunType == 0x403) {
-				fread (LMP5->Trace, sizeof(U16), (U32)*P500E->BlockSize * (U32)*P500E->NumTraceBlks, LMP5->ListModeFile);
+			if ((RunType & 0xFF0F) == 0x400 || (RunType & 0xFF0F) == 0x402 || (RunType & 0xFF0F) == 0x403) {
+				if(*P500E->NumTraceBlks>0)
+					fread (LMP5->Trace, sizeof(U16), (U32)*P500E->BlockSize * (U32)*P500E->NumTraceBlks, LMP5->ListModeFile);
 				// if the watermark was not found (bad TL), move back file pointer to end of header so next cycles starts a search
+
 				if(!nextWMfound) Pixie_fseek (LMP5->ListModeFile , GoodHeaderPos, SEEK_SET);
 			}
 
@@ -932,8 +964,8 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 						fprintf(LMP5->OutputFile, "Run Type:\t%hu\n",         *P500E->RunType);
 						fprintf(LMP5->OutputFile, "Run Start Time (s) :\t%f\n\n", RunStartTime);
 						if(AutoProcessLMData == 1) {
-							if (*P500E->RunType < 0x402) fprintf(LMP5->OutputFile, "Event No\tChannel No\tEnergy\tTrig Time\tXIA_PSA\tUser_PSA\n");
-							if (*P500E->RunType > 0x401) fprintf(LMP5->OutputFile, "Event No\tChannel No\tEnergy\tTrig Time\n");
+							if ((*P500E->RunType & 0xFF0F) < 0x402) fprintf(LMP5->OutputFile, "Event No\tChannel No\tEnergy\tTrig Time\tXIA_PSA\tUser_PSA\n");
+							if ((*P500E->RunType & 0xFF0F) > 0x401) fprintf(LMP5->OutputFile, "Event No\tChannel No\tEnergy\tTrig Time\n");
 						}
 						if(AutoProcessLMData == 2) 
 							fprintf(LMP5->OutputFile, "Event No\tChannel No\tHit Pattern\tEvent_Time_A\tEvent_Time_B\tEvent_Time_C\tEnergy\tTrig Time\tXIA_PSA\tUser_PSA\n");
@@ -943,7 +975,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 					
 					// event processing
 					if(AutoProcessLMData == 1) 
-						if (RunType == 0x402) {		// 4-channel records
+						if ((RunType & 0xFF0F) == 0x402) {		// 4-channel records
 							fprintf(LMP5->OutputFile, "%-9d%-12d%-9d%-15d%-9d%-6d\n", 
 								LMP5->Events[*P500E->ModNum], 
 								0,						// channel
@@ -983,7 +1015,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 								*P500E->UserPSA);
 						}
 					if(AutoProcessLMData == 2) 
-						if (RunType == 0x402) {		// 4-channel records
+						if ((RunType & 0xFF0F) == 0x402) {		// 4-channel records
 							fprintf(LMP5->OutputFile, "%d\t %d\t 0x%X\t %d\t %d\t %d\t %d\t %d\t %d\t %d\n", 
 								LMP5->Events[*P500E->ModNum], 
 								0, 
@@ -1043,7 +1075,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 								*P500E->UserPSA);
 						}
 					if(AutoProcessLMData == 3) 
-						if (RunType == 0x402) {		// 4-channel records
+						if ((RunType & 0xFF0F) == 0x402) {		// 4-channel records
 							fprintf(LMP5->OutputFile, "%u   %hu   %llu   %hu   %hu   %hu   %hu   %hu  %hu  %hu\n", 
 								LMP5->Events[*P500E->ModNum], 
 								0,
@@ -1109,7 +1141,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/**************************************** TASK 0x7002 **************************************************/
 			/************************************************************************************************************/
 			if (TaskNum == 0x7002) {
-				if (RunType != 0x402) {	// not supported in runtask 0x402
+				if ((RunType & 0xFF0F) != 0x402) {	// not supported in runtask 0x402
 					U32  TraceLen       = (U32)*P500E->NumTraceBlks * (U32)*P500E->BlockSize;
 					U32  TracePos       = (U32)(Pixie_ftell(LMP5->ListModeFile) + 1) / 2 - TraceLen;
 				//	U32		i; 
@@ -1138,7 +1170,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/************************************************************************************************************/
 			if (TaskNum == 0x7004) {
 				TraceNum = LMP5->Traces[*P500E->ModNum];
-				if (RunType == 0x402) {		// 4-channel records			
+				if ((RunType & 0xFF0F) == 0x402) {		// 4-channel records			
 					UserData[4*TraceNum+0] = *P500E->Energy_0;
 					UserData[4*TraceNum+1] = *P500E->Energy_1;
 					UserData[4*TraceNum+2] = *P500E->Energy_2;
@@ -1153,7 +1185,9 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/************************************************************************************************************/
 			if (TaskNum == 0x7005) {
 				// not supported in runtask 0x402
-				if (*P500E->RunType == 0x400 || *P500E->RunType == 401 || *P500E->RunType == 403) {
+				if ( (*P500E->RunType & 0xFF0F) == 0x400 || 
+					 (*P500E->RunType & 0xFF0F) == 0x401 || 
+					 (*P500E->RunType & 0xFF0F) == 0x403  ) {
 					UserData[8*LMP5->Traces[*P500E->ModNum]+2 * ChannelNo+0] = *P500E->XIAPSA;
 					UserData[8*LMP5->Traces[*P500E->ModNum]+2 * ChannelNo+1] = *P500E->UserPSA;
 				}
@@ -1162,7 +1196,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/**************************************** TASK 0x7006 **************************************************/
 			/************************************************************************************************************/
 			if (TaskNum == 0x7006) {
-				if (RunType != 0x402) {	// not supported in runtask 0x402
+				if ((RunType & 0xFF0F) != 0x402) {	// not supported in runtask 0x402
 					UserData[32*LMP5->Traces[*P500E->ModNum]+8 * ChannelNo+0] = 
 						65536 * (U32)*P500E->TrigTimeMI + (U32)*P500E->TrigTimeLO; /* 32-bit time stamp */
 					UserData[32*LMP5->Traces[*P500E->ModNum]+8 * ChannelNo+1] = *P500E->Energy; /* Energy */
@@ -1187,6 +1221,12 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 				UserData[3*TraceNum+1] = (U32)EventPos; 
 				UserData[3*TraceNum+2] =  EventLen;
 
+				//debug
+				//if(TraceNum<10)	
+				//{
+				//	sprintf(ErrMSG, "*DEBUG* (Pixie_List_Mode_Parser): TraceNum %d, EventPos %d, EventLen %d",TraceNum,EventPos,EventLen);
+				//	Pixie_Print_MSG(ErrMSG,1);
+				//}
 
 				/* P500e has only one file per module. So no need to remember events from "lower" modules,
 				   they are all zero and any shift is zero
@@ -1207,7 +1247,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/**************************************** TASK 0x7020 ********************************************************/
 			/*************************************************************************************************************/
 			if (TaskNum == 0x7020) {
-				if (RunType != 0x402) {	// not supported in runtask 0x402
+				if ((RunType & 0xFF0F) != 0x402) {	// not supported in runtask 0x402
 					// file creation and header
 					if (!LMP5->TotalEvents) {
 						if (!LMP5->OutputFile) {
@@ -1242,7 +1282,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/**************************************** TASK 0x7021 ********************************************************/
 			/*************************************************************************************************************/
 			if (TaskNum == 0x7021) {
-				if (RunType != 0x402) {	// not YET supported in runtask 0x402
+				if ((RunType & 0xFF0F) != 0x402) {	// not YET supported in runtask 0x402
 					// not yet supported in runtask 0x402
 					// file creation and NO header
 					if (!LMP5->TotalEvents) {
@@ -1294,7 +1334,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 			/**************************************** TASK 0x7009 **************************************************/
 			/************************************************************************************************************/
 			if (TaskNum == 0x7009) {
-				if (RunType == 0x402) {	// only supported in runtask 0x402. copy the event header without the trace blocks
+				if ((RunType & 0xFF0F) == 0x402) {	// only supported in runtask 0x402. copy the event header without the trace blocks
 					EHR = 32;
 					TraceNum = LMP5->Traces[*P500E->ModNum];
 					// overall event
@@ -1357,7 +1397,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 						}
 					}
 				}
-				switch (RunType) {
+				switch ((RunType & 0xFF0F)) {
 					case 0x400:
 						// line one
 						fprintf(LMP5->OutputFile, "%d %d %d %d %d %d\n",
@@ -1442,6 +1482,90 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 				UserData[*P500E->ModNum] = LMP5->TotalEvents + 1;
 			} /* End of 0x7011 */
 			
+			// Compute PSA values.
+			/************************************************************************************************************/
+			/**************************************** TASK 0x7030 **************************************************/
+			/************************************************************************************************************/
+			if (TaskNum == 0x7030) {
+                if (AutoProcessLMData == 3) {
+                    if (!LMP5->TotalEvents) { // only on start of processing
+                        if (!LMP5->OutputFile) { // create output file
+                            // Determine the name of the output file 
+                            strcpy(LMP5->OutputFileName, filename);
+                            *strstr(LMP5->OutputFileName, ".") = '\0';
+                            sprintf(LMP5->OutputFileName,"%s_PSA_m%d.dt3", LMP5->OutputFileName, *P500E->ModNum); 
+                            if(!(LMP5->OutputFile = fopen(LMP5->OutputFileName, "w"))) {
+                                fclose(LMP5->ListModeFile);
+                                sprintf(ErrMSG, "*ERROR* (Pixie_List_Mode_Parser): can't open output file", LMP5->OutputFileName);
+                                Pixie_Print_MSG(ErrMSG,1);
+                                free(LMP5);
+                                free(P500E); 
+                                free(ShiftFromStart);
+                                free(P4headers);
+                                return(-3);
+                            }
+                        }  
+                        /* First header contains 64 records of the run header and the first event header */
+                        RunStartTime =  ((double)*P500E->TrigTimeHI * 65536.0 * 65536.0 + 
+                            (double)*P500E->TrigTimeMI * 65536.0 + 
+                            (double) *P500E->TrigTimeLO) / 
+                            (double)P500E_ADC_CLOCK_MHZ * 1.0e-6;
+                        fprintf(LMP5->OutputFile, "\nModule:\t%hu\n",         *P500E->ModNum);
+                        fprintf(LMP5->OutputFile, "Run Type:\t%hu\n",         *P500E->RunType);
+                        fprintf(LMP5->OutputFile, "Run Start Time (s) :\t%f\n\n", RunStartTime);                    
+                        fprintf(LMP5->OutputFile, "Event\tChannel\tTimeStamp\tEnergy\tRT\tApeak\tBsum\tQ0\tQ1\tPSAval\n");
+                    } // if header
+                    switch ((RunType & 0xFF0F)) {
+                        case 0x400:
+                            if (ComputePSA(LMP5->Trace, (U32)*P500E->NumTraceBlks * (U32)*P500E->BlockSize, UserData) != 0) {
+                                // Not quitting processing, just reporting bad PSA calculation.
+                                /*
+                                fclose(LMP5->ListModeFile);
+                                sprintf(ErrMSG, "*ERROR* (Pixie_List_Mode_Parser): Failed calculating PSA.");
+                                Pixie_Print_MSG(ErrMSG,1);
+                                free(LMP5);
+                                free(P500E); 
+                                free(ShiftFromStart);
+                                free(P4headers);
+                                return(-3);
+                                */
+                                sprintf(ErrMSG, "*WARNING* (Pixie_List_Mode_Parser): Failed calculating PSA for event %ld.", LMP5->Events[*P500E->ModNum]);
+                                Pixie_Print_MSG(ErrMSG, PrintDebugMsg_QCdetail);
+								UserData[11] = 0;
+								UserData[12] = 0;
+								UserData[13] = 0;
+								UserData[14] = 0;
+								UserData[15] = 0;
+								UserData[16] = 0;
+                            }
+							
+                            fprintf(LMP5->OutputFile, "%u   %hu   %llu   %hu   %hu   %hu   %hu   %hu  %hu  %hu\n",
+                                    LMP5->Events[*P500E->ModNum], 
+                                    ChannelNo,
+                                    (unsigned long long)(65536.0 * 65536.0 * (double)*P500E->TrigTimeHI + 
+                                                                   65536.0 * (double)*P500E->TrigTimeMI + 
+                                                                             (double)*P500E->TrigTimeLO),
+                                    *P500E->Energy,
+                                    UserData[11], UserData[12], UserData[13], UserData[14], UserData[15], UserData[16]);
+                            break;
+
+                        case 0x402:
+                            // fall through to default.
+                        default:
+                            sprintf(ErrMSG, "*ERROR* (Pixie_List_Mode_Parser): run type %d not supported for task 0x7030", RunType);
+                            Pixie_Print_MSG(ErrMSG,1);
+                            fclose(LMP5->ListModeFile);
+                            free(LMP5);
+                            free(P500E); 
+                            free(ShiftFromStart);
+                            free(P4headers);
+                            return(-3);
+                            break;
+                    } // switch RunType
+
+                    UserData[0] = LMP5->TotalEvents + 1;
+                    } // AutoProcessLMData = 3
+			} /* End of 0x7030 */
 
 			/*************************************************************************************************************/
 			/**************************************** End of TASKs ******************************************************/
@@ -1457,7 +1581,7 @@ S32 Pixie_List_Mode_Parser(S8 *filename, U32 *UserData, U16 TaskNum )
 
 
 	sprintf(ErrMSG, "*INFO* (Pixie_List_Mode_Parser): Processed %d events, %d are marked as bad.", LMP5->TotalEvents, LMP5->BadEvent);
-	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+	Pixie_Print_MSG(ErrMSG,1);
 	/* Close files */
 	fclose(LMP5->ListModeFile);
 	if (LMP5->OutputFile) fclose(LMP5->OutputFile);
@@ -1557,7 +1681,7 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 	if(!(LMP5->ListModeFile = fopen(LMP5->ListModeFileName, "rb"))) {
 		free(LMP5);
 		free(P500E);
-		sprintf(ErrMSG, "*ERROR* (Pixie_Event_Browser): can't open list mode data file %s", LMP5->ListModeFileName);
+		sprintf(ErrMSG, "*ERROR* (Pixie_Event_Browser): can't open list mode data file %s", filename);
 		Pixie_Print_MSG(ErrMSG,1);
 		return(-1);
 	}
@@ -1570,7 +1694,7 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 
 	RunType = LMP5->FirstHeader[2];
 	/* Pixie-500 Express List Mode Format Mapping */
-	if(RunType==0x402)
+	if((RunType & 0xFF0F)==0x402)
 		P500E_Format_Map_402 (LMP5, P500E);
 	else
 		P500E_Format_Map_400 (LMP5, P500E);
@@ -1618,11 +1742,11 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 		if(!Traces[k]) {
 			sprintf(ErrMSG, "*ERROR* (Pixie_Event_Browser): not enough memory for Traces: %u", *P500E->SumChanLen);
 			Pixie_Print_MSG(ErrMSG,1);
+			fclose(LMP5->ListModeFile);
 			free(LMP5);
 			free(P500E);
 			free(ChanHeader);
 			free(TimeHighWord);
-			fclose(LMP5->ListModeFile);
 			return(-2);
 		}
 	}
@@ -1635,11 +1759,11 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 		error checking is still necessary to catch bad tracelengths etc 
 		Values of ChanHeader may change, so use these, not *P500E->XXX for the return values */
 	if(ErrorChecking (ChanHeader, 1, RunType, LMP5->ListModeFile, P500E)) {				// Error checking. search forward (right) if event not found (unlikely)
+		fclose(LMP5->ListModeFile);
 		free(LMP5);
 		free(P500E);
 		free(ChanHeader);
 		free(TimeHighWord);
-		fclose(LMP5->ListModeFile);
 		for (k = 0; k < NUMBER_OF_CHANNELS; k++) free(Traces[k]);
 		return(-3);
 	}
@@ -1656,6 +1780,8 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 		case MODULETYPE_P4e_16_250:
 		case MODULETYPE_P4e_14_250:
 		case MODULETYPE_P4e_12_250:
+      case MODULETYPE_PN_12_250:
+      case MODULETYPE_PN_12_250P:
 			*P500E->ADCrate = 250;
 			break;
 		case MODULETYPE_P4e_16_125:
@@ -1673,7 +1799,7 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 	UserData[7+2] = *P500E->RunType;	
 
 
-	if(RunType==0x402){
+	if((RunType & 0xFF0F)==0x402){
 		// populate headers and (temp) traces
 		UserData[7+3] = ChanHeader[4];								// Equivalent to Buffer Start Time High Word  
 		UserData[7+4] = ChanHeader[8];								// Equivalent to Buffer Start Time Middle Word  
@@ -1757,11 +1883,12 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 						CurrentPosition += UserData[3+k];
 					}
 				}
+				fclose(LMP5->ListModeFile);
 				free(LMP5);
 				free(P500E);
 				free(ChanHeader);
 				free(TimeHighWord);
-				fclose(LMP5->ListModeFile);
+
 				return (0); /* Return peacefully */
 			}
 			
@@ -1772,11 +1899,11 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 				Pixie_fseek(LMP5->ListModeFile, PrevEvtPos, SEEK_SET);
 				fread(ChanHeader, sizeof(U16), *P500E->ChanHeadLen, LMP5->ListModeFile);
 				if(ErrorChecking (ChanHeader, 0, RunType, LMP5->ListModeFile, P500E)) {			// check prev. event, if not found (prev length rounded down), look to left
+					fclose(LMP5->ListModeFile);
 					free(LMP5);
 					free(P500E);
 					free(ChanHeader);
 					free(TimeHighWord);
-					fclose(LMP5->ListModeFile);
 					for (k = 0; k < NUMBER_OF_CHANNELS; k++) free(Traces[k]);
 					return(-3);
 				}
@@ -1801,22 +1928,22 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 		/* Position LMP5->ListModeFile to the beginning of the current event */
 		if(Pixie_fseek(LMP5->ListModeFile, EvtPos, SEEK_SET)) {
 			for (j = 0; j < NUMBER_OF_CHANNELS; j++) if (Traces[j]) free(Traces[j]);
+			fclose(LMP5->ListModeFile);
 			free(LMP5);
 			free(P500E);
 			free(ChanHeader);
 			free(TimeHighWord);
-			fclose(LMP5->ListModeFile);
 			return (0); /* Return peacefully if it does not exist. unlikely */
 		}
 
 		/* Read the header of the current event. WH_TODO: why again?*/
 		fread(ChanHeader, 2, (size_t)*P500E->ChanHeadLen, LMP5->ListModeFile);
 		if(ErrorChecking (ChanHeader, 1, RunType, LMP5->ListModeFile, P500E)) {
+			fclose(LMP5->ListModeFile);
 			free(LMP5);
 			free(P500E);
 			free(ChanHeader);
 			free(TimeHighWord);
-			fclose(LMP5->ListModeFile);
 			for (k = 0; k < NUMBER_OF_CHANNELS; k++) free(Traces[k]);
 			return(-3);
 		}
@@ -1865,11 +1992,11 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 			// get next event
 			status = fread(ChanHeader, 2, (size_t)*P500E->ChanHeadLen, LMP5->ListModeFile);
 			if(ErrorChecking (ChanHeader, 1, RunType, LMP5->ListModeFile, P500E)) {
+				fclose(LMP5->ListModeFile);
 				free(LMP5);
 				free(P500E);
 				free(ChanHeader);
 				free(TimeHighWord);
-				fclose(LMP5->ListModeFile);
 				for (k = 0; k < NUMBER_OF_CHANNELS; k++) free(Traces[k]);
 				return(-3);
 			}
@@ -1919,13 +2046,13 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 		free(Traces[k]);
 		CurrentPosition += UserData[3+k];
 	}
+	/* Close data file */
+	fclose(LMP5->ListModeFile);
 	/* Free memory */
 	free(ChanHeader);
 	free(TimeHighWord);
 	free(LMP5);
 	free(P500E); 
-	/* Close data file */
-	fclose(LMP5->ListModeFile);
 	return(0);
 }
 
@@ -1934,8 +2061,6 @@ S32 Pixie_Event_Browser(S8 *filename, U32 *UserData)
 /************************** P4 READER FOR COMPATIBILITY **************************************/
 /************************************************************************************************************/
 /************************************************************************************************************/
-/* ModuleEvents array modified by task 0x7001 and used by other 0x7000 tasks */
-U32 MODULE_EVENTS[2*PRESET_MAX_MODULES];
 /* Global data structure for the list mode reader and related functions */
 struct LMReaderDataStruct ListModeDataStructure;
 /* Pointer to the global data structure for the list mode reader and related functions */
@@ -2421,7 +2546,7 @@ S32 Pixie_Parse_List_Mode_Events (S8  *filename,      /* the list mode data file
 			if (AutoProcessLMData != 4) {
 				fclose(TempFiles[i]);
 				sprintf(TempFileName, "_TempFile_Module_%hu", i);
-				if(!(TempFiles[i] = fopen(TempFileName, "rb"))) {
+				if(!(TempFiles[i] = fopen(TempFileName, "r"))) {
 					sprintf(ErrMSG, "*ERROR* (Pixie_Parse_List_Mode_Events): can't open temporary file", TempFileName);
 					Pixie_Print_MSG(ErrMSG,1);
 				}
@@ -3124,15 +3249,15 @@ S32 Pixie_User_List_Mode_Reader (S8  *filename,		// the list mode data file name
     /* Do the processing */
     LMA->ListModeFileName      = filename;
     LMA->par0                  = UserArray;
-	LMA->par1                  = &UserVariable;
-	LMA->par2                  = UserData;
-	LMA->par3                  = &UserDataSize;
-	LMA->PreAnalysisAction     = PixieUserListModeReaderPreProcess;
-    LMA->BufferLevelAction     = PixieUserListModeReaderBufferLevel;
-    LMA->EventLevelAction      = PixieUserListModeReaderEventLevel;
-    LMA->ChannelLevelAction    = PixieUserListModeReaderChannelLevel;
-	LMA->AuxChannelLevelAction = PixieUserListModeReaderAuxChannelLevel;
-	LMA->PostAnalysisAction    = PixieUserListModeReaderPostProcess;
+    LMA->par1                  = &UserVariable;
+    LMA->par2                  = UserData;
+    LMA->par3                  = &UserDataSize;
+    LMA->PreAnalysisAction     = PixieUserListModeReaderPreProcess(LMA);
+    LMA->BufferLevelAction     = PixieUserListModeReaderBufferLevel(LMA);
+    LMA->EventLevelAction      = PixieUserListModeReaderEventLevel(LMA);
+    LMA->ChannelLevelAction    = PixieUserListModeReaderChannelLevel(LMA);
+    LMA->AuxChannelLevelAction = PixieUserListModeReaderAuxChannelLevel(LMA);
+    LMA->PostAnalysisAction    = PixieUserListModeReaderPostProcess(LMA);
     if ((status = PixieListModeReader(LMA)) == -1) {
 	sprintf(ErrMSG, "*ERROR* (Pixie_Locate_List_Mode_Events): Cannot open list mode file");
 	Pixie_Print_MSG(ErrMSG,1);
@@ -3146,9 +3271,6 @@ S32 Pixie_User_List_Mode_Reader (S8  *filename,		// the list mode data file name
 
     return (0);   
 }
-
-
-
 
 
 
@@ -3279,5 +3401,6 @@ S32 Pixie_Read_List_Mode_Events (
 		ListModeTraces[1] = 75;		// default Pixie-4 (75 MHz)
 	return(0);
 }
+
 
 

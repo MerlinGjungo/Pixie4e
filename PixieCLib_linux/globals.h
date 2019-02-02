@@ -121,11 +121,15 @@ extern U32 PrintDebugMsg_Boot;								// if 1, print debug messages during booti
 extern U32 PrintDebugMsg_QCerror;							// if 1, print error debug messages during LM buffer quality check
 extern U32 PrintDebugMsg_QCdetail;							// if 1, print detail debug messages during LM buffer quality check
 extern U32 PrintDebugMsg_other;								// if 1, print other debug messages 
+extern U32 PrintDebugMsg_daq;								// if 1, print debug messages for run start/stop 
+extern U32 PrintDebugMsg_file;								// if 1, Igor also prints to a file
 extern U32 BufferQC;										// if 1, execute data quality control check before writing LM data to file
 extern U32 PollForNewData;									// if 1, return new data in DMA buffer during polling
 extern U32 MultiThreadDAQ;									// if 1, run 0x400 or 0x10x as a separate thread
 extern U8 AutoProcessLMData;								// To control if the LM parse routine processes compressed LM data
 extern U8 KeepCW;											// To control update and enforced minimum of coincidence wait
+extern U8 KeepBL;											// if 1, do not automatically adjust BLcut after gain or filter settings changes
+
 
 #ifdef WINDRIVER_API
 extern WDC_DEVICE_HANDLE hDev[PRESET_MAX_MODULES];			// WinDriver device handle
@@ -151,8 +155,8 @@ extern S32 EndRunFound[PRESET_MAX_MODULES];
 extern DWORD pollingThreadId;
 #endif
 #endif
-DWORD gMainThreadId;
-U32 MT_KeepPolling;
+extern DWORD gMainThreadId;
+extern U32 MT_KeepPolling;
 //***********************************************************
 //		Frequently used indices
 //***********************************************************
@@ -205,6 +209,11 @@ extern U8 P4e14500_FPGA_Configuration[N_P4E_BYTES];
 
 /* P500e FIPPI configuration */
 extern U8 P500e_FPGA_Configuration[N_P500E_BYTES];
+
+/* P32 FIPPI configuration */
+// KS DEBUG: getting run-time stack overflows when attempting Pixie_Acquire_Data(1500)
+//U8 P32_FPGA_Configuration[N_P32_BYTES];
+extern U8* P32_FPGA_Configuration;
 
 /* DSP I/O parameter names */					
 extern S8 DSP_Parameter_Names[N_DSP_PAR][MAX_PAR_NAME_LENGTH];

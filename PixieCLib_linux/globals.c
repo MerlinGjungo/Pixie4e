@@ -84,12 +84,16 @@ U32 Polling;										// if 1, use (old style) polling of module in LM runs, if 
 U32 PrintDebugMsg_Boot;								// if 1, print debug messages during booting
 U32 PrintDebugMsg_QCerror;							// if 1, print error debug messages during LM buffer quality check
 U32 PrintDebugMsg_QCdetail;							// if 1, print detail debug messages during LM buffer quality check
-U32 PrintDebugMsg_other;							// if 1, print other debug messages 
+U32 PrintDebugMsg_other;							// if 1, print other debug messages
+extern U32 PrintDebugMsg_daq;								// if 1, print debug messages for run start/stop    //by Hongyi Wu
+extern U32 PrintDebugMsg_file;								// if 1, Igor also prints to a file    //by Hongyi Wu
 U32 BufferQC;										// if 1, execute data quality control check before writing LM data to file
 U32 PollForNewData;									// if 1, return new data in DMA buffer during polling
 U32 MultiThreadDAQ;									// if 1, run 0x400 or 0x10x as a separate thread
 U8 AutoProcessLMData;								// To control if the LM parse routine processes compressed LM data
 U8 KeepCW;											// To control update and enforced minimum of coincidence wait
+extern U8 KeepBL;											// if 1, do not automatically adjust BLcut after gain or filter settings changes  //by Hongyi Wu
+
 
 #ifdef WINDRIVER_API
 WDC_DEVICE_HANDLE hDev[PRESET_MAX_MODULES]; // WinDriver device handle

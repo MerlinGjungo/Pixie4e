@@ -135,14 +135,15 @@ S32 Start_Run (
 	U32 address, value;
 	U32 *buffer=NULL;
 	U8  k;
+	U32 dwStatus, CSR; 
 
-	buffer = malloc(MAX_HISTOGRAM_LENGTH*NUMBER_OF_CHANNELS * sizeof(U32));
+	buffer = malloc(MCA2D_MEMORY_LENGTH * sizeof(U32));		// temp array to clear MCA memory. choose the larger of 2D or Nch x MCA memory
 	if(!buffer){
 		sprintf(ErrMSG, "*ERROR* (Start_Run): Memory allocation failure");
 		Pixie_Print_MSG(ErrMSG,1);
 		return(-1);
 	}
-	memset(buffer, 0, MAX_HISTOGRAM_LENGTH*NUMBER_OF_CHANNELS * sizeof(U32));
+	memset(buffer, 0,MCA2D_MEMORY_LENGTH * sizeof(U32));	// set to zero
 
 	if(ModNum == Number_Modules)  /* Start run in all modules */
 	{
@@ -166,7 +167,27 @@ S32 Start_Run (
 			/* Clear external memory first before starting a new data acquisition run */
 			if((Type == NEW_RUN) && (Run_Task != 0) && (Control_Task == 0))
 			{
-				Pixie_IOEM(k, 0, MOD_WRITE, MAX_HISTOGRAM_LENGTH*NUMBER_OF_CHANNELS, buffer);
+				// Standard MCA memory
+				Pixie_IOEM(k, HISTOGRAM_MEMORY_ADDRESS, MOD_WRITE, MAX_HISTOGRAM_LENGTH*NUMBER_OF_CHANNELS, buffer);
+
+				// Extra 2D memory
+#ifdef WINDRIVER_API
+				if (PCIBusType==EXPRESS_PCI) {
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[k], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+					// Assert bit 6: high bit of MCA memory range
+					CSR=(U32)SetBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[k], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[k], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+
+					Pixie_IOEM(k, MCA2D_MEMORY_ADDRESS, MOD_WRITE, MCA2D_MEMORY_LENGTH, buffer);
+
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[k], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+					// De-Assert bit 6: high bit of MCA memory range
+					CSR=(U32)ClrBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[k], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[k], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+				}
+#endif
 
 				/* Set RunTask */
 				address=Run_Task_Index+DATA_MEMORY_ADDRESS;
@@ -217,6 +238,25 @@ S32 Start_Run (
 		if((Type == NEW_RUN) && (Run_Task != 0) && (Control_Task == 0))
 		{
 			Pixie_IOEM(ModNum, 0, MOD_WRITE, MAX_HISTOGRAM_LENGTH*NUMBER_OF_CHANNELS, buffer);
+
+			// Extra 2D memory
+#ifdef WINDRIVER_API
+			if (PCIBusType==EXPRESS_PCI) {
+				dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+				// Assert bit 6: high bit of MCA memory range
+				CSR=(U32)SetBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+				dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+				dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+
+				Pixie_IOEM(ModNum, MCA2D_MEMORY_ADDRESS, MOD_WRITE, MCA2D_MEMORY_LENGTH, buffer);
+
+				dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+				// De-Assert bit 6: high bit of MCA memory range
+				CSR=(U32)ClrBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+				dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+				dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+			}
+#endif
 
 			/* Set RunTask */
 			address=Run_Task_Index+DATA_MEMORY_ADDRESS;
@@ -488,11 +528,13 @@ S32 Check_Run_Status (
 	S32 dwStatus = -1;
 
 	dwStatus = Pixie_ReadCSR(ModNum, &CSR);
-	sprintf(ErrMSG, "*INFO* (Check_Run_Status): dwStatus =  %d, CSR = %x",dwStatus,CSR);
-	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-	if (dwStatus<0 || CSR==0xFFFFFFFF) return(REGIO_ERR);
 
 	isRunInProgress = ((U16)CSR & 0x2000) >> 13;
+
+	sprintf(ErrMSG, "*DEBUG* (Check_Run_Status): dwStatus =  %d, CSR = %x, active = %d",dwStatus,CSR,isRunInProgress);
+	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+	
+	if (dwStatus<0 || CSR==0xFFFFFFFF) return(REGIO_ERR);
 
 	return(isRunInProgress);
 }
@@ -837,11 +879,17 @@ S32 Pixie_IODM (
 						Pixie_Devices[ModNum].DSP_Parameter_Values[address-DATA_MEMORY_ADDRESS+k] = (U16)buffer[k];
 					
 					// Fill the DSP parameter block RAM with the updated DSP_Parameter_Values
-// KS DEBUG
-// NOTE: looks like VAddr mapping is not working right under Linux. Using just regular memory I/O
+
 					for (k = 0; k < DSP_IO_BORDER; k++) 
-//						*(U32*)(VAddr[ModNum] + FPGA_PARAM_RAM + 4*k) = (U32)Pixie_Devices[ModNum].DSP_Parameter_Values[k]; 
-						WDC_WriteAddr32(hDev[ModNum], AD_PCI_BAR0, FPGA_PARAM_RAM + 4*k, Pixie_Devices[ModNum].DSP_Parameter_Values[k]);
+
+#ifdef XIA_WINDOZE
+					*(U32*)(VAddr[ModNum] + FPGA_PARAM_RAM + 4*k) = (U32)Pixie_Devices[ModNum].DSP_Parameter_Values[k]; 
+#endif
+#ifdef XIA_LINUX
+					// KS DEBUG
+					// NOTE: looks like VAddr mapping is not working right under Linux. Using just regular memory I/O
+					WDC_WriteAddr32(hDev[ModNum], AD_PCI_BAR0, FPGA_PARAM_RAM + 4*k, Pixie_Devices[ModNum].DSP_Parameter_Values[k]);
+#endif
 
 					// Set bit 5 of APP_HOST_CTL to enable Parameter IO 
 					dwStatus =  PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &dwData, FALSE);
@@ -905,13 +953,21 @@ S32 Pixie_IODM (
 					index = (address - DATA_MEMORY_ADDRESS) + k;
 
 
-					if( (index > (DSP_IO_BORDER+64) ) && (index<=N_DSP_PAR) )
+					//if( (index > (DSP_IO_BORDER+64) ) && (index<=N_DSP_PAR)  || (index < DSP_IO_BORDER )  )
+					if( (index <  DSP_IO_BORDER ) ||									// all input parameters [< DSP_IO_BORDER],  
+						(index > (DSP_IO_BORDER+64) ) && (index < N_DSP_PAR)  ||		// the channel output parameters [DSP_IO_BORDER+64 .. N_DSP_PAR], and
+						(index > (DSP_IO_BORDER+2) )  && (index < DSP_IO_BORDER+28)  )	// some module output parameters can be read directly from DSP RAM
 					{
-						// channel output parameters can be read directly from DSP RAM
-// KS DEBUG 
-// NOTE: looks like VAddr mapping is not working right under Linux. Using just regular memory I/O
-//						dwData = *(U32*)(VAddr[ModNum] + FPGA_PARAM_RAM + 4*index);
-WDC_ReadAddr32(hDev[ModNum], AD_PCI_BAR0, FPGA_PARAM_RAM + 4 * index, &dwData);
+
+
+#ifdef XIA_WINDOZE
+						dwData = *(U32*)(VAddr[ModNum] + FPGA_PARAM_RAM + 4*index);
+#endif
+#ifdef XIA_LINUX
+						// KS DEBUG
+						// NOTE: looks like VAddr mapping is not working right under Linux. Using just regular memory I/O
+						WDC_ReadAddr32(hDev[ModNum], AD_PCI_BAR0, FPGA_PARAM_RAM + 4 * index, &dwData);
+#endif
 						buffer[k] = dwData;
 					}
 					else
@@ -1071,7 +1127,7 @@ S32 Pixie_IOEM (
 				{
 					memset(&DmaData, 0, sizeof(PLX_DMA_PARAMS));
 					DmaData.UserVa	     = (PLX_UINT_PTR)dummy;
-					DmaData.LocalAddr  = PCI_EMDATA;
+					DmaData.LocalAddr    = PCI_EMDATA;
 					DmaData.ByteCount	 = 3*4;	/* Read three dummy words; each word is 32-bt (4 bytes) */
 					DmaData.Direction    = PLX_DMA_LOC_TO_PCI;
 
@@ -1088,7 +1144,7 @@ S32 Pixie_IOEM (
 				if(error>=0) {
 					memset(&DmaData, 0, sizeof(PLX_DMA_PARAMS));
 					DmaData.UserVa			= (PLX_UINT_PTR)buffer;
-					DmaData.LocalAddr     = PCI_EMDATA;
+					DmaData.LocalAddr       = PCI_EMDATA;
 					DmaData.ByteCount		= nWords*4;	/* Read external memory data */
 					DmaData.Direction       = PLX_DMA_LOC_TO_PCI;
 
@@ -1139,13 +1195,26 @@ S32 Pixie_IOEM (
 			break;
 
 		case (EXPRESS_PCI):
+
 			
 #ifdef WINDRIVER_API
 			/* Set bit 2 of CSR to indicate that PCI wants to access the external memory */
 			dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+			if (dwStatus != WD_STATUS_SUCCESS) {
+				sprintf(ErrMSG, "*ERROR* (Pixie_IOEM IO-1): read APP_HOST_CTL not succesful (%d)", dwStatus);
+				Pixie_Print_MSG(ErrMSG,1);
+			}
 			CSR=(U32)SetBit(2, (U16)CSR);	
 			dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+			if (dwStatus != WD_STATUS_SUCCESS) {
+				sprintf(ErrMSG, "*ERROR* (Pixie_IOEM IO-2): write  APP_HOST_CTL not succesful (%d)", dwStatus);
+				Pixie_Print_MSG(ErrMSG,1);
+			}
 			dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);// read back to make sure next I/O does not come too fast
+			if (dwStatus != WD_STATUS_SUCCESS) {
+				sprintf(ErrMSG, "*ERROR* (Pixie_IOEM IO-3): read APP_HOST_CTL not succesful (%d)", dwStatus);
+				Pixie_Print_MSG(ErrMSG,1);
+			}
 
 			if(direction==MOD_WRITE) { /* Write to external memory */
 				// NB: Fast consecutive writes to memory lead to errors (the new value is not written),
@@ -1167,16 +1236,34 @@ S32 Pixie_IOEM (
 				// But need a dummy read of address 0 (to set address 0),
 				// then read addresses 1 through N-1 via ReadAddrBlock() (into buffer[0] through buffer[N-2]),
 				// then read address N-1 to read buffer[N-1].
+
 				error = WDC_ReadAddr32(hDev[ModNum],AD_PCI_BAR2, PCIE_EMDATA+4*address, &u32Data);
+
 				error = WDC_ReadAddrBlock32(hDev[ModNum], AD_PCI_BAR2, PCIE_EMDATA+4*(address+1), (nWords-1)*sizeof(U32), buffer, WDC_ADDR_RW_DEFAULT);
+
 				error = WDC_ReadAddr32(hDev[ModNum],AD_PCI_BAR2, PCIE_EMDATA+4*(address+nWords-1), (buffer+nWords-1));
+
+
 			} // if READ
+
 
 			// read or write: clear bit 2 to release memory
 			dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+			if (dwStatus != WD_STATUS_SUCCESS) {
+				sprintf(ErrMSG, "*ERROR* (Pixie_IOEM IO-4): read APP_HOST_CTL not succesful (%d)", dwStatus);
+				Pixie_Print_MSG(ErrMSG,1);
+			}
 			CSR=(U32)ClrBit(2, (U16)CSR);	/* Clear bit 2 of APP_HOST_CTL to claim PCI's control of external memory */
 			dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+			if (dwStatus != WD_STATUS_SUCCESS) {
+				sprintf(ErrMSG, "*ERROR* (Pixie_IOEM IO-5): write APP_HOST_CTL not succesful (%d)", dwStatus);
+				Pixie_Print_MSG(ErrMSG,1);
+			}
 			dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);// read back to make sure next I/O does not come too fast
+			if (dwStatus != WD_STATUS_SUCCESS) {
+				sprintf(ErrMSG, "*ERROR* (Pixie_IOEM IO-6): read APP_HOST_CTL not succesful (%d)", dwStatus);
+				Pixie_Print_MSG(ErrMSG,1);
+			}
 
 #endif
 			break;
@@ -1417,7 +1504,7 @@ S32 Write_List_Mode_File (
 				NumWordsToRead = WordCount / 2 + 1;
 			}
 
-			if(NumWordsToRead > LIST_MEMORY_LENGTH) {
+			if( (NumWordsToRead > LIST_MEMORY_LENGTH) || (NumWordsToRead ==0) ) {
 				sprintf(ErrMSG, "*ERROR* (Write_List_Mode_File):invalid word count %d", NumWordsToRead);
 				Pixie_Print_MSG(ErrMSG,1);
 				if(!MultiThreadDAQ) fclose(ListModeFile);
@@ -2073,7 +2160,9 @@ S32 Adjust_Offsets_DSP (
 						U8 ModNum )		// module number
 {
 	U32 CurrentModNum, MNstart, MNend;
-	U32 retval;
+	U32 retval, value, ChanNum;
+	U16 TrackDAC, idx_HOD, idx_TDAC;
+	S8  str[256];
 
 	if(ModNum == Number_Modules)
 	{
@@ -2086,6 +2175,8 @@ S32 Adjust_Offsets_DSP (
 		MNend = ModNum+1;
 	}
 
+	idx_HOD=Find_Xact_Match("HOSTODATA", DSP_Parameter_Names, N_DSP_PAR);
+
 	for (CurrentModNum = MNstart; CurrentModNum < MNend ; CurrentModNum ++)
 	{
 		// Find offset in DSP, set DACs to target value, update TRACKDAC values in DSP memory
@@ -2096,9 +2187,30 @@ S32 Adjust_Offsets_DSP (
 			return(-1);
 		}
 
-		// note: FPGA RAM not updated by DSP. Starting another run sets ParIOActive (for Controltask, Resume, etc) so DSP
-		// would read FPGA RAM again and overwrite TRACKDAC values. If another run is required now, manually update
-		// FPGA RAM (read from DSP, download to DSP). Else rely on GUI to read from DSP to update display variables
+		// FPGA RAM not updated by DSP. Starting another run sets ParIOActive (for Controltask, Resume, etc) so DSP
+		// would read FPGA RAM again and overwrite TRACKDAC values. So now read from DSP (output block!)
+		// and apply back to the FPGA RAM. Can not on GUI to read from DSP to update display variables because
+		// GUI reads from FPGA
+		for( ChanNum = 0; ChanNum < NUMBER_OF_CHANNELS; ChanNum ++ )
+		{
+			retval = Pixie_IODM(CurrentModNum, DATA_MEMORY_ADDRESS+idx_HOD+ChanNum, MOD_READ, 1, &value );
+			TrackDAC = (U16)value;
+			//sprintf(ErrMSG, "*INFO* (Adjust_Offsets_DSP): TrackDAC from HostOData: %d.", TrackDAC);
+			//Pixie_Print_MSG(ErrMSG,1);
+			if (retval != 0) {
+				sprintf(ErrMSG, "*ERROR* (Adjust_Offsets_DSP): Cannot get TrackDAC cut for module %d.", CurrentModNum);
+				Pixie_Print_MSG(ErrMSG,1);
+				return(-2);
+			}
+
+			/* Set DSP parameter TrackDAC */
+			sprintf(str,"TRACKDAC%d",ChanNum);
+			idx_TDAC=Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
+			Pixie_Devices[CurrentModNum].DSP_Parameter_Values[idx_TDAC]=TrackDAC;
+			/* Download TrackDAC to the DSP data memory */
+			value = (U32)TrackDAC;
+			Pixie_IODM(CurrentModNum, (U16)(DATA_MEMORY_ADDRESS+idx_TDAC), MOD_WRITE, 1, &value);
+		}
 
 		// No ProgramFippi required here, DACs are not part of it
 
@@ -3019,13 +3131,13 @@ S32 BLcut_Finder (
 		case EXPRESS_PCI: /* Pixie-500e */
 #ifdef WINDRIVER_API
 			Control_Task_Run(ModNum, FIND_BLCUT, 1000);
-			idx=Find_Xact_Match("HOSTIO", DSP_Parameter_Names, N_DSP_PAR);
-			idx += ChanNum; // DSP reports BLcut values in HostIO+ChanNum
+			idx=Find_Xact_Match("HOSTODATA", DSP_Parameter_Names, N_DSP_PAR);
+			idx += ChanNum; // DSP reports BLcut values in HOSTODATA+ChanNum
 
 			retval = Pixie_IODM(ModNum, DATA_MEMORY_ADDRESS+idx, MOD_READ, 1, &value );
 			localBlCut = (U16)value;
 			if (retval != 0) {
-				sprintf(ErrMSG, "*ERROR* (BLcut_Finder): Cannot get baseline cut for module %d channel %d.", ModNum, ChanNum);
+				sprintf(ErrMSG, "*ERROR* (BLcut_Finder): Cannot get baseline cut for module %d channel %d.", ModNum, ChanNum, localBlCut);
 				Pixie_Print_MSG(ErrMSG,1);
 				localBlCut = 10;
 			}
@@ -3070,7 +3182,7 @@ S32 BLcut_Finder (
 	/* Restore DSP parameter ChanNum */
 	idx=Find_Xact_Match("CHANNUM", DSP_Parameter_Names, N_DSP_PAR);
 	Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=KeepChanNum;
-	/* Download HostIO to the DSP data memory */
+	/* Download CHANNUM to the DSP data memory */
 	value = (U32)KeepChanNum;
 	Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value);
 
@@ -3598,11 +3710,27 @@ S32 Pixie_Print_MSG (
 					 S8 *message, 	// message to be printed 
 					 U32 enable )	// print it or not
 {
-	if(enable)
-	{
+	FILE *PIXIEmsg = NULL;
+		
+	if(!enable)	return(0);
 
-	#ifdef COMPILE_IGOR_XOP
-		// TODO: if main thread, do the same as before.
+
+
+#ifdef COMPILE_IGOR_XOP
+	if(PrintDebugMsg_file) {
+		// debug: optionally print the message to file
+		
+
+		PIXIEmsg = fopen("PIXIEmsg.txt", "a");
+		if(PIXIEmsg != NULL)
+		{
+			fprintf(PIXIEmsg, "%s\n", message);
+			fclose(PIXIEmsg);
+		}
+		Pixie_Sleep(2);
+	} else {
+
+
 		//If polling thread (current thread ID is pollingThreadId which is set in Pixie4_Acquire_Data(0x1403),
 		//don't call XOPNotice, but write into msgBuffer.
 		//And don't forget to dump msgBuffer into XOPNotice and clear it on Igor poll with Pixie_Acquire_Data(0x4403).
@@ -3620,12 +3748,11 @@ S32 Pixie_Print_MSG (
 			strcat(message, "\r");
 			XOPNotice(message);
 		}
+	}
 		
-
-		// KS DEBUG Test only console I/O
-	#else
-
-		FILE *PIXIEmsg = NULL;
+#else
+		// for LV dll etc
+		//FILE *PIXIEmsg = NULL;
 
 		PIXIEmsg = fopen("PIXIEmsg.txt", "a");
 		if(PIXIEmsg != NULL)
@@ -3638,8 +3765,7 @@ S32 Pixie_Print_MSG (
 			fclose(PIXIEmsg);
 		}
 
-	#endif
-	}	// end if enable
+#endif
 
 	return(0);
 }
@@ -3802,7 +3928,7 @@ S32 Pixie_Check_Moduletypes (
 *		return values
 *			<0: error
 *			 0: ok
-*		     1: end or run detected
+*		     1: end of run detected
 ****************************************************************/
 
 
@@ -3970,7 +4096,7 @@ S32 Write_DMA_List_Mode_File (
 
 			if  (RunType==0x402) 	{	// run type 0x402 does not have the channel number in the usual place
 					ChanNum = 0;		// default to zero 
-					EventLengthDSP = EventLengthTotal[ModNum] - 3;	// EventLengthTotal = 4x (header + TL), in blocks; so subtract 3 for actual length in runtype 0x402
+					EventLengthDSP = EventLengthTotal[ModNum]; // EventLengthTotal = 1x header + 4x TL (in blocks) in runtype 0x402
 			} else {
 					ChanNum = (U16)((LMBuffer[ModNum][bufPtr+chanHeadEnChanIdx] & 0xFFFF0000) >> 16); 
 					ChanNum = ChanNum & 0x00FF;		// upper bits of channel number reserved for special records
@@ -4256,14 +4382,16 @@ S32 Write_DMA_List_Mode_File (
 				Pixie_Print_MSG(ErrMSG,1);
 			}
 		}
-	
-		// Set the last element to a known pattern, change of which will be used as DMA idle indicator.
-		LMBuffer[ModNum][DMA_LM_FRAMEBUFFER_LENGTH/(sizeof(U32))-1] = 0xA5A5A5A5;
+	//	if(!EndRunFound[ModNum]) {			// only if the run is not over anyway 
+			// Set the last element to a known pattern, change of which will be used as DMA idle indicator.
+			
+			LMBuffer[ModNum][DMA_LM_FRAMEBUFFER_LENGTH/(sizeof(U32))-1] = 0xA5A5A5A5;
 
-		VDMADriver_SetDPTR(hDev[ModNum], MAIN_START);			// rewind DMA sequencer
-		VDMADriver_Go(hDev[ModNum]);							// resume DMA (that was halted by finishing the SG list)
-		sprintf(ErrMSG, "*DEBUG* (Write_DMA_List_Mode_File): Sequencer restarted");
-		Pixie_Print_MSG(ErrMSG,PrintDebugMsg_QCdetail);
+			VDMADriver_SetDPTR(hDev[ModNum], MAIN_START);			// rewind DMA sequencer
+			VDMADriver_Go(hDev[ModNum]);							// resume DMA (that was halted by finishing the SG list)
+			sprintf(ErrMSG, "*DEBUG* (Write_DMA_List_Mode_File): Sequencer restarted");
+			Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+	//	}
 
 #ifdef DUMP
 			switch (RunType) {
@@ -4421,12 +4549,13 @@ S32 ADCSPI (
 	U16 read	)			// 1 for read, 0 for write
 {
 	U32 buffer[N_DSP_PAR];
-	U16 idx_HIO, idx_HIOD;
+	U16 idx_HIO, idx_HIOD, idx_HOD;
 	S32 retval;
 
 	// prepare indices and address words
 	idx_HIO = Find_Xact_Match("HOSTIO", DSP_Parameter_Names, N_DSP_PAR);
-	idx_HIOD = Find_Xact_Match("HOSTIODATA", DSP_Parameter_Names, N_DSP_PAR);
+	idx_HIOD = Find_Xact_Match("HOSTIODATA", DSP_Parameter_Names, N_DSP_PAR);	// input only
+	idx_HOD = Find_Xact_Match("HOSTODATA", DSP_Parameter_Names, N_DSP_PAR);		// output only
 
 	if(read)
 		addr = SetBit(15, addr);
@@ -4455,10 +4584,10 @@ S32 ADCSPI (
 
 	// get read data from DSP
 	Pixie_IODM(ModNum, DATA_MEMORY_ADDRESS, MOD_READ, N_DSP_PAR, buffer);
-	data[0] = (U16)buffer[idx_HIOD+0];
-	data[1] = (U16)buffer[idx_HIOD+1];
-	data[2] = (U16)buffer[idx_HIOD+2];
-	data[3] = (U16)buffer[idx_HIOD+3];
+	data[0] = (U16)buffer[idx_HOD+0];
+	data[1] = (U16)buffer[idx_HOD+1];
+	data[2] = (U16)buffer[idx_HOD+2];
+	data[3] = (U16)buffer[idx_HOD+3];
 
 	return(retval);
 }
@@ -4480,7 +4609,7 @@ S32 Create_List_Mode_File (
 	U8  ChanNum;
 	U16 *Run_Header = NULL;
 	U16 idx;
-	U16 TL, CW, CP;
+	U16 TL, CW, CP, CSRC;
 	
 	if (listFile[CurrentModNum])			// if open, 
 		fclose(listFile[CurrentModNum]);	// close currently open file
@@ -4517,15 +4646,18 @@ S32 Create_List_Mode_File (
 	};
 	Run_Header[0] = BLOCKSIZE;
 	Run_Header[1] = (U16)CurrentModNum;
-	Run_Header[2] = runtask;	
+//	Run_Header[2] = runtask;	
+	Run_Header[3] = MAX_CHAN_HEAD_LENGTH; // Channel header length. To be changed to a constant in defs.h
 	idx=Find_Xact_Match("COINCPATTERN", DSP_Parameter_Names, N_DSP_PAR);				
 	CP = Pixie_Devices[CurrentModNum].DSP_Parameter_Values[idx];		// from local copy
 	Run_Header[4] = CP;	
 	idx=Find_Xact_Match("COINCWAIT", DSP_Parameter_Names, N_DSP_PAR);				
 	CW = Pixie_Devices[CurrentModNum].DSP_Parameter_Values[idx];		// from local copy
 	Run_Header[5] = CW;	
-	Run_Header[3] = MAX_CHAN_HEAD_LENGTH; // Channel header length. To be changed to a constant in defs.h
 	Run_Header[7] = (U16)Pixie_Devices[CurrentModNum].Module_Parameter_Values[BoardVersion_Index];	// board version, e.g. 0xA550 For P4e, 16/125 Rev A
+	idx = Find_Xact_Match("SERIAL_NUMBER", Module_Parameter_Names, N_MODULE_PAR);
+	Run_Header[12] = (U16)Pixie_Devices[CurrentModNum].Module_Parameter_Values[idx];	// serial number
+
 	//sprintf(ErrMSG, "*DEBUG* (Create_List_Mode_File): runtask %x", runtask);
 	//Pixie_Print_MSG(ErrMSG,1);	
 	
@@ -4539,6 +4671,21 @@ S32 Create_List_Mode_File (
 	}
 	if(runtask==0x402)
 		Run_Header[6] -=  (3*MAX_CHAN_HEAD_LENGTH) / BLOCKSIZE;		// only one header for 4 channels in Runtype 0x402
+
+
+	// Determining the Trace4x options for each channel. Sets a flag in the runformat field
+	Run_Header[2] = runtask;
+	for(ChanNum = 0; ChanNum < NUMBER_OF_CHANNELS; ChanNum++) {
+		sprintf(str,"CHANCSRC%d",ChanNum);			
+		idx=Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);				
+		CSRC = Pixie_Devices[CurrentModNum].DSP_Parameter_Values[idx];		// from local copy
+		if(TstBit(CSR_TRACE4X,CSRC)==1)
+			Run_Header[2] = SetBit(4+ChanNum,Run_Header[2]);
+//sprintf(ErrMSG, "*DEBUG* (Create_List_Mode_File): CSRC %x, RunHeader[2] %x", CSRC, Run_Header[2]);
+//Pixie_Print_MSG(ErrMSG,1);
+	}
+
+
 
 	// write the file header
 	if(runtask==0x401)	{	// 0x401 is special in several ways ... 
@@ -4610,3 +4757,157 @@ S32 FindNewDMAData (
 
 	return(lastRSpos);
 }
+
+/****************************************************************
+*	ComputePSA function:
+*	    calculate extended PSA values from waveforms (not DSP or FPGA)
+*	    TODO: use separate arrays for PSA control and output.
+*
+***************************************************************/
+S32 ComputePSA(U16 *trace, U32 traceLen, U32 *PSAval)
+{
+    // PSAval: sum length and location in words 1, 2, 3, 4
+    // Other control options: words 5--10.
+    // Output into word 0, 11--16.
+    S32 retval;
+    double base;
+    double ampl;
+    U32 V_maxloc; // location of trace maximum
+    U16 V_max; // Value of trace maximum
+    U32 lev10, lev90;  // locations of 10% and 90% crossings
+    U32 i;
+    double RTlow; //= 0.1;
+    double RThigh; // = 0.9;
+    double RT;
+    double Q0sum, Q1sum;
+    U32 Q0start, SoQ0, LoQ0;
+    U32 Q1start, SoQ1, LoQ1;
+    U32 normQ0;
+    U32 normQ1;
+    U32 PSAoption, PSAdiv8, PSAletrig, PSAth;
+    double LEthreshold;
+	U32 BLlen = 8;
+
+
+    LoQ0 = PSAval[1]; //12;
+    LoQ1 = PSAval[2]; //64;
+    SoQ0 = PSAval[3]; // 0;
+    SoQ1 = PSAval[4]; //32;
+    RTlow = PSAval[5]/100.0;
+    RThigh = PSAval[6]/100.0;
+    PSAoption = PSAval[7];
+    PSAdiv8 = PSAval[8];
+    PSAletrig = PSAval[9];
+    PSAth = PSAval[10];
+
+    LEthreshold = PSAth*1.27*4; // threshold for leading edge (not CFD) trigger, matching DSP/FPGA scaling
+
+    retval = -1;
+
+    if (PSAdiv8) {
+        normQ0 = 32;
+        normQ1 = 32;
+    }
+    else {
+        normQ0 = 4;
+        normQ1 = 4;
+    }
+
+    
+
+    // Baseline
+    base = 0.0;
+    for (i = 4; i < 4+BLlen; i++) {
+        base += trace[i];
+    }
+    base /= BLlen;
+
+    // Amplitude
+    ampl = 0.0;
+    V_max = 0;
+    V_maxloc = 0;
+    for (i = 0; i < traceLen; i++) {
+        if (trace[i] > V_max) {
+            V_max = trace[i];
+            V_maxloc = i;
+        }
+    } // for trace
+    ampl = (double)V_max - base;
+    
+    // TODO: make sure that only consider rise time levels close to V_maxloc
+    lev10 = 0;
+    for (i = (V_maxloc-LoQ0 > 0) ? V_maxloc-LoQ0 : 0; i < traceLen; i++) {
+        if (trace[i] > (base + ampl*RTlow) ) {
+            lev10 = i;
+            break;
+        }
+    } // for trace
+
+    lev90 = 0;
+    for (i = (V_maxloc-LoQ0 > 0) ? V_maxloc-LoQ0 : 0; i < traceLen; i++) {
+        if (trace[i] > (base + ampl*RThigh) ) {
+            lev90 = i;
+            break;
+        }
+    } // for trace
+
+    RT  = (lev90-lev10)*16;	// in 1/16 clock cycles
+	// TODO: for proper calculation, would need interpolation between 2 closest samples
+	// but currently DSP/FPGa also don't compute RT, so this coarse value is ok for now
+
+    // TODO leadging edge trigger
+    // Q0start, Q1start could be from LEthreshold
+    if (PSAletrig) {
+		Q0start = Q1start = lev10;	// set a default in case the LE trigger doesn't find any
+        for (i = (V_maxloc-LoQ0 > 0) ? V_maxloc-LoQ0 : 0; i < traceLen; i++) {
+            if (trace[i] > (base + LEthreshold) ) {
+                Q0start = Q1start = i;
+                break;
+            }
+        } // for trace
+    }
+    else Q0start = Q1start = lev10;
+    
+    
+    // Compute Q1 sum
+    Q1sum = 0.0;
+    for (i = Q1start + SoQ1; i <Q1start + SoQ1 + LoQ1; i++) {
+        Q1sum += (trace[i] - base);
+    } // for Q1 sum
+    Q1sum /= normQ1;
+    
+    // Compute Q0 sum
+    Q0sum = 0.0;
+    for (i = Q0start + SoQ0; i <Q0start + SoQ0 + LoQ0; i++) {
+        Q0sum += (trace[i] - base);
+    } // for Q0 sum
+    Q0sum /= normQ0;
+
+    // Output
+    PSAval[11] = (int)RT;
+    PSAval[12] = (int)ampl;
+    PSAval[13] = (int)base;
+    PSAval[14] = (int)Q0sum;
+    PSAval[15] = (int)Q1sum;
+    if (Q0sum > 0) 
+		PSAval[16] = (PSAoption>0) ? (int)(1000.*((Q1sum-Q0sum)/Q0sum)) : (int)(1000.*(Q1sum/Q0sum));
+    else 
+		PSAval[16] = 0;
+    retval = 0;
+
+    if (lev10 >= lev90 || lev10 >=V_maxloc || lev90 > V_maxloc)  {
+        sprintf (ErrMSG, "*WARNING* (ComputePSA): problems with finding rising edge: lev10 x=%d, peak x=%d, lev90 x=%d", lev10, V_maxloc, lev90);
+        Pixie_Print_MSG(ErrMSG, PrintDebugMsg_QCdetail);
+        retval = -1;
+    }
+
+	if (Q0sum<=0 || Q1sum<=0 )  {
+        sprintf (ErrMSG, "*WARNING* (ComputePSA): problems with PSA sums: lev10 Q0=%2.2f, Q1=%2.2f", Q0sum, Q1sum);
+        Pixie_Print_MSG(ErrMSG, PrintDebugMsg_QCdetail);
+        retval = -1;
+    }
+
+    return(retval);
+}
+
+

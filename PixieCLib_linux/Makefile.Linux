@@ -51,7 +51,7 @@ LIBOBJS = Boot.o \
           utilities.o \
           globals.o \
           reader.o \
-          pixie500e_lib_linux.o
+          pixie500e_lib.o
 
 
 SAMPLEOBJ = ./SamplePrograms/SampleBoot.o \
@@ -78,7 +78,7 @@ lib: $(LIBOBJS)
 .PHONY: lib
 
 sample: lib $(SAMPLEOBJ)
-	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleBoot     SamplePrograms/SampleBoot.o    -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
+	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleBoot     SamplePrograms/SampleBoot.o   -l$(LIBNAME)  $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS) 
 	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleADCTrace SamplePrograms/SampleADCTrace.o -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
 	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleMCARun SamplePrograms/SampleMCARun.o -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)
 	$(CC) $(LINK_PRE_FLAGS) $(LINK_FLAG_OUT)SamplePrograms/SampleListMode SamplePrograms/SampleListMode.o -l$(LIBNAME) $(PLX_LIB) $(WD_LIB) $(SYSTEM_LIBS)

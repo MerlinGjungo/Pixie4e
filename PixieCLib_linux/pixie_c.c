@@ -102,8 +102,9 @@ S32 Pixie_Hand_Down_Names (S8 *Names[],	// a two dimensional string array
 	S8  *pSource, *pDest;
 
 	// Main thread ID (not to use msgBuffer for Pixie_Print_MSG()
-// KS DEBUG
-//	gMainThreadId = GetCurrentThreadId();
+#ifdef XIA_WINDOZE
+	gMainThreadId = GetCurrentThreadId();
+#endif
 
 	sprintf(ErrMSG, "*DEBUG* Pixie_Hand_Down_Names: starting ...");
 	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_Boot);
@@ -239,8 +240,9 @@ S32 Pixie_Boot_System ( U16 Boot_Pattern )	// bit mask
 
 	
 	// Main thread ID (not to use msgBuffer for Pixie_Print_MSG()
-// KS DEBUG
-//	gMainThreadId = GetCurrentThreadId();
+#ifdef XIA_WINDOZE
+	gMainThreadId = GetCurrentThreadId();
+#endif
 
 	sprintf(ErrMSG, "*DEBUG* Pixie_Boot_System: starting ...");
 	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_Boot);
@@ -357,9 +359,9 @@ S32 Pixie_Boot_System ( U16 Boot_Pattern )	// bit mask
 		Pixie_Print_MSG(ErrMSG,1);
 		return(RD_DSP_PAR_ERR);
 	}
-// KS DEBUG
-sprintf(ErrMSG,"*DEBUG* read DSP parameter values done from %s", Boot_File_Name_List[4]);
-Pixie_Print_MSG(ErrMSG,1);
+	// KS DEBUG
+	sprintf(ErrMSG,"*DEBUG* read DSP parameter values done from %s", Boot_File_Name_List[4]);
+	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_Boot);
 
 	/* Initialize DSP variable names */
 	retval=Pixie_Init_VarNames();
@@ -368,17 +370,16 @@ Pixie_Print_MSG(ErrMSG,1);
 		Pixie_Print_MSG(ErrMSG,1);
 		return(INIT_DSP_PAR_ERR);
 	}
-// KS DEBUG
-sprintf(ErrMSG,"*DEBUG* init DSP variable names done");
-Pixie_Print_MSG(ErrMSG,1);
+	// KS DEBUG
+	sprintf(ErrMSG,"*DEBUG* init DSP variable names done");
+	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_Boot);
 
 
 	/* Initialize several global variables */
 	Pixie_Init_Globals();
-// KS DEBUG
-sprintf(ErrMSG,"*DEBUG* Init_Globals  done");
-Pixie_Print_MSG(ErrMSG,1);
-
+	// KS DEBUG
+	sprintf(ErrMSG,"*DEBUG* Init_Globals  done");
+	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_Boot);
 
 
 	/* Boot all modules present in the system */
@@ -529,6 +530,9 @@ S32 Pixie_User_Par_IO (
  *					0x9002					write to histogram memory section of EM
  *					0x9003					read list mode memory section of EM
  *					0x9004					write to list mode memory section of EM
+ *					0x9005					read 2D memory section of EM
+ *					0x9006					write to 2D memory section of EM
+ *					0x9007					read first 8K of histogram memory section of EM 
  *				0xA000 					special tasks
  *					0xA001					read data, then resume
  *
@@ -550,6 +554,10 @@ S32 Pixie_User_Par_IO (
  *				 0x10 - success
  *				-0x11 - invalid Pixie module number
  *				-0x12 - failure to start the data run
+ *              -0x13 - system contains both P4/500e and P4/500
+ *				-0x14 - list mode file not found or created (0x40#)
+ *				-0x15 - list mode memory allocation failure
+ *				-0x16 - error setting up or initializing DMA transfer 
  *
  *			Run type 0x2000
  *				 0x20 - success
@@ -560,6 +568,11 @@ S32 Pixie_User_Par_IO (
  *				 0x30 - success
  *				-0x31 - invalid Pixie module number
  *				-0x32 - failure to end the run
+ *				-0x34 - DMA transfer timeout
+ *				-0x35 - memory allocation failure
+ *				-0x36 - error setting up or initializing DMA transfer
+ *				-0x37 - error starting dummy run after DMA run
+ *				-0x38 - error writing DMA data to file
  *
  *			Run type 0x4000
  *				-0x41						- invalid Pixie module number
@@ -597,6 +610,9 @@ S32 Pixie_User_Par_IO (
  *				-0x93 - failure to read out LM section of external memory
  *				-0x94 - failure to write to LM section of external memory
  *				-0x95 - invalid external memory I/O request
+ * 				-0x96 - failure to read out 2D section of external memory
+ *				-0x97 - failure to write to 2D section of external memory
+ *				-0x98 - failure to read out first 8K of MCA section of external memory
  *
  *          Run type 0xA000
  *				 0xA0 - success
@@ -632,10 +648,12 @@ S32 Pixie_Acquire_Data (
 	U32 CurrentModNum, MNstart, MNend;	// for looping over modules if ModNum==Number_Modules
 	U64 filelen, filepos;
 	S64 readlen;
-
+	UINT32 val=0;
+	UINT32 valra=0;
+	UINT32 valdptrx=0;
 	// for temp list run
 	U32 *listBuffer = NULL;
-	U32 Wcount, dwStatus, datatimeout, timeout, timeouterror;
+	U32 Wcount, dwStatus, datatimeout, timeout, timeouterror, extraspillcount;
 	U32 clrbuffer[MAX_HISTOGRAM_LENGTH*NUMBER_OF_CHANNELS]={0};
 //#define MEASURERUNTIME	// to measure time between spills for data rate measurement
 
@@ -927,6 +945,7 @@ S32 Pixie_Acquire_Data (
 					return(-0x12);
 				}
 
+
 				// Polling loop for MultiThreadDAQ, executed on separate thread, poll while DSP is active.
 				if (MultiThreadDAQ) 
 				{ 
@@ -982,6 +1001,10 @@ S32 Pixie_Acquire_Data (
 				}
 
 #ifdef WINDRIVER_API
+
+				sprintf(ErrMSG, "==========================================");
+				Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
 				DMADataPos =0;
 				for(CurrentModNum = MNstart; CurrentModNum < MNend ; CurrentModNum ++) {
 					
@@ -992,9 +1015,11 @@ S32 Pixie_Acquire_Data (
 					if(retval<0) {						
 						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): StartRun 0x140# file not found error");
 						Pixie_Print_MSG(ErrMSG,1);
-						return(-1);
+						return(-0x14);
 					}
-
+					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): Create_List_Mode_File ok ");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+	
 					// This shall be moved to Boot.
 					// DMA setup
 					pDmaList[CurrentModNum] = NULL;
@@ -1002,15 +1027,18 @@ S32 Pixie_Acquire_Data (
 					if (!LMBuffer[CurrentModNum]) {
 						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Memory allocation for list mode buffer failure");
 						Pixie_Print_MSG(ErrMSG,1);
-						return(-0x13);
+						return(-0x15);
 					}
+					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): DMA setup ok ");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
 					memset(LMBuffer[CurrentModNum], 0x69, DMA_LM_FRAMEBUFFER_LENGTH); 
 					// cache for list mode data for buffer quality control, only if not allocated yet
 					LMBufferCopy[CurrentModNum] = malloc(DMA_LM_FRAMEBUFFER_LENGTH);
 					if (!LMBufferCopy[CurrentModNum]) {
 						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Memory allocation for list mode buffer copy failure");
 						Pixie_Print_MSG(ErrMSG,1);
-						return(-0x13);
+						return(-0x15);
 					}
 					// PIXIE500E_DMA_Trace_Setup() does
 					// 1. WDC_DMASGBufLock()
@@ -1020,15 +1048,19 @@ S32 Pixie_Acquire_Data (
 					if (retval != 0) {
 						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Run start, DMA setup failed, %d", retval);
 						Pixie_Print_MSG(ErrMSG,1);
-						return(-0x13);
+						return(-0x16);
 					}
+					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): PIXIE500E_DMA_Trace_Setup ok ");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+					
 					retval = PIXIE500E_DMA_Init(hDev[CurrentModNum]);
 					if (retval != 0) {
 						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Run start, DMA init failed, %d", retval);
 						Pixie_Print_MSG(ErrMSG,1);
-						return(-0x13);
+						return(-0x16);
 					}
-
+					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): PIXIE500E_DMA_Init ok ");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 					// Up to this point, moved to Boot
 
 					// Prepare interrupt processing
@@ -1036,7 +1068,7 @@ S32 Pixie_Acquire_Data (
 					// ISR as PIXIE500E_IntHandler_INT3,
 					// clearing IRQ, clear and re-enable VDMA event 0x8, calling Write_DMA_List_Mode_File()
 					// TODO: no error check in PIXIE500E_InterruptSetup_INT3!				
-					if ((Polling==0) && (lower != 0x403)) 
+					if ((MultiThreadDAQ==0) && (Polling==0) && (lower != 0x403)) 
 						PIXIE500E_InterruptSetup_INT3(hDev[CurrentModNum], (U8)CurrentModNum, lower);
 
 
@@ -1051,10 +1083,27 @@ S32 Pixie_Acquire_Data (
 						/* need to stop the run in case some modules started the run OK */
 						End_Run(Number_Modules);
 					}
-					sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to start a data run, retval=%d", retval);
+					sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to start a data run (start), retval=%d", retval);
 					Pixie_Print_MSG(ErrMSG,1);
 					return(-0x12);
 				} // if failed to start
+				sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): Start_Run ok ");
+				Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
+				// check run status after starting, to see if run was really enabled
+				Pixie_Sleep(1);
+				retval = Check_Run_Status(MNstart);	// check module 0 only, always part of the system
+				if( retval < 0)
+				{
+					sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to start a data run (check), retval=%d", retval);
+					Pixie_Print_MSG(ErrMSG,1);
+					return(-0x12);
+				}
+				sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRunFound ptr=%d, LMBuffer ptr=0x%x, LMBufferCounter ptr=%d ", EndRunFound,LMBuffer, LMBufferCounter);
+				Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+				sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRunFound[0]=%d, LMBuffer[0][last]=0x%x, LMBufferCounter[0]=%d ", EndRunFound[0],LMBuffer[0][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1], LMBufferCounter[0]);
+				Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+		
 
 #ifdef MEASURERUNTIME
 				RunStartTicks = GetTickCount();
@@ -1062,13 +1111,27 @@ S32 Pixie_Acquire_Data (
 
 				for(CurrentModNum = MNstart; CurrentModNum < MNend ; CurrentModNum ++) {	
 					retval = WDC_DMASyncCpu(pDmaList[CurrentModNum]); // SyncCpu needed before performing DMA transfers.
+					sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): Done with WDC_DMASyncCpu");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
 					VDMADriver_Go(hDev[CurrentModNum]);
+					sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): Done with VDMA_go");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], VDMA_CSRx, WDC_READ, &val, FALSE);
+					sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): VDMA CSR=0x%08X", val);
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 				} // for modules, DMA go.
+
+
+				sprintf(ErrMSG, "------------------------------------------");
+				Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
 
 				// Polling loop for MultiThreadDAQ, executed on separate thread, poll while DSP is active.
 				if (MultiThreadDAQ) { 
 					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): MultiThreadDAQ, Going into polling loop");
-					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 					status=0;      // default: no module saved data
 
 					do {
@@ -1092,14 +1155,14 @@ S32 Pixie_Acquire_Data (
 								}
 								if (!Check_Run_Status((U8)CurrentModNum)) status = 1;
 
-								sprintf(ErrMSG, "Thread 0x1403, DMA idle, Got buffer %d", LMBufferCounter[CurrentModNum]);
-								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+								sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): Thread 0x1403, DMA idle, Got buffer %d", LMBufferCounter[CurrentModNum]);
+								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 							} // if checking last frame buffer element
 						} // for modules
-					} while (status==0); // poll until end of run.
+					} while (status==0 && MT_KeepPolling==1); // poll until end of run.
 					// ********************* end Polling loop ******************************************************************
 					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): MultiThreadDAQ, Done polling loop");
-					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 					FlushIgorMSG();
 				} // if MultiThreadDAQ
 
@@ -1183,9 +1246,11 @@ S32 Pixie_Acquire_Data (
 		case 0x3000:  /* Stop a data run */
 
 
-			
-	//		sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: starting 0x%x",lower);
-	//		Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+			sprintf(ErrMSG, "------------------------------------------");
+			Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+			//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: starting 0x%x",lower);
+			//Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
 			FlushIgorMSG();
 
 			switch(lower)
@@ -1195,6 +1260,9 @@ S32 Pixie_Acquire_Data (
 				case 0x402:
 				case 0x403:
 	#ifdef WINDRIVER_API
+
+			sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRunFound[0]=%d, LMBuffer[0][last]=0x%x, LMBufferCounter[0]=%d ", EndRunFound[0],LMBuffer[0][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1], LMBufferCounter[0]);
+			Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 
 
 					// 1. issue command to stop the run, but it won't be finished quite yet, keep DMA going
@@ -1206,15 +1274,16 @@ S32 Pixie_Acquire_Data (
 						
 						/* Stop run in all modules */
 						dwStatus = Run_Enable_Clear((U8)CurrentModNum);
-					//	if (dwStatus != 0) {
-					//		sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data) End Run: Unable to clear Run Enable.");
-					//		Pixie_Print_MSG(ErrMSG,1);
-					//		return(-0x13);
-					//	}
+
+						if (dwStatus != 0) {
+							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data) End Run: Unable to clear Run Enable.");
+							Pixie_Print_MSG(ErrMSG,1);
+							return(-0x32);
+						}
 					}
 
-					sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run, cleared RunEna");
-					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+					sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Cleared RunEna");
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 					FlushIgorMSG();
 
 
@@ -1225,10 +1294,11 @@ S32 Pixie_Acquire_Data (
 					{
 						// DSP is stopped now, but there was some data out of DSP.
 						// Read it out and dump to disk until DMA is idle.
-						datatimeout=0;	// combined end condition
-						timeout=0;		// timeout just for time
-						Wcount = 0;		// timeout after each transfer
-						if (Polling==1)	// if no interupts, we still need to read out the old way. But what about multi-thread 0x403?
+						datatimeout=0;			// combined end condition
+						timeout=0;				// timeout just for time
+						//Wcount = 0;				// timeout after each transfer
+						extraspillcount = 1;	// number of extra spills for a module
+						if (Polling==1 || MultiThreadDAQ==1)	// if no interupts, we still need to read out the old way. But what about multi-thread 0x403?
 						{
 							while(!datatimeout)
 							{
@@ -1238,37 +1308,80 @@ S32 Pixie_Acquire_Data (
 								if(active<0) {
 									sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Failed to read Run Status, aborting");
 									Pixie_Print_MSG(ErrMSG,1);
-									return (active);
+									return (-0x32);
 								}
-								if(active) Wcount = 0;		// this ensures we wait at least N cycles after DSP is done
-								sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run, checked RS =  %x",active);
-								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+							//	if(active) Wcount = 0;		// this ensures we wait at least DMABUFREFILL_TIMEOUT cycles after DSP is done
+							//	sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Checked RS =  %x",active);
+							//	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 
 
 								retval = 0; 
 								// if the frame buffer is not filled yet, we should not be idle.
-								if (LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]==0xA5A5A5A5 || LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]==0x69696969) {				
-									// do nothing
-								}
-								else { 
+								dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], VDMA_CSRx, WDC_READ, &val, FALSE); // debug: polling module if DMA done
+								value = LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1];
+								//if(val!=0) {
+								// } else {
+								if ( val==0 || !(value==0xA5A5A5A5 || value==0x69696969) ) {											 
 									// Finished transferring the buffer: dump it, rewind, restart DMA sequencer
 									retval = Write_DMA_List_Mode_File ((U8)CurrentModNum, "", lower);	// =1 if end 
-									sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run, written another buffer for ModNum=%d, count=%d",CurrentModNum, timeout);
-									Pixie_Print_MSG(ErrMSG,1);
-									Wcount = 0;			// this ensures we wait at least N cycles after each transfer
-								} // if DMA is idle	
-								if(EndRunFound[CurrentModNum]) {
-									sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run, QC found EOR");
-									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-								}
-								 		
-								Wcount++; 
+									if(retval <0) 
+									{
+										sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Error writing DMA data to file");
+										Pixie_Print_MSG(ErrMSG,1);
+										return (-0x38);
+									} else {
+										sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run: Written another spill for ModNum=%d, count=%d",CurrentModNum, extraspillcount);
+										Pixie_Print_MSG(ErrMSG,1);
+								//		Wcount = 0;			// this ensures we wait at least N cycles after each transfer
+										timeout = 0;		// every new spill starts the DMA transfer timeout
+										extraspillcount++;
+									}		
+								} // if DMA is not idle	
+
+							//	Wcount++; 
 								timeout++;
-								if( (Wcount==DMABUFREFILL_TIMEOUT && active==0) || EndRunFound[CurrentModNum]==1 || retval<0 || timeout==DMATRANSFER_TIMEOUT) {		// end with timeout after DSP finished DMA flush, or on error or timeout
-									datatimeout=1;												// 50ms after DSP or transfer done, 5000ms max, or EOR found by readout routine
-									//Also assumes that a max of 128 x 2MB buffer (SDRAM completely fullwith backlog) is read out in < 5s 
-								}								
-							}
+
+								// end conditions for the while loop
+
+								//if( (Wcount==DMABUFREFILL_TIMEOUT && active==0) || EndRunFound[CurrentModNum]==1 || retval<0 || timeout==DMATRANSFER_TIMEOUT) {		// end with timeout after DSP finished DMA flush, or on error or timeout
+								// DMABUFREFILL_TIMEOUT (50ms) after DSP or transfer done, DMATRANSFER_TIMEOUT (5000ms) max
+								// Also assumes that a max of 128 x 2MB buffer (SDRAM completely full with backlog) is read out in < 5s 
+								if( timeout>=DMATRANSFER_TIMEOUT) {	
+									datatimeout=1;		
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Timeout EndRunFound[0]=%d, LMBuffer[0][last]=0x%x, LMBufferCounter[0]=%d, P4e DMA status 0x%x ", EndRunFound[0],value, LMBufferCounter[0], val);
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
+									// Also check what partial data we have in the buffer, check for EOR
+									retval = Write_DMA_List_Mode_File ((U8)CurrentModNum, "", lower);	// =1 if end 
+									if(retval <0) {	// error
+										sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Error writing DMA data to file");
+										Pixie_Print_MSG(ErrMSG,1);
+										return (-0x38);
+									}
+									if(retval ==0) {	// processed buffer, but no EOR, DMA still on
+										sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run: Written a partial spill for ModNum=%d, count=%d",CurrentModNum, extraspillcount);
+										Pixie_Print_MSG(ErrMSG,1);
+										extraspillcount++;
+									}
+									if(retval ==1)  {	// processed buffer, found EOR, stopped DMA
+										sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run: Written a partial spill for ModNum=%d, count=%d",CurrentModNum, extraspillcount);
+										Pixie_Print_MSG(ErrMSG,1);
+										timeout = 0;		// every new spill starts the DMA transfer timeout
+										extraspillcount++;
+									}	
+								}	// endif timeout 		
+
+								if(EndRunFound[CurrentModNum]) {
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: QC found EOR");
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+									datatimeout=1;
+
+									// also break the DSP out of its loop to flush the SDRAM data, which may wait forever
+									dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+									CSR=(U32)SetBit(BIT_EORR, (U16)CSR);	// Set bit 7 of APP_HOST_CTL to indicate EOR received 
+									dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+								}	// end if end run found
+							}	// time out loop
 						}	// polling
 						else {
 							while(!datatimeout)
@@ -1281,40 +1394,63 @@ S32 Pixie_Acquire_Data (
 								if(active<0) {
 									sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Failed to read Run Status, aborting");
 									Pixie_Print_MSG(ErrMSG,1);
-									return (active);
+									return (-0x32);
 								}
-								if(active) Wcount = 0;										// this ensures we wait at least N cycles after DSP is done
+						//		if(active) Wcount = 0;										// this ensures we wait at least N cycles after DSP is done
+						//		sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Checked RS =  %x",active);
+						//		Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 
-								sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data): End run, checked RS =  %x",active);
-								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-
-								Wcount++;
+						//		Wcount++;
 								timeout++;
-								// TODO: remove Wcount from the condition below? As is will stop loop50ms after DSP finishes, with no guarantee that interrupts are all done
-								if( (Wcount==DMABUFREFILL_TIMEOUT && active==0) || EndRunFound[CurrentModNum]==1 || timeout==DMATRANSFER_TIMEOUT) {				// end with timeout after DSP finished DMA flush, or on error or timeout
-									datatimeout=1;											// 50ms after DSP or transfer done, 5000ms max, or EOR found by readout routine 	
+
+								// end conditions for the while loop
+								if(EndRunFound[CurrentModNum]) {
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: QC found EOR");
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+									datatimeout=1;
+
+									// also break the DSP out of its loop to flush the SDRAM data, which may wait forever
+									dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+									CSR=(U32)SetBit(BIT_EORR, (U16)CSR);	// Set bit 7 of APP_HOST_CTL to indicate EOR received 
+									dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+
 								}
+								if( timeout>=DMATRANSFER_TIMEOUT) {	
+									datatimeout=1;												
+								}	
+								//// TODO: remove Wcount from the condition below? As is will stop loop 50ms after DSP finishes, with no guarantee that interrupts are all done. But required if QC turned off?
+							    ////	if( (Wcount==DMABUFREFILL_TIMEOUT && active==0) || EndRunFound[CurrentModNum]==1 || timeout==DMATRANSFER_TIMEOUT) {				// end with timeout after DSP finished DMA flush, or on error or timeout
+								// if(                                                EndRunFound[CurrentModNum]==1 || timeout==DMATRANSFER_TIMEOUT) {				// end with timeout after DSP finished DMA flush, or on error or timeout
+								//	datatimeout=1;											// 50ms after DSP or transfer done, 5000ms max, or EOR found by readout routine 	
+								//}
+
 							}	// end while
 
 							FlushIgorMSG();
 						}	// end not polling
 						
-						if(timeout==DMATRANSFER_TIMEOUT) {
-							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): End run timed out for ModNum=%d",CurrentModNum);
+						if(timeout>=DMATRANSFER_TIMEOUT) {
+							// TODO: before issueing error, check if module's DSP ok
+							//Pixie_ReadCSR(CurrentModNum, &CSR);
+							//sprintf(ErrMSG, "ModNum=%d: CSR=0x%X, LMbuffer[last]=0x%X",CurrentModNum, CSR, LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]);
+							//Pixie_Print_MSG(ErrMSG,1);
+							//sprintf(ErrMSG, "ModNum=%d: LMbuffer[first]=0x%X, LMbuffer[WM]=0x%X",CurrentModNum, LMBuffer[CurrentModNum][0],LMBuffer[CurrentModNum][WATERMARKINDEX16/2]);
+							//Pixie_Print_MSG(ErrMSG,1);
+							sprintf(ErrMSG, "*WARNING* (Pixie_Acquire_Data): End run timed out for ModNum=%d (polling = %d)",CurrentModNum, Polling);
 							Pixie_Print_MSG(ErrMSG,1);
 							timeouterror =1;
 							//return(-0x32);
 						}
 
 					//	sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): data read wait done for module %d",CurrentModNum);
-					//	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+					//	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 
 					} // for modules
 
 					if(timeouterror) {
-						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): End run timed out for at least one module");
+						sprintf(ErrMSG, "*WARNING* (Pixie_Acquire_Data): End run timed out for at least one module, data may be incomplete");
 						Pixie_Print_MSG(ErrMSG,1);
-						return(-0x32);
+						return(0); //-0x32); suppress error return here: still need to clean up DMA etc. 
 					}
 
 #ifdef MEASURERUNTIME
@@ -1330,15 +1466,16 @@ S32 Pixie_Acquire_Data (
        			for(CurrentModNum = MNstart; CurrentModNum < MNend ; CurrentModNum ++)
 					{
 						// Halt DMA
-						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run, halt DMA");
-						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+						// supposedly DMA not restarted after EOR
+						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Halt DMA");
+						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 
 						VDMADriver_Halt(hDev[CurrentModNum]);
 
 						Pixie_Sleep(10);
- 						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): DMA halted.");
-						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-
+ 						//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): DMA halted.");
+						//Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+			
 						// To make the flush data (64 words at the end of the run from DSP) disappear.
 						retval = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_SDRAM_STATUS, WDC_READ, &value, FALSE);						
 						value |= 0x8;	// Re-init SDRAM, assert bit 3
@@ -1346,7 +1483,7 @@ S32 Pixie_Acquire_Data (
 						// Reset FIFOs
 						VDMADriver_EventSet(hDev[CurrentModNum], 0x400);
 						Pixie_Sleep(10);
-
+			
 						// Clean up after the run
 						if (pDmaList[CurrentModNum] != NULL) {
 							retval = WDC_DMASyncIo(pDmaList[CurrentModNum]);
@@ -1362,8 +1499,56 @@ S32 Pixie_Acquire_Data (
 							LMBufferCopy[CurrentModNum] = NULL;
 						}
 						fclose(listFile[CurrentModNum]); // close if using global listFile array
-						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): 0x34xx ListMode DMA resources released.");
-						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRun: ListMode DMA resources released.");
+						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
+						// reset the EORR bit
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+						CSR=(U32)ClrBit(BIT_EORR, (U16)CSR);	
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+
+						// Clean up interrupts
+						if (Polling==0 && MultiThreadDAQ==0) 
+							PIXIE500E_IntDisable(hDev[CurrentModNum]);
+
+						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRun: ALL DONE.");
+						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
+						active = Check_Run_Status((U8)CurrentModNum);
+						if(active<0) {
+							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Failed to read Run Status, aborting");
+							Pixie_Print_MSG(ErrMSG,1);
+							return (-0x32);
+						}
+						//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Checked RS =  %x",active);
+						//Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
+						if(active) {
+							sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: DSP still active, trying to stop again");
+							Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+						
+							/* Stop run in all modules */
+							dwStatus = Run_Enable_Clear((U8)CurrentModNum);
+							if (dwStatus != 0) {
+								sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data) End Run: Unable to clear Run Enable.");
+								Pixie_Print_MSG(ErrMSG,1);
+								return(-0x32);
+							}
+
+							Pixie_Sleep(1); 
+
+							active = Check_Run_Status((U8)CurrentModNum);
+							if(active<0) {
+								sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Failed to read Run Status, aborting");
+								Pixie_Print_MSG(ErrMSG,1);
+								return (-0x32);
+							}
+						//	sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): End run: Checked again RS =  %x",active);
+						//	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+						}
+
+
+
 
 						//// Without ADC trace acquisition between the runs, after the first list-mode run,
 						//// there is some junk data in the framebuffer.
@@ -1373,44 +1558,49 @@ S32 Pixie_Acquire_Data (
 						//// Or we're missing some data in the beginning of list-mode data, but only in even runs:
 						//// some bit must be toggling.
 
-						// Prepare for ADC trace (to emulate ADC trace between the list-mode runs)
+	/*					// Prepare for ADC trace (to emulate ADC trace between the list-mode runs)
 						//////////////////////////////////////////////////////////
-						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): 0x34xx Run end, start dummy trace DMA...");
-						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRun: Start Dummy trace DMA...");
+						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 						pDmaTrace = NULL;
 						listBuffer = malloc(IO_BUFFER_LENGTH*NUMBER_OF_CHANNELS*sizeof(U32));
 						if(!listBuffer) {
-							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Memory allocation failure");
+							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): EndRun: Memory allocation failure");
 							Pixie_Print_MSG(ErrMSG,1);
-							return(-0x13);
+							return(-0x35);
 						}
 						//Get_Traces(listBuffer, CurrentModNum, NUMBER_OF_CHANNELS);
 						// *
 						retval = PIXIE500E_DMA_Trace_Setup(hDev[CurrentModNum],  IO_BUFFER_LENGTH*NUMBER_OF_CHANNELS*sizeof(U32), listBuffer, &pDmaTrace);
 						if (retval != 0) {
-							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Run end, dummy trace DMA setup failed, %d", retval);
+							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data):EndRun: Dummy trace DMA setup failed, %d", retval);
 							Pixie_Print_MSG(ErrMSG,1);
-							return(-0x13);
+							return(-0x36);
 						}
 						retval = PIXIE500E_DMA_Init(hDev[CurrentModNum]);
 						if (retval != 0) {
-							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): Run end, dummy trace DMA init failed, %d", retval);
+							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): EndRun: Dummy trace DMA init failed, %d", retval);
 							Pixie_Print_MSG(ErrMSG,1);
-							return(-0x13);
+							return(-0x36);
 						}
 						retval = WDC_DMASyncCpu(pDmaTrace);
 						retval = Start_Run((U8)CurrentModNum, NEW_RUN, 0, GET_TRACES);
+						if (retval != 0) {
+							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): EndRun: Dummy start run failed");
+							Pixie_Print_MSG(ErrMSG,1);
+							return(-0x37);
+						}
 						VDMADriver_Go(hDev[CurrentModNum]);
-						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): 0x34xx started run in DSP & started DMA");
-						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRun: started run in DSP & started DMA");
+						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 						dwStatus = PIXIE500E_DMA_WaitForCompletion(hDev[CurrentModNum], TRUE);
 						if (dwStatus != 0) {
 							sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data) IO_BUFFER read: DMA transfer timed out.");
 							Pixie_Print_MSG(ErrMSG,1);
-							return(-0x13);
+							return(-0x34);
 						}
 						
-		/*	// WH_TODO: this can be commented out, since we reset properly now in DMA start. Already removed in get_Traces
+		/ *	// WH_TODO: this can be commented out, since we reset properly now in DMA start. Already removed in get_Traces
 						// To make the flush data (64 words at the end of the run from DSP) disappear.
 						retval = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_SDRAM_STATUS, WDC_READ, &value, FALSE);
 						value |= 0x8;	// Re-init SDRAM, assert bit 3
@@ -1418,27 +1608,26 @@ S32 Pixie_Acquire_Data (
 						retval = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], APP_SDRAM_STATUS, WDC_READ, &value, FALSE);
 						// Reset FIFOs
 						VDMADriver_EventSet(hDev[CurrentModNum], 0x400);
-			// comment out until here */
+			// comment out until here * /
 
-						retval = WDC_DMASyncIo(pDmaTrace);
-						retval = WDC_DMABufUnlock(pDmaTrace); 
+						//VDMADriver_Halt(hDev[CurrentModNum]);		// should not be necessary as in PIXIE500E_DMA_WaitForCompletion we wait until it's halted by itself
+*/
+				//		retval = WDC_DMASyncIo(pDmaTrace);
+				//		retval = WDC_DMABufUnlock(pDmaTrace);		// this can cause Igor crash without ADC trace read
 							// * /
-						free(listBuffer);
-						pDmaTrace = NULL;
+				//		free(listBuffer);
+				//		pDmaTrace = NULL;
 						
-						sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): 0x34xx Run end, dummy trace DMA done!");
-						Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-						Pixie_Sleep(100);
+					//	sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): EndRun: dummy trace DMA done");
+					//	Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+					//	Pixie_Sleep(100);
 						//////////////////////////////////////////////////////////////////
 						// ADC trace DMA finished
 
 
-						// Clean up interrupts
-						if (Polling==0)
-							PIXIE500E_IntDisable(hDev[CurrentModNum]);
 
-						//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data): 0x34xx DONE.");
-						//Pixie_Print_MSG(ErrMSG,1);
+
+
 					} // for modules
 #endif
 					break;
@@ -1489,8 +1678,21 @@ S32 Pixie_Acquire_Data (
 				// P4e/P500e only
 				// poll all modules individually, if data ready, store to file
 				// returns total number of spills saved to file
+				//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): EndRunFound[0]=%d, LMBuffer[0][last]=0x%x, LMBufferCounter[0]=%d ", EndRunFound[0],LMBuffer[0][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1], LMBufferCounter[0]);
+				//Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+
 				retval=0;      // default: no module saved data
 #ifdef WINDRIVER_API
+				sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_01): about to poll");
+				Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+				if(PrintDebugMsg_daq) {
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[0], VDMA_DPTRx, WDC_READ, &valdptrx, FALSE);
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[0], VDMA_RA, WDC_READ, &valra, FALSE);
+					dwStatus = PIXIE500E_ReadWriteReg(hDev[0], VDMA_CSRx, WDC_READ, &val, FALSE);
+					sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_02): VDMA CSR=0x%04X, RA = 0x%04X, DPTRx = 0x%04X, LMBuffer[0][last]=0x%x", val,valra, valdptrx, LMBuffer[0][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]);
+					Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+				}
+
 				for (CurrentModNum = MNstart; CurrentModNum < MNend ; CurrentModNum ++) {
 
 					if (Polling==1)
@@ -1500,28 +1702,26 @@ S32 Pixie_Acquire_Data (
 						// When polling, do nothing if DMA is not idle, write_DMA_List_Mode_File() if DMA is idle
 						// options: not use VDMADriver_isIdle (with DMA_CSR) here, but just check the LMBuffer[last] for content
 						// if 0x69 (initialized on run start), or 0xA5 (initialized on buffer dump), then the frame buffer is not filled yet, we should not be idle.
-						if (LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]==0xA5A5A5A5 || LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]==0x69696969) {				
-							// do nothing
-							if (PollForNewData)
-							{
-								status = FindNewDMAData();		// finds to position of just after the last new RS block
-								//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): data up to %d words (16bit).",2*status);
-								//Pixie_Print_MSG(ErrMSG,1);//PrintDebugMsg_other);
-								if(status != DMADataPos)		// if unchanged, there is no new data
-								{
-									memcpy(User_data, &LMBuffer[0][DMADataPos], (status-DMADataPos)*sizeof(U32));
-								
-									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): copying = %d words (16bit).",2*(status-DMADataPos));
-									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-									DMADataPos =status;		// advance by amount read
-								}
-								sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): DMADataPos = %d.",DMADataPos);
-								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
-							}
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[CurrentModNum], VDMA_CSRx, WDC_READ, &val, FALSE);
+						dwStatus = LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]; // shorthand for LMbuffer[last]
+						
+
+						// debug
+						if (val==0 && (dwStatus==0xA5A5A5A5 || dwStatus==0x69696969) ) {
+							sprintf(ErrMSG, "*WARNING* (Pixie_Acquire_Data 0x440x_02a): Mismatch CSR, LMbuffer[last] indicating buffer filled, but proceeding to readout ");
+							Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 						}
-						else { // some values in the last frame buffer element: real data, we should be idle
-							//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440#): buffer is FILLED (idle).");
-							//Pixie_Print_MSG(ErrMSG,1);
+						if (val!=0 && (dwStatus!=0xA5A5A5A5 && dwStatus!=0x69696969) ) {
+							sprintf(ErrMSG, "*WARNING* (Pixie_Acquire_Data 0x440x_02b): Mismatch CSR, LMbuffer[last] indicating buffer filled, but proceeding to readout ");
+							Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+						}
+						
+						
+						if (val==0 || (dwStatus!=0xA5A5A5A5 && dwStatus!=0x69696969) ) 
+						
+						{ // some values in the last frame buffer element: real data, we should be idle
+							sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_05): buffer is FILLED (idle), proceeding to store data. (VDMA CSR=0x%04X, LMBuffer[m][last]=0x%x)", val,LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]);
+							Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 							VDMADriver_Halt(hDev[CurrentModNum]);
 							if (Write_DMA_List_Mode_File ((U8)CurrentModNum, "", lower) < 0) { // read data, check, dump to file
 								// if error
@@ -1533,13 +1733,79 @@ S32 Pixie_Acquire_Data (
 									// return new data = from current to end of block	
 									memcpy(User_data, &LMBuffer[0][DMADataPos], (DMA_LM_FRAMEBUFFER_LENGTH/4-DMADataPos)*sizeof(U32));
 									DMADataPos =numDWordsLeftover[0];		// restart from beginning plus the leftovers from last buffer
-									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): reset DMADataPos = %d.",DMADataPos);
-									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_other);
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_06): reset DMADataPos = %d.",DMADataPos);
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+								}
+										
+							}
+						}
+						else
+						{				
+							// do nothing unless PollForNewData
+							if (PollForNewData)
+							{
+								status = FindNewDMAData();		// finds to position of just after the last new RS block
+								//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): data up to %d words (16bit).",2*status);
+								//Pixie_Print_MSG(ErrMSG,1);//PrintDebugMsg_other);
+								if(status != DMADataPos)		// if unchanged, there is no new data
+								{
+									memcpy(User_data, &LMBuffer[0][DMADataPos], (status-DMADataPos)*sizeof(U32));
+								
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_03): copying = %d words (16bit).",2*(status-DMADataPos));
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+									DMADataPos =status;		// advance by amount read
+								}
+								sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_04): DMADataPos = %d.",DMADataPos);
+								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+							}			
+
+						} // end if checking last frame buffer element (if DMA idle)
+
+					/*	if (val!=0 || (dwStatus==0xA5A5A5A5 || dwStatus==0x69696969) ) 
+						
+						{				
+							// do nothing unless PollForNewData
+							if (PollForNewData)
+							{
+								status = FindNewDMAData();		// finds to position of just after the last new RS block
+								//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): data up to %d words (16bit).",2*status);
+								//Pixie_Print_MSG(ErrMSG,1);//PrintDebugMsg_other);
+								if(status != DMADataPos)		// if unchanged, there is no new data
+								{
+									memcpy(User_data, &LMBuffer[0][DMADataPos], (status-DMADataPos)*sizeof(U32));
+								
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_03): copying = %d words (16bit).",2*(status-DMADataPos));
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+									DMADataPos =status;		// advance by amount read
+								}
+								sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_04): DMADataPos = %d.",DMADataPos);
+								Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+							}
+						}
+
+						else 
+						
+						{ // some values in the last frame buffer element: real data, we should be idle
+							sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_05): buffer is FILLED (idle), proceeding to store data. (VDMA CSR=0x%04X, LMBuffer[m][last]=0x%x)", val,LMBuffer[CurrentModNum][DMA_LM_FRAMEBUFFER_LENGTH/sizeof(UINT32)-1]);
+							Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
+							VDMADriver_Halt(hDev[CurrentModNum]);
+							if (Write_DMA_List_Mode_File ((U8)CurrentModNum, "", lower) < 0) { // read data, check, dump to file
+								// if error
+								error = -1;
+							}
+							else {
+								if (PollForNewData)
+								{
+									// return new data = from current to end of block	
+									memcpy(User_data, &LMBuffer[0][DMADataPos], (DMA_LM_FRAMEBUFFER_LENGTH/4-DMADataPos)*sizeof(U32));
+									DMADataPos =numDWordsLeftover[0];		// restart from beginning plus the leftovers from last buffer
+									sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x_06): reset DMADataPos = %d.",DMADataPos);
+									Pixie_Print_MSG(ErrMSG,PrintDebugMsg_daq);
 								}
 										
 							}
 						} // end if checking last frame buffer element (if DMA idle)		
-
+						*/
 					}	// end if polling
 					//sprintf(ErrMSG, "*DEBUG* (Pixie_Acquire_Data 0x440x): polling done.");
 					//Pixie_Print_MSG(ErrMSG,1);
@@ -1736,11 +2002,13 @@ S32 Pixie_Acquire_Data (
 					break;
 
 				case 0x0FB:  /* reboot FPGA */
+					sprintf(ErrMSG, "*INFO* (Pixie_Acquire_Data 0x40FB): Trying to reboot FPGA");
+					Pixie_Print_MSG(ErrMSG,1);
 					BoardRevision = (U16)Pixie_Devices[ModNum].Module_Parameter_Values[Find_Xact_Match("BOARD_VERSION", Module_Parameter_Names, N_MODULE_PAR)];
  					if ((BoardRevision & 0x0FF0) == MODULETYPE_P4e_16_125) 
-						retval=PIXIE500E_ProgramFPGA(hDev[ModNum], 1, 12);		// type 12 is debug mode: force reboot
+						retval=PIXIE4E_ProgramFPGA(hDev[ModNum], 1, 12);		// type 12 is debug mode: force reboot
 					if ((BoardRevision & 0x0FF0) == MODULETYPE_P4e_14_500) 
-						retval=PIXIE500E_ProgramFPGA(hDev[ModNum], 1, 13);		// type 13 is debug mode: force reboot
+						retval=PIXIE4E_ProgramFPGA(hDev[ModNum], 1, 13);		// type 13 is debug mode: force reboot
 					break; 	
 #endif
 
@@ -1979,6 +2247,17 @@ S32 Pixie_Acquire_Data (
 
 					break;
 
+                case 0x11:  /* 2-line output: odd---header data, even---waveforms. */
+					if (ListFileVariant == P500E_LIST_FILE) retval=Pixie_List_Mode_Parser(file_name, User_data, 0x7011);
+					if(retval < 0)
+					{
+						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to read list mode data, retval=%d", retval);
+						Pixie_Print_MSG(ErrMSG,1);
+						return(-0x79);
+					}
+
+					break;
+
 				case 0x20:  /* apply error checking and save corrected file */
 					if (ListFileVariant == P500E_LIST_FILE) retval=Pixie_List_Mode_Parser(file_name, User_data, 0x7020);
 					if(retval < 0)
@@ -2001,6 +2280,16 @@ S32 Pixie_Acquire_Data (
 
 					break;
 
+                case 0x30:  /* Computed PSA values */
+					if (ListFileVariant == P500E_LIST_FILE) retval=Pixie_List_Mode_Parser(file_name, User_data, 0x7030);
+					if(retval < 0)
+					{
+						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to read list mode data, retval=%d", retval);
+						Pixie_Print_MSG(ErrMSG,1);
+						return(-0x79);
+					}
+
+					break;
 
 
 				default:
@@ -2036,6 +2325,7 @@ S32 Pixie_Acquire_Data (
 
 			switch(lower)
 			{
+
 				case 0x1:  
 					/* Read out MCA section of EM */
 					retval=Pixie_IOEM(ModNum, HISTOGRAM_MEMORY_ADDRESS, MOD_READ, HISTOGRAM_MEMORY_LENGTH, User_data);
@@ -2083,6 +2373,77 @@ S32 Pixie_Acquire_Data (
 					}
 
 					break;
+
+				case 0x5:
+					/* read 2D section of EM */
+#ifdef WINDRIVER_API
+					if (PCIBusType==EXPRESS_PCI) {
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+						// Assert bit 6: high bit of MCA memory range
+						CSR=(U32)SetBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+						
+						retval=Pixie_IOEM(ModNum, MCA2D_MEMORY_ADDRESS, MOD_READ, MCA2D_MEMORY_LENGTH, User_data);
+						
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+						// De-Assert bit 6: high bit of MCA memory range
+						CSR=(U32)ClrBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+					}
+#endif
+					if(retval < 0)
+					{
+						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to read out 2D section of external memory, retval=%d", retval);
+						Pixie_Print_MSG(ErrMSG,1);
+						return(-0x96);
+					}
+
+					break;
+
+				case 0x6:	
+					/* write to 2D section of EM */
+#ifdef WINDRIVER_API
+					if (PCIBusType==EXPRESS_PCI) {
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+						// Assert bit 6: high bit of MCA memory range
+						CSR=(U32)SetBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+
+						retval=Pixie_IOEM(ModNum, MCA2D_MEMORY_ADDRESS, MOD_WRITE, MCA2D_MEMORY_LENGTH, User_data);
+
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+						// De-Assert bit 6: high bit of MCA memory range
+						CSR=(U32)ClrBit(BIT_MCAUPPERA, (U16)CSR);	/* Set bit 6 of APP_HOST_CTL to select upper MCA range */
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_WRITE, &CSR, FALSE);
+						dwStatus = PIXIE500E_ReadWriteReg(hDev[ModNum], APP_HOST_CTL, WDC_READ, &CSR, FALSE);
+					}
+#endif
+					if(retval < 0)
+					{
+						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to write to 2D section of external memory, retval=%d", retval);
+						Pixie_Print_MSG(ErrMSG,1);
+						return(-0x97);
+					}
+
+					break;
+
+				case 0x7:  
+					/* Read out first 8K of MCA section of EM */
+               CSR = User_data[0];   // borrow CSR variable for User_data[0], contains length of MCA to read
+               if(CSR>HISTOGRAM_MEMORY_LENGTH)     // enforce a maximum (but leave to host program to make sure User_data is large enough)
+                  CSR = HISTOGRAM_MEMORY_LENGTH;
+					retval=Pixie_IOEM(ModNum, HISTOGRAM_MEMORY_ADDRESS, MOD_READ, CSR, User_data);
+					if(retval < 0)
+					{
+						sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): failure to read out first 8K of MCA section of external memory, retval=%d", retval);
+						Pixie_Print_MSG(ErrMSG,1);
+						return(-0x98);
+					}
+					
+					break;
 					
 				default:
 					sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): invalid external memory I/O request, Run Type=%d", Run_Type);
@@ -2121,14 +2482,14 @@ S32 Pixie_Acquire_Data (
 		
 
 				default:
-					sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): invalid run request, Run Type=%x", Run_Type);
+					sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): invalid run request, Run Type=0x%x", Run_Type);
 					Pixie_Print_MSG(ErrMSG,1);
 					return(-0xAF);
 			}
 			break;
 			
 		default:
-			sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): invalid run type, Run Type=%x", Run_Type);
+			sprintf(ErrMSG, "*ERROR* (Pixie_Acquire_Data): invalid run type, Run Type=0x%x", Run_Type);
 			Pixie_Print_MSG(ErrMSG,1);
 			return(-0xA0);
 	}
@@ -2383,7 +2744,10 @@ S32 Pixie_Buffer_IO (
 				//KeepCW			= tstbit(10,value16);		// To control update and enforced minimum of coincidence wait
 				PollForNewData		= TstBit(11,value16);		// if 1, return new data in DMA buffer during polling
 				MultiThreadDAQ		= TstBit(12,value16);		// if 1, run 0x400, 0x301, and 0x10x as a separate thread
-
+				PrintDebugMsg_daq	  = TstBit(13,value16);		// if 1, print debug messages for run start/stop 
+				PrintDebugMsg_file	    = TstBit(14,value16);		// if 1, Igor also prints to a file
+				KeepBL				    = TstBit(15,value16);		// if 1, do not automatically adjust BLcut after gain or filter settings changes
+				
 				if (Offline == 1) // no further update in offline mode
 					return (0);
                 

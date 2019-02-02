@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
 
 	U8     NumberOfModules = 1;
-	S16     Slots[]         = {231};
+	S16     Slots[]         = {114};
 	S32    retval          = 0;
 	S32    i, j;
 

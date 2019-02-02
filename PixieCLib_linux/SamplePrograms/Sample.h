@@ -82,13 +82,13 @@ S8 *boot_file_names[] = { /* for one Pixie-4 module */
   ""
 #else
   "Firmware/P4e_16_125_vdo.bin",
-  "firmware/syspixie_revC.bin",
-  "firmware/pixie.bin",
+  "Firmware/syspixie_revC.bin",
+  "Firmware/pixie.bin",
   "DSP/PXIcode.bin",
   "Configuration/default_125.set",
   "DSP/p500e.var",
   "DSP/PXIcode.lst",
-  "firmware/syspixie_revC.bin",
+  "Firmware/syspixie_revC.bin",
   "Firmware/P4e_14_500_vdo.bin",
   "Firmware/p500e_zdt.bin",
   "DSP/P500code.bin",

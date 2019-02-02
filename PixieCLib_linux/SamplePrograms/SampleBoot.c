@@ -23,30 +23,11 @@ int main(int argc, char **argv)
 	double ModuleParameterValues [PRESET_MAX_MODULES*N_MODULE_PAR]                     = {0};
 	double ChannelParameterValues[PRESET_MAX_MODULES*N_CHANNEL_PAR*NUMBER_OF_CHANNELS] = {0};
 	/* System configuration */
-	/* #include "SystemConfig.c" */
-	SystemParameterValues[Pixie_Get_Par_Idx("NUMBER_MODULES", "SYSTEM")] = NumberOfModules;
-	SystemParameterValues[Pixie_Get_Par_Idx("OFFLINE_ANALYSIS",   "SYSTEM")] = 0;
-	SystemParameterValues[Pixie_Get_Par_Idx("AUTO_PROCESSLMDATA", "SYSTEM")] = 0;
-	SystemParameterValues[Pixie_Get_Par_Idx("MAX_NUMBER_MODULES", "SYSTEM")] = 7;//13;
-	SystemParameterValues[Pixie_Get_Par_Idx("KEEP_CW",            "SYSTEM")] = 1;
-	/* The PXI crate slot number where the Pixie module is installed */
-	i = Pixie_Get_Par_Idx("SLOT_WAVE", "SYSTEM");
-	for (j = 0; j < NumberOfModules; j++) SystemParameterValues[i++] = Slots[j];
-	/* Download boot file names */
-	Pixie_Hand_Down_Names(boot_file_names, "ALL_FILES");
-	/* Call library function Pixie_User_Par_IO to initialize SystemParameterValues */
-	Pixie_User_Par_IO(SystemParameterValues, "NUMBER_MODULES",     "SYSTEM", MOD_WRITE, 0, 0);
-	Pixie_User_Par_IO(SystemParameterValues, "OFFLINE_ANALYSIS",   "SYSTEM", MOD_WRITE, 0, 0);
-	Pixie_User_Par_IO(SystemParameterValues, "AUTO_PROCESSLMDATA", "SYSTEM", MOD_WRITE, 0, 0);
-	Pixie_User_Par_IO(SystemParameterValues, "MAX_NUMBER_MODULES", "SYSTEM", MOD_WRITE, 0, 0);
-	Pixie_User_Par_IO(SystemParameterValues, "SLOT_WAVE",          "SYSTEM", MOD_WRITE, 0, 0);
-	Pixie_User_Par_IO(SystemParameterValues, "KEEP_CW",            "SYSTEM", MOD_WRITE, 0, 0);
+	#include "SystemConfig.c"
 
-
-
-	
+        PrintDebugMsg_Boot=1;
 	/* Boot all modules in the crate */
-	if((retval = Pixie_Boot_System(0xE)) < 0) { // 0x2 FPGA only, 0x6 FPGA and DSP, 0xE for FPGA, DSP, and DSP parameters
+	if((retval = Pixie_Boot_System(0x2)) < 0) { // 0x2 FPGA only, 0x6 FPGA and DSP, 0xE for FPGA, DSP, and DSP parameters
 		printf("Boot Pixie-4 failed, retval=%d\n", retval);
 		return(retval);
 	}
@@ -54,6 +35,8 @@ int main(int argc, char **argv)
 		printf("... ");
 		printf("*INFO* (Main) Boot Pixie-4 succeeded\n");
 	}
+
+    return (0);
 //	PIXIE500E_LibUninit();
 
 

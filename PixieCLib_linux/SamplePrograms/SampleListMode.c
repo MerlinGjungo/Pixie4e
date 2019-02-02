@@ -14,7 +14,7 @@ int main(void){
 	U8     ModNum          = 0;
 	U8     ChanNum         = 0;
 	U8     NumberOfModules = 1;
-	U8     Slots[]         = {231};
+	U8     Slots[]         = {200};
 	U16    offset          = 0;
 	U16    idx             = 0;
 	S32    retval          = 0;
@@ -171,7 +171,7 @@ int main(void){
 
 
 	Pixie_Acquire_Data(0x1400, NULL, "ListModeData.bin", NumberOfModules); // Start run
-	Pixie_Sleep(2000);
+	Pixie_Sleep(5000);
 	Pixie_Acquire_Data(0x3400, NULL, "ListModeData.bin", NumberOfModules); // Stop run
 	printf("Info: list mode run 0x400 ended\n");
 

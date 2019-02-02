@@ -164,6 +164,8 @@ S32 Pixie_Event_Browser(
 			S8 *filename, 
 			U32 *UserData);
 
+// Processing function for 0x7030
+S32 ComputePSA(U16* trace, U32 traceLength, U32 *PSAval);
 
 #ifdef __cplusplus
 }

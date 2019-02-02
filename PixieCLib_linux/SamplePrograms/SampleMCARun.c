@@ -14,7 +14,7 @@ int main(void){
 	U8     ModNum          = 0;
 	U8     ChanNum         = 0;
 	U8     NumberOfModules = 1;
-	U8     Slots[]         = {231}; 
+	U8     Slots[]         = {200}; 
 	U16    offset          = 0;
 	U16    idx             = 0;
 	U32   *UserData        = NULL;

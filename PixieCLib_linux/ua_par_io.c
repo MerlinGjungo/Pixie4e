@@ -156,10 +156,13 @@ S32 UA_PAR_IO (	double *User_Par_Values,	// user parameters to be transferred
 	U8      CHANNEL     = (U8)(strcmp(user_variable_type,                "CHANNEL") == 0);
 	U8      ALLCHANNEL  = (U8)(strcmp(user_variable_name, "ALL_CHANNEL_PARAMETERS") == 0);
 	U8      CHANNELSTAT = (U8)(strcmp(user_variable_name, "CHANNEL_RUN_STATISTICS") == 0);
+	U8      MODULESTAT  = (U8)(strcmp(user_variable_name,  "MODULE_RUN_STATISTICS") == 0);
 	U8		READ		= (U8)(direction == 1);
 	U32		dsp_par[N_DSP_PAR];
 	U32		k;
 	S32     retval      = -1;
+	U16		len;
+	U16		off;
 	
 	if (direction > 1)
 	{
@@ -175,9 +178,36 @@ S32 UA_PAR_IO (	double *User_Par_Values,	// user parameters to be transferred
 	// NEW in 4.0: always update all local values from module 
 	if ( (READ) && (Offline != 1) )
 	{
-		Pixie_IODM(ModNum, (U16)DATA_MEMORY_ADDRESS, MOD_READ, N_DSP_PAR, dsp_par);		// read from module
+//		sprintf(ErrMSG, "*INFO* (UA_PAR_IO): variable name %s", user_variable_name);
+//		Pixie_Print_MSG(ErrMSG,1);
+
+		if(CHANNELSTAT || MODULESTAT)
+		{
+			// avoid the DSP handshaking by only reading runstats from FPGA
+			len = N_DSP_PAR-DSP_IO_BORDER-65;
+			off = DSP_IO_BORDER+65;
+			Pixie_IODM(ModNum, (U16)DATA_MEMORY_ADDRESS+off, MOD_READ, len, dsp_par);		// read only chan stats from module
+			
+			for(k = 0; k < len; k++) 
+				Pixie_Devices[ModNum].DSP_Parameter_Values[k+off] = (U16)dsp_par[k];		// update local values	
+			
+			len = 25;
+			off = DSP_IO_BORDER+3;
+			Pixie_IODM(ModNum, (U16)DATA_MEMORY_ADDRESS+off, MOD_READ, len, dsp_par);		// read only mod stats from module
+			
+			for(k = 0; k < len; k++) 
+				Pixie_Devices[ModNum].DSP_Parameter_Values[k+off] = (U16)dsp_par[k];		// update local values	
+		
+//			sprintf(ErrMSG, "*INFO* (UA_PAR_IO): reading partial IODM");
+//			Pixie_Print_MSG(ErrMSG,1);
+		} else {
+			Pixie_IODM(ModNum, (U16)DATA_MEMORY_ADDRESS, MOD_READ, N_DSP_PAR, dsp_par);		// read from module
+			
 			for(k = 0; k < N_DSP_PAR; k++) 
 				Pixie_Devices[ModNum].DSP_Parameter_Values[k] = (U16)dsp_par[k];		// update local values
+//			sprintf(ErrMSG, "*INFO* (UA_PAR_IO): reading IODM");
+//			Pixie_Print_MSG(ErrMSG,1);
+		}
 	}
 
 	if (MODULE) return UA_MODULE_PAR_IO (User_Par_Values, user_variable_name, direction, ModNum, ChanNum);
@@ -355,6 +385,7 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 	U16	DSP_CLOCK_MHZ = P4_DSP_CLOCK_MHZ;
 	U16	CTscale =P4_CTSCALE;						// The scaling factor for count time counters
 	U16	BoardVersion;
+   U32   buffer[128];
 
 	U16	offset = ModNum * N_MODULE_PAR;
 	U32	value32, value2;
@@ -425,16 +456,18 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 				else 
 					Pixie_Devices[k].DSP_Parameter_Values[idx] = ClrBit(11 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);  // clear bit 11 (in all modules for convenience)
 
-
-				/* Update the Igor variables  */
-				value32  = (U32)(User_Par_Values[idxu+offset] = Pixie_Devices[k].Module_Parameter_Values[idxu] = (double)Pixie_Devices[k].DSP_Parameter_Values[idx]);
-				value2 = (U32)(User_Par_Values[idx3+offset] = Pixie_Devices[k].Module_Parameter_Values[idx3] = (double)Pixie_Devices[k].DSP_Parameter_Values[idx4]);
+				/* Update the Pixie_Devices variables  */
+				value32  = (U32)(Pixie_Devices[k].Module_Parameter_Values[idxu] = (double)Pixie_Devices[k].DSP_Parameter_Values[idx]);
+				value2   = (U32)(Pixie_Devices[k].Module_Parameter_Values[idx3] = (double)Pixie_Devices[k].DSP_Parameter_Values[idx4]);
 				/* Download to the  Pixie modules */
 				Pixie_IODM((U8)k, (U16)(DATA_MEMORY_ADDRESS+idx),  MOD_WRITE, 1, &value32);
 				Pixie_IODM((U8)k, (U16)(DATA_MEMORY_ADDRESS+idx4), MOD_WRITE, 1, &value2);
 				/* Program FiPPI also applies ModCSRA settings to System FPGA */
 				Control_Task_Run((U8)k, PROGRAM_FIPPI, 1000);
 			}	// end for
+			// update user array
+			User_Par_Values[idxu+offset] = Pixie_Devices[ModNum].Module_Parameter_Values[idxu];
+			User_Par_Values[idx3+offset] = Pixie_Devices[ModNum].Module_Parameter_Values[idx3];
 	    }
 	    if (READ) {
 			idx=Find_Xact_Match("MODULE_CSRA", Module_Parameter_Names, N_MODULE_PAR);
@@ -445,14 +478,47 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 	if(strcmp(user_variable_name,"MODULE_CSRB") == 0 || ALLREAD)
 	{
 	    if (WRITE) {
-			idx=Find_Xact_Match("MODULE_CSRB", Module_Parameter_Names, N_MODULE_PAR);
-			value32=(U32)User_Par_Values[idx+offset];
-			Pixie_Devices[ModNum].Module_Parameter_Values[idx]=User_Par_Values[idx+offset];
+			idxu = Find_Xact_Match("MODULE_CSRB", Module_Parameter_Names, N_MODULE_PAR);
+			idx  = Find_Xact_Match("MODCSRB",     DSP_Parameter_Names,    N_DSP_PAR);
+			value32=(U32)User_Par_Values[idxu+offset];
+			Pixie_Devices[ModNum].Module_Parameter_Values[idxu]=User_Par_Values[idxu+offset];
+			
 			/* Update the DSP parameter MODCSRB */
-			idx=Find_Xact_Match("MODCSRB", DSP_Parameter_Names, N_DSP_PAR);
 			Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)value32;
 			/* Download to the selected Pixie module */
-			Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value32);
+			// Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value32);
+
+			// some bits apply to all modules
+			for(k = 0; k < Number_Modules; k++)
+			{
+				/* Disable LM data write: bit 1.  All modules must be the same 	*/
+				if(TstBit(1, Pixie_Devices[ModNum].DSP_Parameter_Values[idx]) == 1) 
+					Pixie_Devices[k].DSP_Parameter_Values[idx] = SetBit(1 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);   // set bit 1 (in all modules)
+				else 
+					Pixie_Devices[k].DSP_Parameter_Values[idx] = ClrBit(1 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);  // clear bit 1 (in all modules)
+
+				/* SAUNA/Xe code: bit 8.  All modules must be the same 	*/
+				if(TstBit(8, Pixie_Devices[ModNum].DSP_Parameter_Values[idx]) == 1) 
+					Pixie_Devices[k].DSP_Parameter_Values[idx] = SetBit(8 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);   // set bit 8 (in all modules)
+				else 
+					Pixie_Devices[k].DSP_Parameter_Values[idx] = ClrBit(8 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);  // clear bit 8 (in all modules)
+
+				/* NMISA code: bit 9.  All modules must be the same 	*/
+				if(TstBit(9, Pixie_Devices[ModNum].DSP_Parameter_Values[idx]) == 1) 
+					Pixie_Devices[k].DSP_Parameter_Values[idx] = SetBit(9 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);   // set bit 9 (in all modules)
+				else 
+					Pixie_Devices[k].DSP_Parameter_Values[idx] = ClrBit(9 ,Pixie_Devices[k].DSP_Parameter_Values[idx]);  // clear bit 9 (in all modules)
+
+
+				/* Update the Pixie_Devices variables  */
+				value32  = (U32)(Pixie_Devices[k].Module_Parameter_Values[idxu] = (double)Pixie_Devices[k].DSP_Parameter_Values[idx]);
+				/* Download to the  Pixie modules */
+				Pixie_IODM((U8)k, (U16)(DATA_MEMORY_ADDRESS+idx),  MOD_WRITE, 1, &value32);
+				/* Program FiPPI also applies ModCSRB settings to System FPGA */
+				Control_Task_Run((U8)k, PROGRAM_FIPPI, 1000);
+			}	// end for
+			// update user array
+			User_Par_Values[idxu+offset] = Pixie_Devices[ModNum].Module_Parameter_Values[idxu];
 	    }
 	    if (READ) {
 			idx=Find_Xact_Match("MODULE_CSRB", Module_Parameter_Names, N_MODULE_PAR);
@@ -521,6 +587,9 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 			//KeepCW			  = Tstbit(10,value16);		// To control update and enforced minimum of coincidence wait
 			PollForNewData		  = TstBit(11,value16);		// if 1, return new data in DMA buffer during polling
 			MultiThreadDAQ		  = TstBit(12,value16);		// if 1, run 0x400 or 0x10x as a separate thread
+			PrintDebugMsg_daq	  = TstBit(13,value16);		// if 1, print debug messages for run start/stop 
+			PrintDebugMsg_file	    = TstBit(14,value16);		// if 1, Igor also prints to a file
+			KeepBL				    = TstBit(15,value16);		// if 1, do not automatically adjust BLcut after gain or filter settings changes
 
 			// When changing C_CONTROL in one Pixie module, we need to broadcast it to all other modules as well 
 			Pixie_Broadcast("C_CONTROL", ModNum);
@@ -1013,7 +1082,6 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 	{
 	    if (WRITE) return (-4); // Wrong direction for this variable
 	    if (READ) {
-			/* Run time */
 			idx=Find_Xact_Match("TOTALTIMEA", DSP_Parameter_Names, N_DSP_PAR);
 			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
 			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
@@ -1022,6 +1090,50 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 			idx=Find_Xact_Match("TOTAL_TIME", Module_Parameter_Names, N_MODULE_PAR);
 			Pixie_Devices[ModNum].Module_Parameter_Values[idx]=TotalTime;
 			User_Par_Values[idx+offset]=TotalTime;
+	    }
+	}
+
+   if(strcmp(user_variable_name,"COINC_COUNT_TIME") == 0 || ALLSTAT || ALLREAD)
+	{
+	    if (WRITE) return (-4); // Wrong direction for this variable
+	    if (READ) {
+			idx=Find_Xact_Match("CCTA", DSP_Parameter_Names, N_DSP_PAR);
+			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
+			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
+			rtc=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+2];
+			TotalTime=(rta*pow(65536.0,2.0)+rtb*65536.0+rtc)*1.0e-6/SYSTEM_CLOCK_MHZ;  // kept in system FPGA logic
+			idx=Find_Xact_Match("COINC_COUNT_TIME", Module_Parameter_Names, N_MODULE_PAR);
+			Pixie_Devices[ModNum].Module_Parameter_Values[idx]=TotalTime;
+			User_Par_Values[idx+offset]=TotalTime;
+	    }
+	}
+
+   if(strcmp(user_variable_name,"COINC_SFDT") == 0 || ALLSTAT || ALLREAD)
+	{
+	    if (WRITE) return (-4); // Wrong direction for this variable
+	    if (READ) {
+			idx=Find_Xact_Match("CSFDTA", DSP_Parameter_Names, N_DSP_PAR);
+			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
+			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
+			rtc=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+2];
+			TotalTime=(rta*pow(65536.0,2.0)+rtb*65536.0+rtc)*1.0e-6/SYSTEM_CLOCK_MHZ;  // kept in system FPGA logic
+			idx=Find_Xact_Match("COINC_SFDT", Module_Parameter_Names, N_MODULE_PAR);
+			Pixie_Devices[ModNum].Module_Parameter_Values[idx]=TotalTime;
+			User_Par_Values[idx+offset]=TotalTime;
+	    }
+	}
+
+	if(strcmp(user_variable_name,"NUM_COINC_TRIG") == 0 || ALLSTAT || ALLREAD)
+	{
+	    if (WRITE) return (-4); // Wrong direction for this variable
+	    if (READ) {
+			idx=Find_Xact_Match("NCOINCTRIGA", DSP_Parameter_Names, N_DSP_PAR);
+			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
+			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
+			NumEvents=(double)(rta*65536.0+rtb);
+			idx=Find_Xact_Match("NUM_COINC_TRIG", Module_Parameter_Names, N_MODULE_PAR);
+			Pixie_Devices[ModNum].Module_Parameter_Values[idx]=NumEvents;
+			User_Par_Values[idx+offset]=NumEvents;
 	    }
 	}
 	
@@ -1079,10 +1191,31 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 			rtc=Pixie_Devices[ModNum].DSP_Parameter_Values[RUNTIME_Index+2];
 			RunTime=(rta*pow(65536.0,2.0)+rtb*65536.0+rtc)*1.0e-6/DSP_CLOCK_MHZ;
 			/* Update Event Rate */
-			idx=Find_Xact_Match("EVENT_RATE", Module_Parameter_Names, N_MODULE_PAR);
+			idxu=Find_Xact_Match("EVENT_RATE", Module_Parameter_Names, N_MODULE_PAR);
 			if (RunTime == 0) Rate = 0.0;
 			else              Rate = NumEvents / RunTime;
-			Pixie_Devices[ModNum].Module_Parameter_Values[idx] = User_Par_Values[idx+offset] = Rate;
+			Pixie_Devices[ModNum].Module_Parameter_Values[idxu] = User_Par_Values[idxu+offset] = Rate;
+	    }
+	}
+
+	if(strcmp(user_variable_name,"COINC_INPUT_RATE") == 0 || ALLSTAT || ALLREAD)
+	{
+	    if (WRITE) return (-4); // Wrong direction for this variable
+	    if (READ) {
+			idx=Find_Xact_Match("NCOINCTRIGA", DSP_Parameter_Names, N_DSP_PAR);
+			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
+			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
+			NumEvents=(double)(rta*65536.0+rtb);
+			idx=Find_Xact_Match("CCTA", DSP_Parameter_Names, N_DSP_PAR);
+			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
+			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
+			rtc=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+2];
+			RunTime=(rta*pow(65536.0,2.0)+rtb*65536.0+rtc)*1.0e-6/SYSTEM_CLOCK_MHZ;  // kept in system FPGA logic
+			/* Update Coinc Input Rate */
+			idxu=Find_Xact_Match("COINC_INPUT_RATE", Module_Parameter_Names, N_MODULE_PAR);
+			if (RunTime == 0) Rate = 0.0;
+			else              Rate = NumEvents / RunTime;
+			Pixie_Devices[ModNum].Module_Parameter_Values[idxu] = User_Par_Values[idxu+offset] = Rate;
 	    }
 	}
 
@@ -1125,41 +1258,129 @@ S32 UA_MODULE_PAR_IO (	double *User_Par_Values,	// user parameters to be transfe
 	if(strcmp(user_variable_name,"USER_IN") == 0 || ALLREAD)		// 16 variables for custom code
 	{
 	    if (WRITE) {
-			idx  = Find_Xact_Match("USER_IN", Module_Parameter_Names, N_MODULE_PAR);
-			idxu = Find_Xact_Match("USERIN", DSP_Parameter_Names, N_DSP_PAR);
+			idxu  = Find_Xact_Match("USER_IN", Module_Parameter_Names, N_MODULE_PAR);
+			idx = Find_Xact_Match("USERIN", DSP_Parameter_Names, N_DSP_PAR);
 			for (k = 0; k < N_USER_PAR_IO ; k++) {
-				value32=(U32)User_Par_Values[idx+offset+k];
-				Pixie_Devices[ModNum].Module_Parameter_Values[idx+k]=User_Par_Values[idx+offset+k];
+				value32=(U32)User_Par_Values[idxu+offset+k];
+				//sprintf(ErrMSG, "*DEBUG* (UA_PAR_IO): User_in write  %d = %d ", k, value32);
+				//Pixie_Print_MSG(ErrMSG,1);
+				Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k]=User_Par_Values[idxu+offset+k];
 				// Update the DSP parameters 
-				Pixie_Devices[ModNum].DSP_Parameter_Values[idxu+k]=(U16)value32;
+				Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k]=(U16)value32;
 				// Download to the selected Pixie module
-				Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value32);
+				Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx+k), MOD_WRITE, 1, &value32);
 			}
 			// Program FiPPI 
 			Control_Task_Run(ModNum, PROGRAM_FIPPI, 1000);
 	    }
 	    if (READ) {
-			idx=Find_Xact_Match("USER_IN", Module_Parameter_Names, N_MODULE_PAR);
-			idxu = Find_Xact_Match("USERIN", DSP_Parameter_Names, N_DSP_PAR);
+			idxu=Find_Xact_Match("USER_IN", Module_Parameter_Names, N_MODULE_PAR);
+			idx = Find_Xact_Match("USERIN", DSP_Parameter_Names, N_DSP_PAR);
 			for (k = 0; k < N_USER_PAR_IO ; k++) {
-				valdbl=(double)Pixie_Devices[ModNum].DSP_Parameter_Values[idxu+k];	// Get DSP parameter
-				Pixie_Devices[ModNum].Module_Parameter_Values[idx+k]=valdbl;		// update local user values
-				User_Par_Values[idx+offset+k]=valdbl;								// update GUI values
+				//sprintf(ErrMSG, "*DEBUG* (UA_PAR_IO): User_in read %d = %d ", k, Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k]);
+				//Pixie_Print_MSG(ErrMSG,1);
+				valdbl=(double)Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k];	// Get DSP parameter
+				Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k]=valdbl;		// update local user values
+				User_Par_Values[idxu+offset+k]=valdbl;								// update GUI values
 			}			
 	    }
 	}
 
-	if(strcmp(user_variable_name,"USER_OUT") == 0 || ALLREAD)		// 16 variables for custom code
+	if(strcmp(user_variable_name,"EXTRA_IN") == 0 || ALLREAD)		// 16 variables for custom code
+	{
+	    if (WRITE) {
+			idxu  = Find_Xact_Match("EXTRA_IN", Module_Parameter_Names, N_MODULE_PAR);
+			idx = Find_Xact_Match("EXTRAIN", DSP_Parameter_Names, N_DSP_PAR);
+			for (k = 0; k < 8 ; k++) {
+				value32=(U32)User_Par_Values[idxu+offset+k];
+				Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k]=User_Par_Values[idxu+offset+k];
+				// Update the DSP parameters 
+				Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k]=(U16)value32;
+				// Download to the selected Pixie module
+				Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx+k), MOD_WRITE, 1, &value32);
+			}
+			// Program FiPPI 
+			Control_Task_Run(ModNum, PROGRAM_FIPPI, 1000);
+	    }
+	    if (READ) {
+			idxu=Find_Xact_Match("EXTRA_IN", Module_Parameter_Names, N_MODULE_PAR);
+			idx = Find_Xact_Match("EXTRAIN", DSP_Parameter_Names, N_DSP_PAR);
+			for (k = 0; k < 8 ; k++) {
+				valdbl=(double)Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k];	// Get DSP parameter
+				Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k]=valdbl;		// update local user values
+				User_Par_Values[idxu+offset+k]=valdbl;								// update GUI values
+			}			
+	    }
+	}
+
+	if(strcmp(user_variable_name,"USER_OUT") == 0 || ALLSTAT || ALLREAD)		// 16 variables for custom code
 	{
 		if (WRITE) return (-4); // Wrong direction for this variable
 	    if (READ) {
-			idx=Find_Xact_Match("USER_OUT", Module_Parameter_Names, N_MODULE_PAR);
-			idxu = Find_Xact_Match("USEROUT", DSP_Parameter_Names, N_DSP_PAR);
+			idxu= Find_Xact_Match("USER_OUT", Module_Parameter_Names, N_MODULE_PAR);
+			idx = Find_Xact_Match("USEROUT", DSP_Parameter_Names, N_DSP_PAR);
 			for (k = 0; k < N_USER_PAR_IO ; k++) {
-				valdbl=(double)Pixie_Devices[ModNum].DSP_Parameter_Values[idxu+k];	// Get DSP parameter
-				Pixie_Devices[ModNum].Module_Parameter_Values[idx+k]=valdbl;	// update local user values
-				User_Par_Values[idx+offset+k]=valdbl;									// update GUI values
+				valdbl=(double)Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k];	// Get DSP parameter
+				Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k]=valdbl;	// update local user values
+				User_Par_Values[idxu+offset+k]=valdbl;									// update GUI values
 			}			
+	    }
+	}
+
+   if(strcmp(user_variable_name,"EXTRA_OUT") == 0 || ALLSTAT || ALLREAD)		// 16 variables for custom code
+	{
+		if (WRITE) return (-4); // Wrong direction for this variable
+	    if (READ) {
+
+         // NMISA special counters
+         // DSP keeps 16 x 2 words (16bit) of double coinc counts and 16 x 2 words (16bit) of triple coinc counts
+         // double coinc counts -> USER_OUT
+         // triple coinc counts -> EXTRA_OUT  0..15
+         // double coinc rates  -> EXTRA_OUT 16..31
+         // triple coinc rates  -> EXTRA_OUT 32..47
+         idx  = Find_Xact_Match("MODCSRB",     DSP_Parameter_Names,    N_DSP_PAR);
+         if (TstBit(9, Pixie_Devices[ModNum].DSP_Parameter_Values[idx]) == 1 ) 
+         {
+
+            // get the coinc count time
+            idx=Find_Xact_Match("CCTA", DSP_Parameter_Names, N_DSP_PAR);
+   			rta=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
+   			rtb=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+1];
+   			rtc=Pixie_Devices[ModNum].DSP_Parameter_Values[idx+2];
+   			RunTime=(rta*pow(65536.0,2.0)+rtb*65536.0+rtc)*1.0e-6/SYSTEM_CLOCK_MHZ;  // kept in system FPGA logic
+   
+         	// Get runstats from memory  
+   			Pixie_IODM(ModNum, DATA_MEMORY_ADDRESS + 1664 /* UEO_OFFSET: defined in defs.h but not found?*/ , MOD_READ, 64, buffer);      // special user output values "UExtraOut" start at memory address 1664
+            // compute and copy to output array
+      	   idxu = Find_Xact_Match("EXTRA_OUT", Module_Parameter_Names, N_MODULE_PAR);
+            idx3 = Find_Xact_Match("USER_OUT",  Module_Parameter_Names, N_MODULE_PAR);
+   
+   			for (k = 0; k < 16 ; k++) {
+               // first 2x16 values -> USER_OUT
+   				valdbl=(double)(buffer[2*k]*65536+buffer[2*k+1]);
+      			Pixie_Devices[ModNum].Module_Parameter_Values[idx3+k]=valdbl;  	// update local user values 
+   				User_Par_Values[idx3+offset+k]=valdbl;									// update GUI values
+   
+               // second 2x16 values -> EXTRA_OUT 0..15
+               valdbl=(double)(buffer[2*k+32]*65536+buffer[2*k+1+32]);
+      			Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k]=valdbl;  	// update local user values 
+   				User_Par_Values[idxu+offset+k]=valdbl;									// update GUI values
+   
+               // first 2x16 values / time -> EXTRA_OUT 16..31
+               valdbl=(double)(buffer[2*k]*65536+buffer[2*k+1]);
+               if (RunTime == 0) Rate = 0.0;
+   			   else              Rate = valdbl / RunTime;
+      			Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k+16]=Rate;  	// update local user values 
+   				User_Par_Values[idxu+offset+k+16]=Rate;									// update GUI values
+   
+               // second 2x16 values / time -> EXTRA_OUT 32..47
+               valdbl=(double)(buffer[2*k+32]*65536+buffer[2*k+1+32]);
+               if (RunTime == 0) Rate = 0.0;
+   			   else              Rate = valdbl / RunTime;
+      			Pixie_Devices[ModNum].Module_Parameter_Values[idxu+k+32]=Rate;  	// update local user values
+   				User_Par_Values[idxu+offset+k+32]=Rate;									// update GUI values
+   			}	
+		    }
 	    }
 	}
 	
@@ -1214,11 +1435,11 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 	U8  ALLSTAT = (strcmp(user_variable_name, "CHANNEL_RUN_STATISTICS") == 0);
 	U8	READ    = (direction == 1);
 	U8	WRITE   = (direction == 0);
-	U16	idx   = 65535, idxu;
-	U16	i; 
+	U16	idx   = 65535, idxu, idx2;
+	U16	i,k; 
 	U16	Xavg;
 	U16	SGA;
-	U16	FL, FG, SL, SG;
+	U16	FL, FG, SL, SG, FastThresh;
 	U16	rta, rtb, rtc, val16, vbl16, high16, temp16;
 	U16 SYSTEM_CLOCK_MHZ = P4_SYSTEM_CLOCK_MHZ;	// initialize to Pixie-4 default
 	U16 FILTER_CLOCK_MHZ = P4_FILTER_CLOCK_MHZ;
@@ -1234,7 +1455,7 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 	U32	value; //, dsp_par[N_DSP_PAR];
 	double	BLcut, DigGain, Vgain, Voffset, tau, TriggerRiseTime, TraceLength;
 	double	TriggerFlatTop, EnergyRiseTime, EnergyFlatTop, TriggerThreshold;
-	double	FastThresh, xdt, intdt, xwait, rate;
+	double	xdt, intdt, xwait, rate;
 	double	baselinepercent, CFDthresh, Log2EBin, CountTime, FastPeaks, FTDT;
 	double	ChanCSRA, ChanCSRB, ChanCSRC, Integrator, lastxdt, Dbl_value;
 	double  GateWindow, GateDelay, BaselineCut, BaselineAVG, SGA_gain;
@@ -1391,13 +1612,21 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 			sprintf(str,"FASTLENGTH%d",ChanNum);
 			idx=Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
 			FL=Pixie_Devices[ModNum].DSP_Parameter_Values[idx];
-			FastThresh=TriggerThreshold*FL;
-			if(FastThresh >= 4095) 
-				FastThresh = (TriggerThreshold = RoundOff(4095 / FL - 0.5)) * FL; /* in ADC counts */		 
+			FastThresh=RoundOff(TriggerThreshold*FL);
+			if(FastThresh >= 4095) {
+				FastThresh = RoundOff(4095 - 0.5* FL);
+				TriggerThreshold = FastThresh/ FL; 
+			}
+			if(FastThresh < 2) {
+				FastThresh = 0;
+				TriggerThreshold = 0.0;
+			}
+			//sprintf(ErrMSG, "*DEBUG* (Channel Par IO): FastThresh %d, TriggerThreshold %f, FL %d ", FastThresh, TriggerThreshold, FL);
+			//Pixie_Print_MSG(ErrMSG,1);
 			/* Update DSP parameter FastThresh */
 			sprintf(str,"FASTTHRESH%d",ChanNum);
 			idx=Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
-			Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)FastThresh;
+			Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=FastThresh;
 			/* Download to the selected Pixie module */
 			value=(U32)FastThresh;
 			Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value);
@@ -1503,9 +1732,9 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 		    
 			// update Digital gain adjustment 
 		    DigGain = Vgain/SGA_gain-1.0;
-		    //limit digital gain to 10 percent up or down
-		    if (DigGain >  0.1) DigGain    =  0.1;
-		    if (DigGain < -0.1) DigGain    = -0.1;
+		    //limit digital gain to 20 percent up or down
+		    if (DigGain >  0.2) DigGain    =  0.2;
+		    if (DigGain < -0.2) DigGain    = -0.2;
 		    if (DigGain >= 0)   DigGainInt = (U16)(65535 * DigGain);
 		    else                DigGainInt = (U16)(65536 + 65535 * DigGain);
 		    // Set DSP parameter DigGain 
@@ -1522,12 +1751,13 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 		    Control_Task_Run(ModNum, PROGRAM_FIPPI, 1000);
 		    
 			// Find baselne cut value 
-		    BLcut_Finder(ModNum, ChanNum, &BLcut);
-		    //------------------------------------------------------------------------------
-		    //	BLcut_Finder will change the value of BLCut. Here we update it.
-		    //------------------------------------------------------------------------------
-		    idx=Find_Xact_Match("BLCUT", Channel_Parameter_Names, N_CHANNEL_PAR);
-		    User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
+			if(!KeepBL) 
+			{
+			    BLcut_Finder(ModNum, ChanNum, &BLcut);
+				//	BLcut_Finder will change the value of BLCut. Here we update it.
+				idx=Find_Xact_Match("BLCUT", Channel_Parameter_Names, N_CHANNEL_PAR);
+				User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
+			}
 		    
 			// Update user_value of Vgain  
 		    idx=Find_Xact_Match("VGAIN", Channel_Parameter_Names, N_CHANNEL_PAR);
@@ -1673,13 +1903,14 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 			/* Program FiPPI -- strictly speaking, tau is not in Fippi (yet), but a number of Tau dependent coeffs are also computed */
 			Control_Task_Run(ModNum, PROGRAM_FIPPI, 1000);	
 
-			/* Find baseline cut value */
-			BLcut_Finder(ModNum, ChanNum, &BLcut);
-			//------------------------------------------------------------------------------
-			//	BLcut_Finder will change the value of BLCut. Here we update it.
-			//------------------------------------------------------------------------------
-			idx=Find_Xact_Match("BLCUT", Channel_Parameter_Names, N_CHANNEL_PAR);
-			User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
+			// Find baseline cut value 
+			if(!KeepBL) 
+			{
+				BLcut_Finder(ModNum, ChanNum, &BLcut);
+				//	BLcut_Finder will change the value of BLCut. Here we update it.
+				idx=Find_Xact_Match("BLCUT", Channel_Parameter_Names, N_CHANNEL_PAR);
+				User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
+			}
 	    }
 	    if (READ) {
 			sprintf(str,"PREAMPTAUA%d",ChanNum);
@@ -2047,16 +2278,46 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 			/* Update DSP parameters */
 			sprintf(str,"CFDTHR%d",ChanNum);
 			idx = Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
-			value = (U32)(Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)(CFDthresh*655.36));
+			Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)(CFDthresh*655.36);
 			/* Download to the selected Pixie module */
-			Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value);				
-			/* Update value */ 
+			value = (U32)(CFDthresh*655.36);
+			Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value);	
+			/* Program FiPPI */
+			Control_Task_Run(ModNum, PROGRAM_FIPPI, 1000);
+			/* Update local value */ 
 			idx=Find_Xact_Match("CFD_THRESHOLD", Channel_Parameter_Names, N_CHANNEL_PAR);
 			Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx] = CFDthresh;
 	    }
 	    if (READ) {
 			idx=Find_Xact_Match("CFD_THRESHOLD", Channel_Parameter_Names, N_CHANNEL_PAR);
 			User_Par_Values[idx+offset]=ChanPar_Read_Update ("CFDTHR",idx,ModNum,ChanNum,1.0/655.36);
+	    }
+	}
+            
+	if(strcmp(user_variable_name,"FCFD_THRESHOLD") == 0 || ALLREAD)
+	{
+	    if (WRITE) {
+			/* Get value */
+			idx=Find_Xact_Match("FCFD_THRESHOLD", Channel_Parameter_Names, N_CHANNEL_PAR);      // threshold 
+			/* Apply restrictions */
+  			if (User_Par_Values[idx+offset] < 0  ) User_Par_Values[idx+offset] = 0;
+			if (User_Par_Values[idx+offset] > 65535) User_Par_Values[idx+offset] = 65535;
+			CFDthresh = User_Par_Values[idx+offset];
+     
+			/* Update DSP parameters */
+			sprintf(str,"FCFDTH%d",ChanNum);
+			idx = Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
+			Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)(CFDthresh);
+			/* Download to the selected Pixie module */
+			value = (U32)(CFDthresh);
+			Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value);				
+			/* Update value */ 
+			idx=Find_Xact_Match("FCFD_THRESHOLD", Channel_Parameter_Names, N_CHANNEL_PAR);
+			Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx] = CFDthresh;
+	    }
+	    if (READ) {
+			idx=Find_Xact_Match("FCFD_THRESHOLD", Channel_Parameter_Names, N_CHANNEL_PAR);
+            User_Par_Values[idx+offset]=ChanPar_Read_Update ("FCFDTH",idx,ModNum,ChanNum,1.0);
 	    }
 	}
 	
@@ -2104,8 +2365,9 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 			/* Update DSP parameters */
 			sprintf(str,"LOG2EBIN%d",ChanNum);
 			idx = Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
-			value = (U32)(Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)(Dbl_value));
+			Pixie_Devices[ModNum].DSP_Parameter_Values[idx]=(U16)(Dbl_value);
 			/* Download to the selected Pixie module */
+			value = (U32)(Dbl_value);
 			Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx), MOD_WRITE, 1, &value);
 			/* Update value */ 
 			idx=Find_Xact_Match("BINFACTOR", Channel_Parameter_Names, N_CHANNEL_PAR);
@@ -2421,12 +2683,12 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 				else if((BoardVersion & 0x0FF0) == MODULETYPE_P4e_16_125) //  
 				{
 					factor = 1000.0 / (double)ADC_CLOCK_MHZ ; // applied in Fippi logic, one 8ns sample per delay unit
-					high16 = 126; 
+					high16 = 253; 
 				}
 				else if((BoardVersion & 0x0FF0) == MODULETYPE_P4e_14_500) //  
 				{
 					factor = 1000.0 / (double)ADC_CLOCK_MHZ * 4; // applied in Fippi logic, four 2ns samples per delay unit
-					high16 = 126; 
+					high16 = 253; 
 				}
 				else
 				{
@@ -2847,7 +3109,52 @@ S32 UA_CHANNEL_PAR_IO (	double *User_Par_Values,	// user parameters to be transf
 			idx=Find_Xact_Match("PSM_TEMP_AVG", Channel_Parameter_Names, N_CHANNEL_PAR);
 			User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx]=Dbl_value;
 	    }			
-	}			
+	}	
+
+	if(strcmp(user_variable_name,"CH_EXTRA_IN") == 0 || ALLREAD)
+	{
+	    if (WRITE) {
+			idxu=Find_Xact_Match("CH_EXTRA_IN", Channel_Parameter_Names, N_CHANNEL_PAR);
+			sprintf(str,"CHEXTRAIN%d",ChanNum);
+			idx=Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
+			idx2  = Find_Xact_Match("MODCSRB",     DSP_Parameter_Names,    N_DSP_PAR);
+
+			for (k = 0; k < 8 ; k++) {
+				value=(U32)User_Par_Values[idxu+offset+k];
+
+				if(k==0 && TstBit(10, Pixie_Devices[ModNum].DSP_Parameter_Values[idx2]) == 1)		// in slow CFD mode, check limits 
+				{
+					if(value > 63)	value = 63;
+					if(value <  1)	value =  1;
+				}
+				if(k==1 && TstBit(10, Pixie_Devices[ModNum].DSP_Parameter_Values[idx2]) == 1)		// in slow CFD mode, check limits 
+				{
+					if(value >  7)	value =  7;
+					if(value <  0)	value =  0;
+				}
+
+				User_Par_Values[idxu+offset+k] = value;		// update user wave
+
+				Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idxu+k]=User_Par_Values[idxu+offset+k];
+				/* Update DSP parameters */
+				Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k]=(U16)value;
+				/* Download to the selected Pixie module */
+				Pixie_IODM(ModNum, (U16)(DATA_MEMORY_ADDRESS+idx+k), MOD_WRITE, 1, &value);
+			}
+			/* Program FiPPI */
+			Control_Task_Run(ModNum, PROGRAM_FIPPI, 1000);
+	    }
+	    if (READ) {
+			idxu=Find_Xact_Match("CH_EXTRA_IN", Channel_Parameter_Names, N_CHANNEL_PAR);
+			sprintf(str,"CHEXTRAIN%d",ChanNum);
+			idx=Find_Xact_Match(str, DSP_Parameter_Names, N_DSP_PAR);
+			for (k = 0; k < 8 ; k++) {
+				Dbl_value=(double)Pixie_Devices[ModNum].DSP_Parameter_Values[idx+k];	// Get DSP parameter
+				Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idxu+k]=Dbl_value;		// update local user values
+				User_Par_Values[idxu+offset+k]=Dbl_value;								// update GUI values
+			}
+	    }
+	}
 
 					
 	if(idx == 65535) // Keep it at the end of list	
@@ -2934,13 +3241,15 @@ S32 Compute_PileUp(U8 ModNum, U8 ChanNum, U16 SL, U16 SG, double *User_Par_Value
     //------------------------------------------------------------------------------
     idx=Find_Xact_Match("TRACE_DELAY", Channel_Parameter_Names, N_CHANNEL_PAR);
     User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
-    /* Find baselne cut value */
-    BLcut_Finder(ModNum, ChanNum, &BLcut);
-    //------------------------------------------------------------------------------
-    //	BLcut_Finder will change the value of BLCut. Here we update it.
-    //------------------------------------------------------------------------------
-    idx=Find_Xact_Match("BLCUT", Channel_Parameter_Names, N_CHANNEL_PAR);
-    User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
+
+	// Find baselne cut value 
+	if(!KeepBL) 
+	{
+		BLcut_Finder(ModNum, ChanNum, &BLcut);
+		//	BLcut_Finder will change the value of BLCut. Here we update it.
+		idx=Find_Xact_Match("BLCUT", Channel_Parameter_Names, N_CHANNEL_PAR);
+		User_Par_Values[idx+offset]=Pixie_Devices[ModNum].Channel_Parameter_Values[ChanNum][idx];
+	}
 
 
 	//------------------------------------------------------------------------------

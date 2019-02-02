@@ -61,15 +61,12 @@ extern "C" {
 #endif
 
 // ***********************************************************
-//		Definition for COMPILE_IGOR_XOP
+//		Definitions required to be set by makefile
 // ***********************************************************
 // Set COMPILE_IGOR_XOP if compiling Igor XOP code
-// ***********************************************************
-//		End of definition for COMPILE_IGOR_XOP
-// ***********************************************************
-
 // Set XIA_WINDOZE for Windows
 // Set XIA_LINUX for Linux. Example code only, not tested/supported by XIA
+// Set COMPILE_TOOL_MINGW32 when compiling with mingw32 compiler rather than MS Visual Studio
 
 // ***********************************************************
 //		Basic data type definitions
@@ -91,11 +88,11 @@ extern "C" {
 //		C Library version information
 // ***********************************************************
 
-#define C_LIBRARY_RELEASE		0x425	// C Library release number
+#define C_LIBRARY_RELEASE		0x450	// C Library release number
 #ifdef WI64  
-	#define C_LIBRARY_BUILD			0x6406		// C Library build number
+	#define C_LIBRARY_BUILD			0x6402		// C Library build number
 #else
-	#define C_LIBRARY_BUILD			0x3206		// C Library build number
+	#define C_LIBRARY_BUILD			0x3202		// C Library build number
 #endif
 
 // ***********************************************************
@@ -127,7 +124,11 @@ extern "C" {
 #define MODULETYPE_P4e_14_500	0x05E0	// any P4e revision, xx bit, yy MHz 
 #define MODULETYPE_P4e_12_500	0x05F0	// any P4e revision, xx bit, yy MHz 
 
+#define MODULETYPE_PN_12_250	0x0990	// any std PN revision, 12 bit, 250 MHz 
+#define MODULETYPE_PN_12_250P	0x0980	// any ptp PN revision, 12 bit, 250 MHz 
 #define MODULETYPE_P16			0xA912	// P16 
+#define MODULETYPE_P32        0x0F00   // HiDen (not 0xAF00, because for ProgramFPGA type=MODULETYPE & 0x0FF0
+
 	
 // ***********************************************************
 //		Module specifications
@@ -186,15 +187,19 @@ extern "C" {
 #define BLOCKSIZE					32		// Number of 16-bit words per data block
 #define MAX_HISTOGRAM_LENGTH		32768	// Maximum MCA histogram length
 #define MAX_TRACE_LENGTH			65536	// Maximum trace length
+#define UEI_OFFSET					1536	// Address of User Extra In block in DSP data memory 
+#define UEO_OFFSET					1664	// Address of User Extra Out block in DSP data memory 
 
 #define FPGA_PARAM_RAM				0x2000	// address of RAM in FPGA containing the DSP parameters (input)
 
 
 #define HISTOGRAM_MEMORY_LENGTH		131072	// external histogram memory length (32bit wide)
+#define HISTOGRAM_MEMORY_ADDRESS	0x0		// histogram memory start location in external memory  
 #define LIST_MEMORY_LENGTH			131072	// external list mode memory length (32-bit wide)
-#define HISTOGRAM_MEMORY_ADDRESS	0x0		// histogram memory buffer in external memory   	
-#define LIST_MEMORY_ADDRESS			0x20000	// list mode buffer in external memory
-#define LM_DBLBUF_BLOCK_LENGTH		65536  	// lenght of one block in external memory in double buffer mode
+#define LIST_MEMORY_ADDRESS			0x20000	// list mode buffer start location in external memory
+#define MCA2D_MEMORY_LENGTH			262144	// external 2D spectrum memory length (32-bit wide)
+#define MCA2D_MEMORY_ADDRESS		0x0		// external 2D spectrum memory start location in external memory (high bit set elsewhere)  
+#define LM_DBLBUF_BLOCK_LENGTH		65536  	// length of one block in external memory in double buffer mode
 
 
 #define PCI_CFDATA				  0x00		// PCI address for Data Register in Config FPGA (write only)
@@ -222,6 +227,7 @@ extern "C" {
 #define EEPROM_MEMORY_SIZE		2048	// Memory size in bytes of P4/P500 EEPROM chip 
 #define N_P4E_BYTES			    10071302// Fippi (P4E Rev A, B)
 #define N_P500E_BYTES			1873114 // Fippi (P500E rev B)
+#define N_P32_BYTES             9730652   // P32 configuration
 #define EEPROM_XIA_OFFSET		7		// starting address for XIA content in "words"
 // EEPROM content:	0-6		GN configuration
 //					7		revision and serial number
@@ -254,6 +260,8 @@ extern "C" {
 #define COM_FPGA_CONFIG_P500_REV_B	9		// P500 Communication FPGA configuration 
 #define P500_DSP_CODE				10		// P500 DSP code
 #define P4E14500_FPGA_CONFIG		11		// P4e Artix configuration (14/500 only)
+#define P32_FPGA_CONFIG             12				// P32 Artix configuration
+#define P32_DSP_CODE                13              // P32 DSP code
 
 #define DSP_PARA_NAM		0		// DSP parameter names
 //#define DSP_MEM_NAM		1		// DSP internal memory parameter names
@@ -264,7 +272,7 @@ extern "C" {
 // ***********************************************************
 
 #define DMABUFREFILL_TIMEOUT	50		// 2MB refill timeout limit in ms
-#define DMATRANSFER_TIMEOUT		5000	// DMA transfer timeout limit in ms
+#define DMATRANSFER_TIMEOUT		500	// DMA transfer timeout limit in ms
 #define MOD_READ				1		// Host read from modules
 #define MOD_WRITE				0		// Host write to modules  
 
@@ -308,6 +316,8 @@ extern "C" {
 #define BIT_RUNENA				0		// Host Control bit to request DAQ run
 #define BIT_CTRLENA				1		// Host Control bit to request control run
 #define BIT_PARIO				5		// Host Control bit to request parameter I/O
+#define BIT_MCAUPPERA			6		// Host Control bit to specify upper MCA address range
+#define BIT_EORR				7		// Host Control bit to indicate to DSP that EOR has been received
 #define BIT_PARIO_ACTIVE		12		// Host Statuis bit indicating par I/O in progress
 #define BIT_RUN_ACTIVE			13		// Host Statuis bit indicating DAQ or control run in progress
 #define BIT_DATA_READY			14		// Host Statuis bit indicating data ready in mailbox
@@ -326,6 +336,8 @@ extern "C" {
 #define CSR_ODD_WORD			11		// Set by DSP to indicate odd number of words in EM
 #define CSR_ACTIVE				13		// Set by DSP to indicate run in progress
 #define CSR_DATAREADY			14		// Set by DSP to indicate data is ready. Cleared by reading WCR
+#define CSR_TRACE4X			    11		// bit controlling the 4x trace option
+
 
 // ***********************************************************
 //		Pixie-4/P500(e) variant definitions

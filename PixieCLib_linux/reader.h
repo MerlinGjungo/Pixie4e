@@ -150,12 +150,21 @@ extern "C" {
     U32    TotalEvents;				/* Event  counter for all modules */
     U32    TotalTraces;    			/* Trace  counter for all modules */
 	U32	   BadEvent;
+#ifdef	COMPILE_TOOL_MINGW32
+    S32  (*PreAnalysisAction) (LMReaderDataStruct *); /* Pointer to the user function containing logic before file parsing starts */
+    S32  (*BufferLevelAction) (LMReaderDataStruct *);	/* Pointer to the user function containing logic at the buffer  level */
+    S32  (*EventLevelAction)  (LMReaderDataStruct *);	/* Pointer to the user function containing logic at the event   level */
+    S32  (*ChannelLevelAction) (LMReaderDataStruct *);	/* Pointer to the user function containing logic at the channel level */
+    S32  (*AuxChannelLevelAction) (LMReaderDataStruct *); /* Pointer to the user function containing logic for a channel not in the read pattern */
+    S32  (*PostAnalysisAction) (LMReaderDataStruct *);	/* Pointer to the user function containing logic after file parsing ends */
+#else
     S32  (*PreAnalysisAction) (); /* Pointer to the user function containing logic before file parsing starts */
     S32  (*BufferLevelAction) ();	/* Pointer to the user function containing logic at the buffer  level */
     S32  (*EventLevelAction)  ();	/* Pointer to the user function containing logic at the event   level */
     S32  (*ChannelLevelAction) ();	/* Pointer to the user function containing logic at the channel level */
 	S32  (*AuxChannelLevelAction) (); /* Pointer to the user function containing logic for a channel not in the read pattern */
     S32  (*PostAnalysisAction) ();	/* Pointer to the user function containing logic after file parsing ends */
+#endif
 };
 
 typedef struct LMReaderDataStruct * LMR_t;
@@ -217,6 +226,7 @@ typedef struct LMReaderDataStruct * LMR_t;
 };
 
 typedef struct P500E_ListModeFormatStruct * P500E_t;
+
 
 #ifdef __cplusplus
 }
