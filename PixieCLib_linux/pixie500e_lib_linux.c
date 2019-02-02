@@ -25,7 +25,7 @@
 *************************************************************/
 /* WinDriver license registration string */
 #define PIXIE500E_DEFAULT_LICENSE_STRING ""
-#define PIXIE500E_DEFAULT_DRIVER_NAME "windrvr1281"
+#define PIXIE500E_DEFAULT_DRIVER_NAME "wuhongyi"
 #define PIXIE500E_FCL_TIME_OUT (1000000)
 
 #define MIN_REFCLK_DIVIN_RATIO (10000000)
