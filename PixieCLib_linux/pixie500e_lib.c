@@ -1128,11 +1128,13 @@ UINT32 PIXIE500E_WriteI2C(WDC_DEVICE_HANDLE hDev, const void *buffer, UINT32 add
 #if (DEBUG_PRINT)
 				printf("RD TWI_IRT_STATUS = 0x%x,\n", tmp);
 #endif
-#if defined (XIA_WINDOZE)
-				Sleep(10);
-#elif defined (XIA_LINUX)
-				usleep(10 * 1000);
-#endif
+				// by Hongyi Wu
+/* #if defined (XIA_WINDOZE) */ 
+/* 				Sleep(10); */
+/* #elif defined (XIA_LINUX) */
+/* 				usleep(10 * 1000); */
+/* #endif */
+				Pixie_Sleep(10);//by Hongyi Wu
 
 				if(tmp & 0x1)
 				{
@@ -2425,7 +2427,8 @@ UINT32 PIXIE500E_DMA_Init(WDC_DEVICE_HANDLE hDev)
 		dwStatus = PIXIE500E_ReadWriteReg(hDev, APP_CFG, WDC_WRITE, &i, FALSE);
 		sprintf(ErrMSG, "*INFO* (PIXIE500E_DMA_Init): Requested recalibration");
 		Pixie_Print_MSG(ErrMSG,1);
-		Sleep(1);
+		/* Sleep(1); */  //by Hongyi Wu
+		Pixie_Sleep(1);// by Hongyi Wu
 		dwStatus = PIXIE500E_ReadWriteReg(hDev, APP_SDRAM_STATUS, WDC_READ, &i, FALSE);
 		sprintf(ErrMSG, "*INFO* (PIXIE500E_DMA_Init): SDRAM STATUS after recalibration: at register 0x80: 0x%X", i);
 		Pixie_Print_MSG(ErrMSG,1);

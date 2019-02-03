@@ -126,13 +126,13 @@ plxlib:
 
 
 clean:
-	-rm $(LIBOBJS) lib$(LIBNAME).a $(SAMPLEOBJ) 
-	-rm SamplePrograms/SampleBoot
-	-rm SamplePrograms/SampleADCTrace
-	-rm SamplePrograms/SampleMCARun
-	-rm SamplePrograms/SampleListMode
-	-rm SamplePrograms/SampleListFileParser
-	-rm $(P500ELIBOBJS) lib$(P500ELIBNAME).a $(P500ETESTOBJS)
-	-rm SamplePrograms/SampleP500eTest
+	-rm -f $(LIBOBJS) lib$(LIBNAME).a $(SAMPLEOBJ) 
+	-rm -f SamplePrograms/SampleBoot
+	-rm -f SamplePrograms/SampleADCTrace
+	-rm -f SamplePrograms/SampleMCARun
+	-rm -f SamplePrograms/SampleListMode
+	-rm -f SamplePrograms/SampleListFileParser
+	-rm -f $(P500ELIBOBJS) lib$(P500ELIBNAME).a $(P500ETESTOBJS)
+	-rm -f SamplePrograms/SampleP500eTest
 .PHONY: clean
 
